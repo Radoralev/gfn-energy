@@ -1,0 +1,152 @@
+2024-05-02 12:53:02,010 INFO    StreamThr :22203 [internal.py:wandb_internal():86] W&B internal server running at pid: 22203, started at: 2024-05-02 12:53:02.009622
+2024-05-02 12:53:02,010 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: status
+2024-05-02 12:53:02,012 INFO    WriterThread:22203 [datastore.py:open_for_write():87] open: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/run-ygnp6lfy.wandb
+2024-05-02 12:53:02,012 DEBUG   SenderThread:22203 [sender.py:send():379] send: header
+2024-05-02 12:53:02,032 DEBUG   SenderThread:22203 [sender.py:send():379] send: run
+2024-05-02 12:53:02,677 INFO    SenderThread:22203 [dir_watcher.py:__init__():211] watching files in: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files
+2024-05-02 12:53:02,677 INFO    SenderThread:22203 [sender.py:_start_run_threads():1124] run started: ygnp6lfy with start time 1714647182.009639
+2024-05-02 12:53:02,682 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: check_version
+2024-05-02 12:53:02,682 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: check_version
+2024-05-02 12:53:03,215 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: run_start
+2024-05-02 12:53:03,220 DEBUG   HandlerThread:22203 [system_info.py:__init__():26] System info init
+2024-05-02 12:53:03,220 DEBUG   HandlerThread:22203 [system_info.py:__init__():41] System info init done
+2024-05-02 12:53:03,220 INFO    HandlerThread:22203 [system_monitor.py:start():194] Starting system monitor
+2024-05-02 12:53:03,221 INFO    SystemMonitor:22203 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-05-02 12:53:03,221 INFO    HandlerThread:22203 [system_monitor.py:probe():214] Collecting system info
+2024-05-02 12:53:03,221 INFO    SystemMonitor:22203 [interfaces.py:start():190] Started cpu monitoring
+2024-05-02 12:53:03,222 INFO    SystemMonitor:22203 [interfaces.py:start():190] Started disk monitoring
+2024-05-02 12:53:03,222 INFO    SystemMonitor:22203 [interfaces.py:start():190] Started gpu monitoring
+2024-05-02 12:53:03,223 INFO    SystemMonitor:22203 [interfaces.py:start():190] Started memory monitoring
+2024-05-02 12:53:03,223 INFO    SystemMonitor:22203 [interfaces.py:start():190] Started network monitoring
+2024-05-02 12:53:03,233 DEBUG   HandlerThread:22203 [system_info.py:probe():150] Probing system
+2024-05-02 12:53:03,237 DEBUG   HandlerThread:22203 [system_info.py:_probe_git():135] Probing git
+2024-05-02 12:53:03,245 DEBUG   HandlerThread:22203 [system_info.py:_probe_git():143] Probing git done
+2024-05-02 12:53:03,245 DEBUG   HandlerThread:22203 [system_info.py:probe():198] Probing system done
+2024-05-02 12:53:03,245 DEBUG   HandlerThread:22203 [system_monitor.py:probe():223] {'os': 'Linux-6.5.0-28-generic-x86_64-with-glibc2.17', 'python': '3.8.19', 'heartbeatAt': '2024-05-02T10:53:03.233503', 'startedAt': '2024-05-02T10:53:02.007066', 'docker': None, 'cuda': None, 'args': ('--t_scale', '1.', '--energy', 'alanine_vacuum', '--pis_architectures', '--zero_init', '--clipping', '--mode_fwd', 'tb', '--lr_policy', '1e-3', '--lr_flow', '1e-1'), 'state': 'running', 'program': 'train.py', 'codePathLocal': 'train.py', 'codePath': 'energy_sampling/train.py', 'git': {'remote': 'https://github.com/GFNOrg/gfn-diffusion.git', 'commit': '7c350b4c208658faf5e2b63280f8fd4da8a6b3f8'}, 'email': 'radoslavralev@tum.de', 'root': '/home/radoslavralev/Documents/Thesis/gfn-diffusion', 'host': 'rr-msi', 'username': 'radoslavralev', 'executable': '/home/radoslavralev/miniconda3/envs/gfn-diffusion/bin/python', 'cpu_count': 8, 'cpu_count_logical': 12, 'cpu_freq': {'current': 1999.9395000000002, 'min': 400.0, 'max': 4033.3333333333335}, 'cpu_freq_per_core': [{'current': 3969.097, 'min': 400.0, 'max': 4400.0}, {'current': 400.0, 'min': 400.0, 'max': 4400.0}, {'current': 400.0, 'min': 400.0, 'max': 4400.0}, {'current': 4081.737, 'min': 400.0, 'max': 4400.0}, {'current': 3999.059, 'min': 400.0, 'max': 4400.0}, {'current': 1388.628, 'min': 400.0, 'max': 4400.0}, {'current': 1918.352, 'min': 400.0, 'max': 4400.0}, {'current': 3995.182, 'min': 400.0, 'max': 4400.0}, {'current': 3299.95, 'min': 400.0, 'max': 3300.0}, {'current': 3299.929, 'min': 400.0, 'max': 3300.0}, {'current': 400.0, 'min': 400.0, 'max': 3300.0}, {'current': 2341.993, 'min': 400.0, 'max': 3300.0}], 'disk': {'/': {'total': 896.8126182556152, 'used': 285.34978103637695}}, 'gpu': 'NVIDIA GeForce RTX 4050 Laptop GPU', 'gpu_count': 1, 'gpu_devices': [{'name': 'NVIDIA GeForce RTX 4050 Laptop GPU', 'memory_total': 6439305216}], 'memory': {'total': 31.04424285888672}}
+2024-05-02 12:53:03,246 INFO    HandlerThread:22203 [system_monitor.py:probe():224] Finished collecting system info
+2024-05-02 12:53:03,246 INFO    HandlerThread:22203 [system_monitor.py:probe():227] Publishing system info
+2024-05-02 12:53:03,246 DEBUG   HandlerThread:22203 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2024-05-02 12:53:03,678 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/conda-environment.yaml
+2024-05-02 12:53:04,164 DEBUG   HandlerThread:22203 [system_info.py:_save_conda():222] Saving conda packages done
+2024-05-02 12:53:04,165 INFO    HandlerThread:22203 [system_monitor.py:probe():229] Finished publishing system info
+2024-05-02 12:53:04,166 DEBUG   SenderThread:22203 [sender.py:send():379] send: files
+2024-05-02 12:53:04,166 INFO    SenderThread:22203 [sender.py:_save_file():1390] saving file wandb-metadata.json with policy now
+2024-05-02 12:53:04,196 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: python_packages
+2024-05-02 12:53:04,196 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: python_packages
+2024-05-02 12:53:04,197 DEBUG   SenderThread:22203 [sender.py:send():379] send: telemetry
+2024-05-02 12:53:04,239 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-02 12:53:04,239 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-02 12:53:04,240 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: stop_status
+2024-05-02 12:53:04,677 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/conda-environment.yaml
+2024-05-02 12:53:04,678 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/output.log
+2024-05-02 12:53:04,678 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/requirements.txt
+2024-05-02 12:53:04,678 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/wandb-metadata.json
+2024-05-02 12:53:04,883 INFO    wandb-upload_0:22203 [upload_job.py:push():131] Uploaded file /tmp/tmpw_ndgobowandb/owboux76-wandb-metadata.json
+2024-05-02 12:53:06,611 DEBUG   SenderThread:22203 [sender.py:send():379] send: telemetry
+2024-05-02 12:53:06,611 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-02 12:53:06,678 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/output.log
+2024-05-02 12:53:07,039 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: status_report
+2024-05-02 12:53:08,117 DEBUG   SenderThread:22203 [sender.py:send():379] send: exit
+2024-05-02 12:53:08,117 INFO    SenderThread:22203 [sender.py:send_exit():586] handling exit code: 255
+2024-05-02 12:53:08,117 INFO    SenderThread:22203 [sender.py:send_exit():588] handling runtime: 4
+2024-05-02 12:53:08,117 INFO    SenderThread:22203 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-02 12:53:08,118 INFO    SenderThread:22203 [sender.py:send_exit():594] send defer
+2024-05-02 12:53:08,118 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,118 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 0
+2024-05-02 12:53:08,118 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,118 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 0
+2024-05-02 12:53:08,118 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 1
+2024-05-02 12:53:08,118 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,118 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 1
+2024-05-02 12:53:08,118 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,118 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 1
+2024-05-02 12:53:08,118 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 2
+2024-05-02 12:53:08,118 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,118 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 2
+2024-05-02 12:53:08,118 INFO    HandlerThread:22203 [system_monitor.py:finish():203] Stopping system monitor
+2024-05-02 12:53:08,118 DEBUG   SystemMonitor:22203 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-05-02 12:53:08,119 DEBUG   SystemMonitor:22203 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-05-02 12:53:08,119 DEBUG   SystemMonitor:22203 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-05-02 12:53:08,119 INFO    HandlerThread:22203 [interfaces.py:finish():202] Joined cpu monitor
+2024-05-02 12:53:08,119 INFO    HandlerThread:22203 [interfaces.py:finish():202] Joined disk monitor
+2024-05-02 12:53:08,148 INFO    HandlerThread:22203 [interfaces.py:finish():202] Joined gpu monitor
+2024-05-02 12:53:08,148 INFO    HandlerThread:22203 [interfaces.py:finish():202] Joined memory monitor
+2024-05-02 12:53:08,148 INFO    HandlerThread:22203 [interfaces.py:finish():202] Joined network monitor
+2024-05-02 12:53:08,148 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,148 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 2
+2024-05-02 12:53:08,148 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 3
+2024-05-02 12:53:08,148 DEBUG   SenderThread:22203 [sender.py:send():379] send: stats
+2024-05-02 12:53:08,149 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,149 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 3
+2024-05-02 12:53:08,150 DEBUG   SenderThread:22203 [sender.py:send():379] send: history
+2024-05-02 12:53:08,151 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: summary_record
+2024-05-02 12:53:08,151 INFO    SenderThread:22203 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-02 12:53:08,151 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,151 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 3
+2024-05-02 12:53:08,151 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 4
+2024-05-02 12:53:08,151 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,151 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 4
+2024-05-02 12:53:08,152 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,152 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 4
+2024-05-02 12:53:08,152 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 5
+2024-05-02 12:53:08,152 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,152 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 5
+2024-05-02 12:53:08,152 DEBUG   SenderThread:22203 [sender.py:send():379] send: summary
+2024-05-02 12:53:08,152 INFO    SenderThread:22203 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-02 12:53:08,152 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,152 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 5
+2024-05-02 12:53:08,152 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 6
+2024-05-02 12:53:08,153 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,153 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 6
+2024-05-02 12:53:08,153 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,153 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 6
+2024-05-02 12:53:08,155 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: status_report
+2024-05-02 12:53:08,397 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 7
+2024-05-02 12:53:08,397 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:08,397 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 7
+2024-05-02 12:53:08,397 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:08,397 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 7
+2024-05-02 12:53:08,679 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/output.log
+2024-05-02 12:53:08,679 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/config.yaml
+2024-05-02 12:53:08,679 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/wandb-summary.json
+2024-05-02 12:53:09,117 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-02 12:53:10,565 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 8
+2024-05-02 12:53:10,565 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: poll_exit
+2024-05-02 12:53:10,566 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:10,566 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 8
+2024-05-02 12:53:10,566 DEBUG   SenderThread:22203 [sender.py:send_request():406] send_request: defer
+2024-05-02 12:53:10,566 INFO    SenderThread:22203 [sender.py:send_request_defer():610] handle sender defer: 8
+2024-05-02 12:53:10,566 INFO    SenderThread:22203 [job_builder.py:build():318] Attempting to build job artifact
+2024-05-02 12:53:10,567 INFO    SenderThread:22203 [job_builder.py:_get_source_type():455] is repo sourced job
+2024-05-02 12:53:10,583 INFO    SenderThread:22203 [job_builder.py:build():431] adding wandb-job metadata file
+2024-05-02 12:53:10,587 INFO    SenderThread:22203 [sender.py:transition_state():614] send defer: 9
+2024-05-02 12:53:10,587 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: defer
+2024-05-02 12:53:10,587 INFO    HandlerThread:22203 [handler.py:handle_request_defer():172] handle defer: 9
+2024-05-02 12:53:10,588 DEBUG   SenderThread:22203 [sender.py:send():379] send: artifact
+2024-05-02 12:53:10,680 INFO    Thread-12 :22203 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/output.log
+2024-05-02 12:53:11,019 WARNING StreamThr :22203 [internal.py:is_dead():414] Internal process exiting, parent pid 22130 disappeared
+2024-05-02 12:53:11,019 ERROR   StreamThr :22203 [internal.py:wandb_internal():152] Internal process shutdown.
+2024-05-02 12:53:11,118 DEBUG   HandlerThread:22203 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-02 12:53:11,118 INFO    HandlerThread:22203 [handler.py:finish():866] shutting down handler
+2024-05-02 12:53:11,118 INFO    WriterThread:22203 [datastore.py:close():296] close: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/run-ygnp6lfy.wandb
+2024-05-02 12:53:11,969 INFO    wandb-upload_1:22203 [upload_job.py:push():86] Skipped uploading /home/radoslavralev/.local/share/wandb/artifacts/staging/tmp7j5tcxrx
+2024-05-02 12:53:12,222 INFO    wandb-upload_0:22203 [upload_job.py:push():89] Uploaded file /tmp/tmprfnddelo/wandb-job.json
+2024-05-02 12:53:13,699 INFO    SenderThread:22203 [sender.py:send_artifact():1468] sent artifact job-https___github.com_GFNOrg_gfn-diffusion.git_energy_sampling_train.py - {'id': 'QXJ0aWZhY3Q6ODE4MzEzNDUx', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjE2NzA2MzI0Nw==', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6ODE4MjkzMjQ4', 'versionIndex': 1}}}
+2024-05-02 12:53:13,699 INFO    SenderThread:22203 [sender.py:finish():1546] shutting down sender
+2024-05-02 12:53:13,699 INFO    SenderThread:22203 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-05-02 12:53:14,681 INFO    SenderThread:22203 [dir_watcher.py:finish():388] scan: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files
+2024-05-02 12:53:14,682 INFO    SenderThread:22203 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/conda-environment.yaml conda-environment.yaml
+2024-05-02 12:53:14,682 INFO    SenderThread:22203 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/wandb-summary.json wandb-summary.json
+2024-05-02 12:53:14,682 INFO    SenderThread:22203 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/wandb-metadata.json wandb-metadata.json
+2024-05-02 12:53:14,682 INFO    SenderThread:22203 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/output.log output.log
+2024-05-02 12:53:14,682 INFO    SenderThread:22203 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/config.yaml config.yaml
+2024-05-02 12:53:14,682 INFO    SenderThread:22203 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/requirements.txt requirements.txt
+2024-05-02 12:53:14,687 INFO    SenderThread:22203 [file_pusher.py:finish():172] shutting down file pusher
+2024-05-02 12:53:14,688 INFO    SenderThread:22203 [file_pusher.py:join():178] waiting for file pusher
+2024-05-02 12:53:15,194 INFO    wandb-upload_2:22203 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/conda-environment.yaml
+2024-05-02 12:53:15,575 INFO    wandb-upload_0:22203 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/output.log
+2024-05-02 12:53:15,596 INFO    wandb-upload_3:22203 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/config.yaml
+2024-05-02 12:53:15,615 INFO    wandb-upload_4:22203 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/requirements.txt
+2024-05-02 12:53:15,703 INFO    wandb-upload_1:22203 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240502_125302-ygnp6lfy/files/wandb-summary.json
+2024-05-02 12:53:16,191 INFO    SenderThread:22203 [file_stream.py:finish():614] file stream finish called
+2024-05-02 12:53:17,137 INFO    SenderThread:22203 [file_stream.py:finish():618] file stream finish is done

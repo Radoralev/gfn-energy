@@ -1,0 +1,122 @@
+{
+    "os": "Linux-6.5.0-28-generic-x86_64-with-glibc2.17",
+    "python": "3.8.19",
+    "heartbeatAt": "2024-05-02T11:49:21.372278",
+    "startedAt": "2024-05-02T11:49:18.093465",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--t_scale",
+        "1.",
+        "--energy",
+        "alanine_vacuum_target",
+        "--pis_architectures",
+        "--zero_init",
+        "--clipping",
+        "--mode_fwd",
+        "tb",
+        "--lr_policy",
+        "1e-3",
+        "--lr_flow",
+        "1e-1"
+    ],
+    "state": "running",
+    "program": "train.py",
+    "codePathLocal": "train.py",
+    "codePath": "energy_sampling/train.py",
+    "git": {
+        "remote": "https://github.com/GFNOrg/gfn-diffusion.git",
+        "commit": "7c350b4c208658faf5e2b63280f8fd4da8a6b3f8"
+    },
+    "email": "radoslavralev@tum.de",
+    "root": "/home/radoslavralev/Documents/Thesis/gfn-diffusion",
+    "host": "rr-msi",
+    "username": "radoslavralev",
+    "executable": "/home/radoslavralev/miniconda3/envs/gfn-diffusion/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 12,
+    "cpu_freq": {
+        "current": 3831.1346666666664,
+        "min": 400.0,
+        "max": 4033.3333333333335
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 4100.0,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 4100.0,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 4100.0,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 4100.0,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 4079.134,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 4093.552,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 4099.983,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 4100.0,
+            "min": 400.0,
+            "max": 4400.0
+        },
+        {
+            "current": 3299.913,
+            "min": 400.0,
+            "max": 3300.0
+        },
+        {
+            "current": 3301.114,
+            "min": 400.0,
+            "max": 3300.0
+        },
+        {
+            "current": 3300.21,
+            "min": 400.0,
+            "max": 3300.0
+        },
+        {
+            "current": 3299.71,
+            "min": 400.0,
+            "max": 3300.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 896.8126182556152,
+            "used": 285.3605537414551
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 4050 Laptop GPU",
+            "memory_total": 6439305216
+        }
+    ],
+    "memory": {
+        "total": 31.04424285888672
+    }
+}

@@ -1,0 +1,972 @@
+2024-05-03 14:00:57,234 INFO    StreamThr :28164 [internal.py:wandb_internal():86] W&B internal server running at pid: 28164, started at: 2024-05-03 14:00:57.234323
+2024-05-03 14:00:57,236 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status
+2024-05-03 14:00:57,237 INFO    WriterThread:28164 [datastore.py:open_for_write():87] open: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/run-34ghr1ag.wandb
+2024-05-03 14:00:57,237 DEBUG   SenderThread:28164 [sender.py:send():379] send: header
+2024-05-03 14:00:57,255 DEBUG   SenderThread:28164 [sender.py:send():379] send: run
+2024-05-03 14:00:57,846 INFO    SenderThread:28164 [dir_watcher.py:__init__():211] watching files in: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files
+2024-05-03 14:00:57,846 INFO    SenderThread:28164 [sender.py:_start_run_threads():1124] run started: 34ghr1ag with start time 1714737657.234286
+2024-05-03 14:00:57,852 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: check_version
+2024-05-03 14:00:57,853 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: check_version
+2024-05-03 14:00:57,922 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: run_start
+2024-05-03 14:00:57,927 DEBUG   HandlerThread:28164 [system_info.py:__init__():26] System info init
+2024-05-03 14:00:57,927 DEBUG   HandlerThread:28164 [system_info.py:__init__():41] System info init done
+2024-05-03 14:00:57,927 INFO    HandlerThread:28164 [system_monitor.py:start():194] Starting system monitor
+2024-05-03 14:00:57,927 INFO    SystemMonitor:28164 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-05-03 14:00:57,928 INFO    HandlerThread:28164 [system_monitor.py:probe():214] Collecting system info
+2024-05-03 14:00:57,928 INFO    SystemMonitor:28164 [interfaces.py:start():190] Started cpu monitoring
+2024-05-03 14:00:57,929 INFO    SystemMonitor:28164 [interfaces.py:start():190] Started disk monitoring
+2024-05-03 14:00:57,929 INFO    SystemMonitor:28164 [interfaces.py:start():190] Started gpu monitoring
+2024-05-03 14:00:57,930 INFO    SystemMonitor:28164 [interfaces.py:start():190] Started memory monitoring
+2024-05-03 14:00:57,930 INFO    SystemMonitor:28164 [interfaces.py:start():190] Started network monitoring
+2024-05-03 14:00:57,939 DEBUG   HandlerThread:28164 [system_info.py:probe():150] Probing system
+2024-05-03 14:00:57,943 DEBUG   HandlerThread:28164 [system_info.py:_probe_git():135] Probing git
+2024-05-03 14:00:57,951 DEBUG   HandlerThread:28164 [system_info.py:_probe_git():143] Probing git done
+2024-05-03 14:00:57,951 DEBUG   HandlerThread:28164 [system_info.py:probe():198] Probing system done
+2024-05-03 14:00:57,951 DEBUG   HandlerThread:28164 [system_monitor.py:probe():223] {'os': 'Linux-6.5.0-28-generic-x86_64-with-glibc2.17', 'python': '3.8.19', 'heartbeatAt': '2024-05-03T12:00:57.939422', 'startedAt': '2024-05-03T12:00:57.231902', 'docker': None, 'cuda': None, 'args': ('--t_scale', '1.', '--energy', 'alanine_vacuum_full', '--pis_architectures', '--zero_init', '--clipping', '--mode_fwd', 'tb', '--lr_policy', '1e-3', '--lr_flow', '1e-1', '--both_ways'), 'state': 'running', 'program': 'train.py', 'codePathLocal': 'train.py', 'codePath': 'energy_sampling/train.py', 'git': {'remote': 'https://github.com/GFNOrg/gfn-diffusion.git', 'commit': '7c350b4c208658faf5e2b63280f8fd4da8a6b3f8'}, 'email': 'radoslavralev@tum.de', 'root': '/home/radoslavralev/Documents/Thesis/gfn-diffusion', 'host': 'rr-msi', 'username': 'radoslavralev', 'executable': '/home/radoslavralev/miniconda3/envs/gfn-diffusion/bin/python', 'cpu_count': 8, 'cpu_count_logical': 12, 'cpu_freq': {'current': 2235.9300833333336, 'min': 400.0, 'max': 4033.3333333333335}, 'cpu_freq_per_core': [{'current': 3500.606, 'min': 400.0, 'max': 4400.0}, {'current': 784.879, 'min': 400.0, 'max': 4400.0}, {'current': 400.0, 'min': 400.0, 'max': 4400.0}, {'current': 4221.521, 'min': 400.0, 'max': 4400.0}, {'current': 3858.459, 'min': 400.0, 'max': 4400.0}, {'current': 400.0, 'min': 400.0, 'max': 4400.0}, {'current': 3760.051, 'min': 400.0, 'max': 4400.0}, {'current': 3366.864, 'min': 400.0, 'max': 4400.0}, {'current': 2371.792, 'min': 400.0, 'max': 3300.0}, {'current': 400.0, 'min': 400.0, 'max': 3300.0}, {'current': 2426.255, 'min': 400.0, 'max': 3300.0}, {'current': 1340.734, 'min': 400.0, 'max': 3300.0}], 'disk': {'/': {'total': 896.8126182556152, 'used': 285.84835052490234}}, 'gpu': 'NVIDIA GeForce RTX 4050 Laptop GPU', 'gpu_count': 1, 'gpu_devices': [{'name': 'NVIDIA GeForce RTX 4050 Laptop GPU', 'memory_total': 6439305216}], 'memory': {'total': 31.04425048828125}}
+2024-05-03 14:00:57,951 INFO    HandlerThread:28164 [system_monitor.py:probe():224] Finished collecting system info
+2024-05-03 14:00:57,951 INFO    HandlerThread:28164 [system_monitor.py:probe():227] Publishing system info
+2024-05-03 14:00:57,951 DEBUG   HandlerThread:28164 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2024-05-03 14:00:58,847 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/conda-environment.yaml
+2024-05-03 14:00:58,969 DEBUG   HandlerThread:28164 [system_info.py:_save_conda():222] Saving conda packages done
+2024-05-03 14:00:58,969 INFO    HandlerThread:28164 [system_monitor.py:probe():229] Finished publishing system info
+2024-05-03 14:00:58,970 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:00:58,971 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-metadata.json with policy now
+2024-05-03 14:00:59,008 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: python_packages
+2024-05-03 14:00:59,008 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: python_packages
+2024-05-03 14:00:59,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:00:59,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:00:59,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:00:59,212 DEBUG   SenderThread:28164 [sender.py:send():379] send: telemetry
+2024-05-03 14:00:59,582 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/0bzksm99-wandb-metadata.json
+2024-05-03 14:00:59,847 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/conda-environment.yaml
+2024-05-03 14:00:59,847 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:00:59,847 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/requirements.txt
+2024-05-03 14:00:59,847 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-metadata.json
+2024-05-03 14:01:01,799 DEBUG   SenderThread:28164 [sender.py:send():379] send: telemetry
+2024-05-03 14:01:01,847 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:02,143 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:02,143 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_0_66f3d5c1799f3aea490d.png with policy now
+2024-05-03 14:01:02,145 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:01:02,145 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:02,145 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_0_d5428cf978a41c0c24a5.png with policy now
+2024-05-03 14:01:02,278 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:02,516 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/7p2ysyhf-media/images/visualization/rama_gt_0_d5428cf978a41c0c24a5.png
+2024-05-03 14:01:02,574 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/75lct68n-media/images/visualization/rama_pred_0_66f3d5c1799f3aea490d.png
+2024-05-03 14:01:02,847 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_0_66f3d5c1799f3aea490d.png
+2024-05-03 14:01:02,848 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_0_d5428cf978a41c0c24a5.png
+2024-05-03 14:01:02,848 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media
+2024-05-03 14:01:02,848 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images
+2024-05-03 14:01:02,848 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:01:03,394 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/does331d-media/images/visualization/rama_pred_0_66f3d5c1799f3aea490d.png
+2024-05-03 14:01:03,403 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/ul3krx9d-media/images/visualization/rama_gt_0_d5428cf978a41c0c24a5.png
+2024-05-03 14:01:03,848 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:05,849 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:07,305 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:07,849 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:09,850 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:11,851 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:12,413 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:13,852 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:14,008 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:01:14,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:01:14,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:01:15,853 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:17,435 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:17,853 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:18,334 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:18,335 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_0_d78da30b270f5f92a36c.png with policy now
+2024-05-03 14:01:18,337 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:18,337 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_0_5177394815acfa4105a6.png with policy now
+2024-05-03 14:01:18,337 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:01:18,338 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:01:18,339 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:01:18,339 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:01:18,833 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/yquj4r0u-media/images/visualization/rama_gt_0_5177394815acfa4105a6.png
+2024-05-03 14:01:18,833 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/adcw2abm-media/images/visualization/rama_pred_0_d78da30b270f5f92a36c.png
+2024-05-03 14:01:18,854 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_0_d78da30b270f5f92a36c.png
+2024-05-03 14:01:18,854 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:01:18,854 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_0_5177394815acfa4105a6.png
+2024-05-03 14:01:18,854 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:01:19,356 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/jvxdlj6u-media/images/visualization/rama_pred_0_d78da30b270f5f92a36c.png
+2024-05-03 14:01:19,386 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/tzmca33e-media/images/visualization/rama_gt_0_5177394815acfa4105a6.png
+2024-05-03 14:01:19,854 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:21,855 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:22,520 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:23,855 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:25,856 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:27,633 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:27,856 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:28,857 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/config.yaml
+2024-05-03 14:01:29,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:01:29,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:01:29,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:01:29,857 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:31,858 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:33,146 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:33,859 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:33,976 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:33,976 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_100_317d875e1417200f858b.png with policy now
+2024-05-03 14:01:33,978 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:33,978 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_100_168cf27b35b592cca073.png with policy now
+2024-05-03 14:01:33,978 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:01:33,979 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:01:33,979 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:01:33,982 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:01:34,356 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/l9f0lr3d-media/images/visualization/rama_gt_100_168cf27b35b592cca073.png
+2024-05-03 14:01:34,381 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/a6vx9xj0-media/images/visualization/rama_pred_100_317d875e1417200f858b.png
+2024-05-03 14:01:34,859 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:01:34,859 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_100_168cf27b35b592cca073.png
+2024-05-03 14:01:34,859 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_100_317d875e1417200f858b.png
+2024-05-03 14:01:34,859 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:01:35,338 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/diqqrnw7-media/images/visualization/rama_gt_100_168cf27b35b592cca073.png
+2024-05-03 14:01:35,347 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/vkmueybf-media/images/visualization/rama_pred_100_317d875e1417200f858b.png
+2024-05-03 14:01:35,859 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:37,860 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:38,209 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:39,861 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:41,861 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:43,308 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:43,862 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:44,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:01:44,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:01:44,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:01:45,863 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:47,863 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:48,324 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:49,864 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:50,541 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:50,541 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_200_98cb3835f1fe367cfb87.png with policy now
+2024-05-03 14:01:50,544 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:01:50,545 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:01:50,545 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_200_fa8c9d0b44fe2782b347.png with policy now
+2024-05-03 14:01:50,545 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:01:50,545 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:01:50,548 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:01:50,865 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:01:50,865 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_200_fa8c9d0b44fe2782b347.png
+2024-05-03 14:01:50,865 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_200_98cb3835f1fe367cfb87.png
+2024-05-03 14:01:50,865 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:01:50,991 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/kl7o1t2u-media/images/visualization/rama_pred_200_98cb3835f1fe367cfb87.png
+2024-05-03 14:01:50,992 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/psk3ilfi-media/images/visualization/rama_gt_200_fa8c9d0b44fe2782b347.png
+2024-05-03 14:01:51,466 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/uskvzhde-media/images/visualization/rama_pred_200_98cb3835f1fe367cfb87.png
+2024-05-03 14:01:51,865 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:51,974 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/dpiy6k2r-media/images/visualization/rama_gt_200_fa8c9d0b44fe2782b347.png
+2024-05-03 14:01:53,452 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:53,866 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:55,866 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:57,867 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:01:57,930 DEBUG   SystemMonitor:28164 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-05-03 14:01:57,931 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:01:58,561 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:01:59,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:01:59,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:01:59,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:01:59,868 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:01,869 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:03,668 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:03,870 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:05,870 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:06,411 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:06,411 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_300_c466d45a0c21fb9cecc8.png with policy now
+2024-05-03 14:02:06,413 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:02:06,414 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:06,414 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_300_fb6c827c53ea17f16eb0.png with policy now
+2024-05-03 14:02:06,415 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:02:06,415 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:02:06,418 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:02:06,857 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/ybhokkjf-media/images/visualization/rama_pred_300_c466d45a0c21fb9cecc8.png
+2024-05-03 14:02:06,857 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/pk3f31w1-media/images/visualization/rama_gt_300_fb6c827c53ea17f16eb0.png
+2024-05-03 14:02:06,871 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:02:06,871 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_300_fb6c827c53ea17f16eb0.png
+2024-05-03 14:02:06,871 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_300_c466d45a0c21fb9cecc8.png
+2024-05-03 14:02:06,871 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:02:07,370 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/rqda2xq2-media/images/visualization/rama_gt_300_fb6c827c53ea17f16eb0.png
+2024-05-03 14:02:07,371 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/3q9jtoro-media/images/visualization/rama_pred_300_c466d45a0c21fb9cecc8.png
+2024-05-03 14:02:07,871 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:08,767 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:09,872 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:11,873 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:13,872 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:13,874 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:14,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:02:14,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:02:14,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:02:15,875 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:17,875 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:18,932 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:19,876 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:21,877 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:22,754 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:22,754 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_400_9ec6d1a08d9f7f2df7dd.png with policy now
+2024-05-03 14:02:22,757 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:02:22,757 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:22,758 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_400_1d338a7e781319a04cdb.png with policy now
+2024-05-03 14:02:22,758 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:02:22,758 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:02:22,758 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:02:22,878 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:02:22,878 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_400_9ec6d1a08d9f7f2df7dd.png
+2024-05-03 14:02:22,878 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_400_1d338a7e781319a04cdb.png
+2024-05-03 14:02:22,878 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:02:23,246 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/wx7js4j4-media/images/visualization/rama_gt_400_1d338a7e781319a04cdb.png
+2024-05-03 14:02:23,246 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/solgpbta-media/images/visualization/rama_pred_400_9ec6d1a08d9f7f2df7dd.png
+2024-05-03 14:02:23,710 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/5pjp66pn-media/images/visualization/rama_gt_400_1d338a7e781319a04cdb.png
+2024-05-03 14:02:23,878 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:23,988 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:24,270 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/l7h3tq57-media/images/visualization/rama_pred_400_9ec6d1a08d9f7f2df7dd.png
+2024-05-03 14:02:25,879 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:27,880 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:27,931 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:02:28,992 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:29,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:02:29,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:02:29,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:02:29,881 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:31,881 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:33,882 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:34,128 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:35,883 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:37,884 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:38,908 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:38,908 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_500_7b5d6e103e5f4343deb8.png with policy now
+2024-05-03 14:02:38,910 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:02:38,911 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:38,911 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_500_f743358a0f023bef661d.png with policy now
+2024-05-03 14:02:38,911 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:02:38,911 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:02:38,915 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:02:39,233 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:39,296 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/pcuo98yu-media/images/visualization/rama_pred_500_7b5d6e103e5f4343deb8.png
+2024-05-03 14:02:39,297 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/ljzmtw7y-media/images/visualization/rama_gt_500_f743358a0f023bef661d.png
+2024-05-03 14:02:39,885 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:39,885 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:02:39,885 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_500_f743358a0f023bef661d.png
+2024-05-03 14:02:39,885 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_500_7b5d6e103e5f4343deb8.png
+2024-05-03 14:02:39,885 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:02:40,342 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/2v6h6nxm-media/images/visualization/rama_gt_500_f743358a0f023bef661d.png
+2024-05-03 14:02:40,378 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/2q1zmpr2-media/images/visualization/rama_pred_500_7b5d6e103e5f4343deb8.png
+2024-05-03 14:02:41,886 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:43,886 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:44,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:02:44,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:02:44,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:02:44,337 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:45,887 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:47,888 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:49,385 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:49,889 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:51,890 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:53,890 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:55,292 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:02:55,891 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:56,324 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:56,324 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_600_2bb0621091b8203bcf79.png with policy now
+2024-05-03 14:02:56,326 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:02:56,327 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:02:56,327 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_600_15fcbbe52b9cf0ec32d2.png with policy now
+2024-05-03 14:02:56,327 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:02:56,328 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:02:56,330 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:02:56,711 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/bc4japei-media/images/visualization/rama_gt_600_15fcbbe52b9cf0ec32d2.png
+2024-05-03 14:02:56,730 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/dwbjyzet-media/images/visualization/rama_pred_600_2bb0621091b8203bcf79.png
+2024-05-03 14:02:56,892 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:02:56,892 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_600_2bb0621091b8203bcf79.png
+2024-05-03 14:02:56,893 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_600_15fcbbe52b9cf0ec32d2.png
+2024-05-03 14:02:56,893 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:02:57,369 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/qucur2k2-media/images/visualization/rama_pred_600_2bb0621091b8203bcf79.png
+2024-05-03 14:02:57,407 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/25ttmolw-media/images/visualization/rama_gt_600_15fcbbe52b9cf0ec32d2.png
+2024-05-03 14:02:57,892 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:02:57,932 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:02:59,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:02:59,009 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:02:59,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:02:59,894 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:00,389 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:01,895 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:03,896 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:05,465 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:05,897 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:07,897 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:09,898 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:10,493 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:11,899 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:13,353 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:03:13,354 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_700_769f9be993a7e62f119d.png with policy now
+2024-05-03 14:03:13,355 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:03:13,356 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:03:13,356 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_700_7a0ef0ee6e3b5090f363.png with policy now
+2024-05-03 14:03:13,357 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:03:13,357 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:03:13,357 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:03:13,757 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/tjzztoc6-media/images/visualization/rama_pred_700_769f9be993a7e62f119d.png
+2024-05-03 14:03:13,758 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/hpbfoh5z-media/images/visualization/rama_gt_700_7a0ef0ee6e3b5090f363.png
+2024-05-03 14:03:13,900 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:13,900 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:03:13,900 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_700_769f9be993a7e62f119d.png
+2024-05-03 14:03:13,900 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_700_7a0ef0ee6e3b5090f363.png
+2024-05-03 14:03:13,901 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:03:14,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:03:14,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:03:14,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:03:14,407 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/eh69f922-media/images/visualization/rama_gt_700_7a0ef0ee6e3b5090f363.png
+2024-05-03 14:03:14,407 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/xb9at6cd-media/images/visualization/rama_pred_700_769f9be993a7e62f119d.png
+2024-05-03 14:03:15,630 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:15,901 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:17,902 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:19,903 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:20,660 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:21,904 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:23,904 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:25,720 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:25,905 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:27,906 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:27,932 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:03:29,009 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:03:29,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:03:29,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:03:29,907 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:30,756 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:03:30,756 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_800_c777537cf3845e0e21c0.png with policy now
+2024-05-03 14:03:30,756 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:30,798 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:03:30,799 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:03:30,799 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_800_38ed8d164e03d1024345.png with policy now
+2024-05-03 14:03:30,799 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:03:30,800 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:03:30,802 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:03:30,908 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:03:30,908 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_800_c777537cf3845e0e21c0.png
+2024-05-03 14:03:30,908 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_800_38ed8d164e03d1024345.png
+2024-05-03 14:03:30,908 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:03:31,244 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/yzvx6pml-media/images/visualization/rama_pred_800_c777537cf3845e0e21c0.png
+2024-05-03 14:03:31,305 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/9m6dqumm-media/images/visualization/rama_gt_800_38ed8d164e03d1024345.png
+2024-05-03 14:03:31,751 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/5smur4jv-media/images/visualization/rama_pred_800_c777537cf3845e0e21c0.png
+2024-05-03 14:03:31,779 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/jj23vzy1-media/images/visualization/rama_gt_800_38ed8d164e03d1024345.png
+2024-05-03 14:03:31,908 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:33,909 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:35,856 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:35,910 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:37,911 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:39,912 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:40,861 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:41,913 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:43,914 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:44,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:03:44,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:03:44,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:03:45,869 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:45,915 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:47,916 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:48,377 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:03:48,377 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_900_51dbe0201832267f5d53.png with policy now
+2024-05-03 14:03:48,379 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:03:48,380 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:03:48,380 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_900_1651024489ade1e085ad.png with policy now
+2024-05-03 14:03:48,381 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:03:48,381 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:03:48,385 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:03:48,849 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/a5a3dy9p-media/images/visualization/rama_gt_900_1651024489ade1e085ad.png
+2024-05-03 14:03:48,849 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/0u5c2f75-media/images/visualization/rama_pred_900_51dbe0201832267f5d53.png
+2024-05-03 14:03:48,916 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:03:48,916 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_900_1651024489ade1e085ad.png
+2024-05-03 14:03:48,916 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_900_51dbe0201832267f5d53.png
+2024-05-03 14:03:48,917 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:03:49,465 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/r4zfg8pk-media/images/visualization/rama_gt_900_1651024489ade1e085ad.png
+2024-05-03 14:03:49,465 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/2g1ao06m-media/images/visualization/rama_pred_900_51dbe0201832267f5d53.png
+2024-05-03 14:03:49,917 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:50,918 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:51,918 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:53,919 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:55,920 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:55,992 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:03:57,920 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:03:57,933 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:03:59,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:03:59,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:03:59,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:03:59,922 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:01,080 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:01,923 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:03,924 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:04,773 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:04,773 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1000_1b2aae4effa08337dde8.png with policy now
+2024-05-03 14:04:04,775 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:04,775 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:04:04,775 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1000_5c9af49507bb7e33d82c.png with policy now
+2024-05-03 14:04:04,776 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:04:04,777 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:04:04,780 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:04:04,924 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:04:04,924 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1000_1b2aae4effa08337dde8.png
+2024-05-03 14:04:04,925 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1000_5c9af49507bb7e33d82c.png
+2024-05-03 14:04:04,925 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:04:05,236 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/v9hjc62t-media/images/visualization/rama_pred_1000_1b2aae4effa08337dde8.png
+2024-05-03 14:04:05,237 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/26gyschu-media/images/visualization/rama_gt_1000_5c9af49507bb7e33d82c.png
+2024-05-03 14:04:05,854 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/y68bvfrm-media/images/visualization/rama_pred_1000_1b2aae4effa08337dde8.png
+2024-05-03 14:04:05,854 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/ko8o9qub-media/images/visualization/rama_gt_1000_5c9af49507bb7e33d82c.png
+2024-05-03 14:04:05,925 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:06,211 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:07,926 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:09,927 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:11,360 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:11,928 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:13,929 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:14,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:04:14,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:04:14,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:04:15,930 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:16,377 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:17,931 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:19,932 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:20,937 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:20,938 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1100_b4e2d6f77106d4c8f666.png with policy now
+2024-05-03 14:04:20,940 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:20,940 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1100_506d661dff732402c380.png with policy now
+2024-05-03 14:04:20,940 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:04:20,941 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:04:20,941 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:04:20,944 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:04:21,416 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/7gwg6110-media/images/visualization/rama_pred_1100_b4e2d6f77106d4c8f666.png
+2024-05-03 14:04:21,416 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/k824b1ng-media/images/visualization/rama_gt_1100_506d661dff732402c380.png
+2024-05-03 14:04:21,509 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:21,933 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:21,933 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:04:21,933 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1100_506d661dff732402c380.png
+2024-05-03 14:04:21,933 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1100_b4e2d6f77106d4c8f666.png
+2024-05-03 14:04:21,934 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:04:22,542 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/b5c73sml-media/images/visualization/rama_gt_1100_506d661dff732402c380.png
+2024-05-03 14:04:22,542 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/rjx7yydo-media/images/visualization/rama_pred_1100_b4e2d6f77106d4c8f666.png
+2024-05-03 14:04:23,934 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:25,935 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:26,531 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:27,933 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:04:27,936 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:29,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:04:29,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:04:29,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:04:29,937 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:31,543 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:31,938 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:33,939 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:35,940 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:37,400 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:37,941 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:38,467 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:38,467 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1200_0d27af94959e66e5ec54.png with policy now
+2024-05-03 14:04:38,469 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:38,469 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1200_e9fc59aa9b0963d7f829.png with policy now
+2024-05-03 14:04:38,471 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:04:38,473 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:04:38,473 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:04:38,473 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:04:38,924 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/4r4m9ct5-media/images/visualization/rama_gt_1200_e9fc59aa9b0963d7f829.png
+2024-05-03 14:04:38,924 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/2wf1gyde-media/images/visualization/rama_pred_1200_0d27af94959e66e5ec54.png
+2024-05-03 14:04:38,941 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:04:38,942 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1200_0d27af94959e66e5ec54.png
+2024-05-03 14:04:38,942 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1200_e9fc59aa9b0963d7f829.png
+2024-05-03 14:04:38,942 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:04:39,466 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/kafp0nxa-media/images/visualization/rama_pred_1200_0d27af94959e66e5ec54.png
+2024-05-03 14:04:39,475 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/62byhzxa-media/images/visualization/rama_gt_1200_e9fc59aa9b0963d7f829.png
+2024-05-03 14:04:39,942 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:41,943 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:42,429 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:43,944 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:44,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:04:44,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:04:44,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:04:45,945 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:47,535 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:47,946 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:49,947 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:51,948 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:52,572 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:53,949 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:55,950 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:56,261 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:56,261 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1300_c3dbc8e1987ab301d3fa.png with policy now
+2024-05-03 14:04:56,262 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:04:56,262 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1300_11b290f28eb7061306f0.png with policy now
+2024-05-03 14:04:56,264 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:04:56,266 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:04:56,266 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:04:56,268 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:04:56,745 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/yu9vv4hr-media/images/visualization/rama_pred_1300_c3dbc8e1987ab301d3fa.png
+2024-05-03 14:04:56,745 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/eiw26vkq-media/images/visualization/rama_gt_1300_11b290f28eb7061306f0.png
+2024-05-03 14:04:56,950 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:04:56,950 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1300_c3dbc8e1987ab301d3fa.png
+2024-05-03 14:04:56,950 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1300_11b290f28eb7061306f0.png
+2024-05-03 14:04:56,951 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:04:57,458 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/r3uwqbcu-media/images/visualization/rama_pred_1300_c3dbc8e1987ab301d3fa.png
+2024-05-03 14:04:57,458 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/ljrkjqqh-media/images/visualization/rama_gt_1300_11b290f28eb7061306f0.png
+2024-05-03 14:04:57,580 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:04:57,934 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:04:57,950 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:04:59,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:04:59,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:04:59,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:04:59,951 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:01,952 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:02,604 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:03,953 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:05,954 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:07,652 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:07,956 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:09,957 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:11,958 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:12,891 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:05:12,891 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1400_57dc6e0410aa886b0481.png with policy now
+2024-05-03 14:05:12,891 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:12,893 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:05:12,894 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:05:12,894 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1400_0a66eef620de6474a4fa.png with policy now
+2024-05-03 14:05:12,895 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:05:12,895 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:05:12,897 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:05:12,959 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:05:12,959 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1400_0a66eef620de6474a4fa.png
+2024-05-03 14:05:12,959 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1400_57dc6e0410aa886b0481.png
+2024-05-03 14:05:12,959 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:05:13,432 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/aehhzn73-media/images/visualization/rama_gt_1400_0a66eef620de6474a4fa.png
+2024-05-03 14:05:13,432 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/kq1se2j2-media/images/visualization/rama_pred_1400_57dc6e0410aa886b0481.png
+2024-05-03 14:05:13,959 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:14,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:05:14,010 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:05:14,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:05:14,017 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/zl4f6ilj-media/images/visualization/rama_pred_1400_57dc6e0410aa886b0481.png
+2024-05-03 14:05:14,556 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/jtkt78j2-media/images/visualization/rama_gt_1400_0a66eef620de6474a4fa.png
+2024-05-03 14:05:15,960 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:17,962 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:17,967 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:19,963 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:21,964 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:22,975 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:23,965 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:25,966 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:27,934 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:05:27,968 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:28,065 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:29,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:05:29,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:05:29,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:05:29,921 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:05:29,922 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1500_b818fea8f01fa81532b4.png with policy now
+2024-05-03 14:05:29,962 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:05:29,963 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:05:29,963 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1500_8b468492a0eefbd24686.png with policy now
+2024-05-03 14:05:29,964 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:05:29,964 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:05:29,966 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:05:29,969 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:29,969 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:05:29,969 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1500_b818fea8f01fa81532b4.png
+2024-05-03 14:05:29,969 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1500_8b468492a0eefbd24686.png
+2024-05-03 14:05:29,969 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:05:30,301 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/7zsx72ej-media/images/visualization/rama_pred_1500_b818fea8f01fa81532b4.png
+2024-05-03 14:05:30,366 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/ofx3sqeo-media/images/visualization/rama_gt_1500_8b468492a0eefbd24686.png
+2024-05-03 14:05:30,806 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/4iwg1wd2-media/images/visualization/rama_pred_1500_b818fea8f01fa81532b4.png
+2024-05-03 14:05:30,847 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/58l08ds5-media/images/visualization/rama_gt_1500_8b468492a0eefbd24686.png
+2024-05-03 14:05:31,970 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:33,113 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:33,971 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:35,972 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:37,973 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:38,254 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:39,974 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:41,975 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:43,372 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:43,976 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:44,010 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:05:44,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:05:44,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:05:45,977 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:46,868 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:05:46,868 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1600_141c1a84d2e7d873d092.png with policy now
+2024-05-03 14:05:46,870 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:05:46,871 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:05:46,871 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1600_6e37784411800a830916.png with policy now
+2024-05-03 14:05:46,871 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:05:46,871 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:05:46,874 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:05:46,978 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:05:46,978 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1600_6e37784411800a830916.png
+2024-05-03 14:05:46,978 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1600_141c1a84d2e7d873d092.png
+2024-05-03 14:05:46,978 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:05:47,255 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/eiattbmh-media/images/visualization/rama_pred_1600_141c1a84d2e7d873d092.png
+2024-05-03 14:05:47,275 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/ce5z6uwh-media/images/visualization/rama_gt_1600_6e37784411800a830916.png
+2024-05-03 14:05:47,773 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/2qlcvbc9-media/images/visualization/rama_pred_1600_141c1a84d2e7d873d092.png
+2024-05-03 14:05:47,979 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:48,423 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:48,456 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/jya1yixg-media/images/visualization/rama_gt_1600_6e37784411800a830916.png
+2024-05-03 14:05:49,980 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:51,981 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:53,574 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:53,982 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:55,984 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:57,935 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:05:57,985 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:05:58,632 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:05:59,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:05:59,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:05:59,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:05:59,986 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:01,986 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:03,988 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:04,201 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:04,202 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1700_1ac2673ec7aff62cb80d.png with policy now
+2024-05-03 14:06:04,202 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:04,204 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:06:04,205 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:04,205 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1700_b56e3293734b31b2225a.png with policy now
+2024-05-03 14:06:04,205 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:06:04,206 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:06:04,210 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:06:04,681 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/pk9nuggi-media/images/visualization/rama_pred_1700_1ac2673ec7aff62cb80d.png
+2024-05-03 14:06:04,715 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/a1hh4w8x-media/images/visualization/rama_gt_1700_b56e3293734b31b2225a.png
+2024-05-03 14:06:04,988 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:06:04,988 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1700_b56e3293734b31b2225a.png
+2024-05-03 14:06:04,988 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1700_1ac2673ec7aff62cb80d.png
+2024-05-03 14:06:04,989 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:06:05,505 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/uo5xn476-media/images/visualization/rama_pred_1700_1ac2673ec7aff62cb80d.png
+2024-05-03 14:06:05,526 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/n12ko1bw-media/images/visualization/rama_gt_1700_b56e3293734b31b2225a.png
+2024-05-03 14:06:05,989 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:07,990 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:09,293 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:09,991 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:11,992 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:13,992 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:14,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:06:14,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:06:14,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:06:14,384 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:15,993 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:17,994 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:19,995 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:20,097 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:20,902 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:20,902 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1800_e3ffeb0694704f321ca1.png with policy now
+2024-05-03 14:06:20,904 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:06:20,905 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:20,905 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1800_d700ce0d3a4db97ba114.png with policy now
+2024-05-03 14:06:20,905 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:06:20,905 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:06:20,908 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:06:20,996 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:06:20,996 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1800_d700ce0d3a4db97ba114.png
+2024-05-03 14:06:20,996 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1800_e3ffeb0694704f321ca1.png
+2024-05-03 14:06:20,996 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:06:21,431 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/qa9kwtjr-media/images/visualization/rama_gt_1800_d700ce0d3a4db97ba114.png
+2024-05-03 14:06:21,431 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/kt2dsnht-media/images/visualization/rama_pred_1800_e3ffeb0694704f321ca1.png
+2024-05-03 14:06:21,996 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:22,043 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/9f9lut9o-media/images/visualization/rama_pred_1800_e3ffeb0694704f321ca1.png
+2024-05-03 14:06:22,044 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/z1pv9ujv-media/images/visualization/rama_gt_1800_d700ce0d3a4db97ba114.png
+2024-05-03 14:06:23,998 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:25,113 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:25,999 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:27,935 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:06:28,000 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:29,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:06:29,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:06:29,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:06:30,001 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:30,219 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:32,003 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:34,004 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:35,414 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:36,005 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:38,006 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:39,334 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:39,334 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_1900_47451018568230407e35.png with policy now
+2024-05-03 14:06:39,336 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:06:39,337 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:39,337 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_1900_ac9e9f82347ca011cab7.png with policy now
+2024-05-03 14:06:39,337 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:06:39,337 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:06:39,340 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:06:39,712 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/upy3hlih-media/images/visualization/rama_gt_1900_ac9e9f82347ca011cab7.png
+2024-05-03 14:06:39,719 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/2su1719z-media/images/visualization/rama_pred_1900_47451018568230407e35.png
+2024-05-03 14:06:40,008 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:40,008 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:06:40,008 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1900_47451018568230407e35.png
+2024-05-03 14:06:40,008 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1900_ac9e9f82347ca011cab7.png
+2024-05-03 14:06:40,008 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:06:40,532 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:40,576 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/f7tsad14-media/images/visualization/rama_pred_1900_47451018568230407e35.png
+2024-05-03 14:06:40,576 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/2mpwtrdm-media/images/visualization/rama_gt_1900_ac9e9f82347ca011cab7.png
+2024-05-03 14:06:42,009 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:44,010 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:44,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:06:44,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:06:44,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:06:45,675 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:46,011 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:48,012 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:50,014 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:50,820 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:52,015 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:54,016 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:55,825 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:06:56,017 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:57,936 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:06:58,018 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:06:58,346 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:58,346 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_2000_aed97b1b3a3b5977c724.png with policy now
+2024-05-03 14:06:58,349 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:06:58,349 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_2000_7aead22edd26fa8d8a67.png with policy now
+2024-05-03 14:06:58,349 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:06:58,352 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:06:58,352 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:06:58,352 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:06:58,742 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/eook1euo-media/images/visualization/rama_pred_2000_aed97b1b3a3b5977c724.png
+2024-05-03 14:06:58,760 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/xnx6b0g0-media/images/visualization/rama_gt_2000_7aead22edd26fa8d8a67.png
+2024-05-03 14:06:59,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:06:59,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:06:59,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:06:59,019 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:06:59,019 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_2000_7aead22edd26fa8d8a67.png
+2024-05-03 14:06:59,019 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_2000_aed97b1b3a3b5977c724.png
+2024-05-03 14:06:59,019 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:06:59,620 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/qxbf7xen-media/images/visualization/rama_pred_2000_aed97b1b3a3b5977c724.png
+2024-05-03 14:06:59,620 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/b266qwch-media/images/visualization/rama_gt_2000_7aead22edd26fa8d8a67.png
+2024-05-03 14:07:00,019 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:00,949 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:02,021 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:04,022 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:05,991 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:06,023 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:08,025 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:10,026 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:11,111 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:12,027 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:14,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:07:14,011 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:07:14,013 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:07:14,028 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:16,029 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:16,210 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:17,068 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:07:17,068 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_2100_6c4d6075f78f537fa0ef.png with policy now
+2024-05-03 14:07:17,071 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:07:17,072 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:07:17,072 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_2100_6a134fb74707c097046d.png with policy now
+2024-05-03 14:07:17,072 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:07:17,072 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:07:17,076 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:07:17,498 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/7gmqgyyf-media/images/visualization/rama_gt_2100_6a134fb74707c097046d.png
+2024-05-03 14:07:17,498 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/m9la4ayw-media/images/visualization/rama_pred_2100_6c4d6075f78f537fa0ef.png
+2024-05-03 14:07:18,030 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:18,030 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:07:18,030 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_2100_6a134fb74707c097046d.png
+2024-05-03 14:07:18,031 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_2100_6c4d6075f78f537fa0ef.png
+2024-05-03 14:07:18,031 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:07:18,578 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/15mgdp24-media/images/visualization/rama_gt_2100_6a134fb74707c097046d.png
+2024-05-03 14:07:18,578 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/0bjcb2nd-media/images/visualization/rama_pred_2100_6c4d6075f78f537fa0ef.png
+2024-05-03 14:07:20,031 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:21,313 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:22,032 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:24,033 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:26,034 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:26,482 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:27,936 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:07:28,035 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:29,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:07:29,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:07:29,012 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:07:30,036 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:31,537 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:32,037 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:34,039 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:35,196 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:07:35,196 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_pred_2200_daa22073fd0c491a1558.png with policy now
+2024-05-03 14:07:35,198 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: partial_history
+2024-05-03 14:07:35,199 DEBUG   SenderThread:28164 [sender.py:send():379] send: files
+2024-05-03 14:07:35,199 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file media/images/visualization/rama_gt_2200_d43a1af5ac0a6321af5a.png with policy now
+2024-05-03 14:07:35,200 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:07:35,200 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:07:35,204 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:07:35,582 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/51ruu4tu-media/images/visualization/rama_gt_2200_d43a1af5ac0a6321af5a.png
+2024-05-03 14:07:35,607 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/pnomqyoz-media/images/visualization/rama_pred_2200_daa22073fd0c491a1558.png
+2024-05-03 14:07:36,040 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:36,041 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:07:36,041 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_2200_d43a1af5ac0a6321af5a.png
+2024-05-03 14:07:36,041 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_created():271] file/dir created: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_2200_daa22073fd0c491a1558.png
+2024-05-03 14:07:36,041 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization
+2024-05-03 14:07:36,509 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/p75doxxn-media/images/visualization/rama_gt_2200_d43a1af5ac0a6321af5a.png
+2024-05-03 14:07:36,522 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /tmp/tmpyli54bziwandb/e24vzy94-media/images/visualization/rama_pred_2200_daa22073fd0c491a1558.png
+2024-05-03 14:07:36,555 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:38,042 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:40,043 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:41,607 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:42,045 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:44,011 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-03 14:07:44,012 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: stop_status
+2024-05-03 14:07:44,012 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-03 14:07:44,046 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:46,048 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:46,685 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:48,049 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:49,861 DEBUG   SenderThread:28164 [sender.py:send():379] send: exit
+2024-05-03 14:07:49,861 INFO    SenderThread:28164 [sender.py:send_exit():586] handling exit code: 255
+2024-05-03 14:07:49,861 INFO    SenderThread:28164 [sender.py:send_exit():588] handling runtime: 411
+2024-05-03 14:07:49,861 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:07:49,862 INFO    SenderThread:28164 [sender.py:send_exit():594] send defer
+2024-05-03 14:07:49,862 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,862 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 0
+2024-05-03 14:07:49,862 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,862 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 0
+2024-05-03 14:07:49,862 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 1
+2024-05-03 14:07:49,862 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,862 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 1
+2024-05-03 14:07:49,862 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,862 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 1
+2024-05-03 14:07:49,862 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 2
+2024-05-03 14:07:49,862 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,862 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 2
+2024-05-03 14:07:49,862 INFO    HandlerThread:28164 [system_monitor.py:finish():203] Stopping system monitor
+2024-05-03 14:07:49,862 INFO    HandlerThread:28164 [interfaces.py:finish():202] Joined cpu monitor
+2024-05-03 14:07:49,863 DEBUG   SystemMonitor:28164 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-05-03 14:07:49,863 INFO    HandlerThread:28164 [interfaces.py:finish():202] Joined disk monitor
+2024-05-03 14:07:49,863 DEBUG   SystemMonitor:28164 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-05-03 14:07:49,894 INFO    HandlerThread:28164 [interfaces.py:finish():202] Joined gpu monitor
+2024-05-03 14:07:49,894 INFO    HandlerThread:28164 [interfaces.py:finish():202] Joined memory monitor
+2024-05-03 14:07:49,894 INFO    HandlerThread:28164 [interfaces.py:finish():202] Joined network monitor
+2024-05-03 14:07:49,894 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,894 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 2
+2024-05-03 14:07:49,894 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 3
+2024-05-03 14:07:49,894 DEBUG   SenderThread:28164 [sender.py:send():379] send: stats
+2024-05-03 14:07:49,895 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,895 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 3
+2024-05-03 14:07:49,896 DEBUG   SenderThread:28164 [sender.py:send():379] send: history
+2024-05-03 14:07:49,896 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: summary_record
+2024-05-03 14:07:49,896 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:07:49,896 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,896 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 3
+2024-05-03 14:07:49,896 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 4
+2024-05-03 14:07:49,896 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,896 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 4
+2024-05-03 14:07:49,897 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,897 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 4
+2024-05-03 14:07:49,897 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 5
+2024-05-03 14:07:49,897 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,897 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 5
+2024-05-03 14:07:49,897 DEBUG   SenderThread:28164 [sender.py:send():379] send: summary
+2024-05-03 14:07:49,897 INFO    SenderThread:28164 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-03 14:07:49,897 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,897 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 5
+2024-05-03 14:07:49,897 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 6
+2024-05-03 14:07:49,898 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,898 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 6
+2024-05-03 14:07:49,898 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,898 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 6
+2024-05-03 14:07:49,898 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 7
+2024-05-03 14:07:49,898 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: status_report
+2024-05-03 14:07:49,898 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:49,898 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 7
+2024-05-03 14:07:49,898 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:49,898 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 7
+2024-05-03 14:07:50,050 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:50,050 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:07:50,861 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-03 14:07:51,860 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 8
+2024-05-03 14:07:51,860 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: poll_exit
+2024-05-03 14:07:51,860 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:51,860 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 8
+2024-05-03 14:07:51,861 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:51,861 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 8
+2024-05-03 14:07:51,861 INFO    SenderThread:28164 [job_builder.py:build():318] Attempting to build job artifact
+2024-05-03 14:07:51,861 INFO    SenderThread:28164 [job_builder.py:_get_source_type():455] is repo sourced job
+2024-05-03 14:07:51,864 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-03 14:07:51,878 INFO    SenderThread:28164 [job_builder.py:build():431] adding wandb-job metadata file
+2024-05-03 14:07:51,882 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 9
+2024-05-03 14:07:51,882 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: poll_exit
+2024-05-03 14:07:51,882 DEBUG   SenderThread:28164 [sender.py:send():379] send: artifact
+2024-05-03 14:07:51,884 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:51,884 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 9
+2024-05-03 14:07:52,051 INFO    Thread-12 :28164 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:52,865 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-03 14:07:53,611 INFO    SenderThread:28164 [sender.py:send_artifact():1468] sent artifact job-https___github.com_GFNOrg_gfn-diffusion.git_energy_sampling_train.py - {'id': 'QXJ0aWZhY3Q6ODE5NTc5MTc0', 'state': 'COMMITTED', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjE2NzA2MzI0Nw==', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6ODE5NTc5MTc0', 'versionIndex': 4}}}
+2024-05-03 14:07:53,611 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:53,611 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 9
+2024-05-03 14:07:53,611 INFO    SenderThread:28164 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-05-03 14:07:54,053 INFO    SenderThread:28164 [dir_watcher.py:finish():388] scan: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files
+2024-05-03 14:07:54,053 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/conda-environment.yaml conda-environment.yaml
+2024-05-03 14:07:54,053 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json wandb-summary.json
+2024-05-03 14:07:54,053 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-metadata.json wandb-metadata.json
+2024-05-03 14:07:54,053 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log output.log
+2024-05-03 14:07:54,053 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/config.yaml config.yaml
+2024-05-03 14:07:54,053 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/requirements.txt requirements.txt
+2024-05-03 14:07:54,054 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_2000_7aead22edd26fa8d8a67.png media/images/visualization/rama_gt_2000_7aead22edd26fa8d8a67.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_2200_d43a1af5ac0a6321af5a.png media/images/visualization/rama_gt_2200_d43a1af5ac0a6321af5a.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_800_38ed8d164e03d1024345.png media/images/visualization/rama_gt_800_38ed8d164e03d1024345.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_200_fa8c9d0b44fe2782b347.png media/images/visualization/rama_gt_200_fa8c9d0b44fe2782b347.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_500_7b5d6e103e5f4343deb8.png media/images/visualization/rama_pred_500_7b5d6e103e5f4343deb8.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_2100_6c4d6075f78f537fa0ef.png media/images/visualization/rama_pred_2100_6c4d6075f78f537fa0ef.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1500_8b468492a0eefbd24686.png media/images/visualization/rama_gt_1500_8b468492a0eefbd24686.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1200_0d27af94959e66e5ec54.png media/images/visualization/rama_pred_1200_0d27af94959e66e5ec54.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_200_98cb3835f1fe367cfb87.png media/images/visualization/rama_pred_200_98cb3835f1fe367cfb87.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1000_5c9af49507bb7e33d82c.png media/images/visualization/rama_gt_1000_5c9af49507bb7e33d82c.png
+2024-05-03 14:07:54,055 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_400_9ec6d1a08d9f7f2df7dd.png media/images/visualization/rama_pred_400_9ec6d1a08d9f7f2df7dd.png
+2024-05-03 14:07:54,056 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1700_b56e3293734b31b2225a.png media/images/visualization/rama_gt_1700_b56e3293734b31b2225a.png
+2024-05-03 14:07:54,056 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1100_b4e2d6f77106d4c8f666.png media/images/visualization/rama_pred_1100_b4e2d6f77106d4c8f666.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_0_d78da30b270f5f92a36c.png media/images/visualization/rama_pred_0_d78da30b270f5f92a36c.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1400_0a66eef620de6474a4fa.png media/images/visualization/rama_gt_1400_0a66eef620de6474a4fa.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_100_317d875e1417200f858b.png media/images/visualization/rama_pred_100_317d875e1417200f858b.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1400_57dc6e0410aa886b0481.png media/images/visualization/rama_pred_1400_57dc6e0410aa886b0481.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_700_7a0ef0ee6e3b5090f363.png media/images/visualization/rama_gt_700_7a0ef0ee6e3b5090f363.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1000_1b2aae4effa08337dde8.png media/images/visualization/rama_pred_1000_1b2aae4effa08337dde8.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_2100_6a134fb74707c097046d.png media/images/visualization/rama_gt_2100_6a134fb74707c097046d.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_0_66f3d5c1799f3aea490d.png media/images/visualization/rama_pred_0_66f3d5c1799f3aea490d.png
+2024-05-03 14:07:54,060 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1200_e9fc59aa9b0963d7f829.png media/images/visualization/rama_gt_1200_e9fc59aa9b0963d7f829.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_700_769f9be993a7e62f119d.png media/images/visualization/rama_pred_700_769f9be993a7e62f119d.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_2200_daa22073fd0c491a1558.png media/images/visualization/rama_pred_2200_daa22073fd0c491a1558.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1600_141c1a84d2e7d873d092.png media/images/visualization/rama_pred_1600_141c1a84d2e7d873d092.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_2000_aed97b1b3a3b5977c724.png media/images/visualization/rama_pred_2000_aed97b1b3a3b5977c724.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1700_1ac2673ec7aff62cb80d.png media/images/visualization/rama_pred_1700_1ac2673ec7aff62cb80d.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_800_c777537cf3845e0e21c0.png media/images/visualization/rama_pred_800_c777537cf3845e0e21c0.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_300_c466d45a0c21fb9cecc8.png media/images/visualization/rama_pred_300_c466d45a0c21fb9cecc8.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_500_f743358a0f023bef661d.png media/images/visualization/rama_gt_500_f743358a0f023bef661d.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_900_51dbe0201832267f5d53.png media/images/visualization/rama_pred_900_51dbe0201832267f5d53.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_400_1d338a7e781319a04cdb.png media/images/visualization/rama_gt_400_1d338a7e781319a04cdb.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1300_c3dbc8e1987ab301d3fa.png media/images/visualization/rama_pred_1300_c3dbc8e1987ab301d3fa.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1600_6e37784411800a830916.png media/images/visualization/rama_gt_1600_6e37784411800a830916.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1900_ac9e9f82347ca011cab7.png media/images/visualization/rama_gt_1900_ac9e9f82347ca011cab7.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1500_b818fea8f01fa81532b4.png media/images/visualization/rama_pred_1500_b818fea8f01fa81532b4.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_0_d5428cf978a41c0c24a5.png media/images/visualization/rama_gt_0_d5428cf978a41c0c24a5.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1100_506d661dff732402c380.png media/images/visualization/rama_gt_1100_506d661dff732402c380.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_900_1651024489ade1e085ad.png media/images/visualization/rama_gt_900_1651024489ade1e085ad.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1300_11b290f28eb7061306f0.png media/images/visualization/rama_gt_1300_11b290f28eb7061306f0.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1800_e3ffeb0694704f321ca1.png media/images/visualization/rama_pred_1800_e3ffeb0694704f321ca1.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_300_fb6c827c53ea17f16eb0.png media/images/visualization/rama_gt_300_fb6c827c53ea17f16eb0.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_100_168cf27b35b592cca073.png media/images/visualization/rama_gt_100_168cf27b35b592cca073.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_1800_d700ce0d3a4db97ba114.png media/images/visualization/rama_gt_1800_d700ce0d3a4db97ba114.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_1900_47451018568230407e35.png media/images/visualization/rama_pred_1900_47451018568230407e35.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_0_5177394815acfa4105a6.png media/images/visualization/rama_gt_0_5177394815acfa4105a6.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_pred_600_2bb0621091b8203bcf79.png media/images/visualization/rama_pred_600_2bb0621091b8203bcf79.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [dir_watcher.py:finish():402] scan save: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/media/images/visualization/rama_gt_600_15fcbbe52b9cf0ec32d2.png media/images/visualization/rama_gt_600_15fcbbe52b9cf0ec32d2.png
+2024-05-03 14:07:54,061 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 10
+2024-05-03 14:07:54,062 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: poll_exit
+2024-05-03 14:07:54,062 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:54,062 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 10
+2024-05-03 14:07:54,062 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:54,062 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 10
+2024-05-03 14:07:54,062 INFO    SenderThread:28164 [file_pusher.py:finish():172] shutting down file pusher
+2024-05-03 14:07:54,509 INFO    wandb-upload_3:28164 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/output.log
+2024-05-03 14:07:54,510 INFO    wandb-upload_0:28164 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/wandb-summary.json
+2024-05-03 14:07:54,510 INFO    wandb-upload_2:28164 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/conda-environment.yaml
+2024-05-03 14:07:54,534 INFO    wandb-upload_4:28164 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/requirements.txt
+2024-05-03 14:07:54,537 INFO    wandb-upload_1:28164 [upload_job.py:push():131] Uploaded file /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/files/config.yaml
+2024-05-03 14:07:54,638 WARNING StreamThr :28164 [internal.py:is_dead():414] Internal process exiting, parent pid 28095 disappeared
+2024-05-03 14:07:54,638 ERROR   StreamThr :28164 [internal.py:wandb_internal():152] Internal process shutdown.
+2024-05-03 14:07:54,738 INFO    Thread-11 :28164 [sender.py:transition_state():614] send defer: 11
+2024-05-03 14:07:54,738 DEBUG   HandlerThread:28164 [handler.py:handle_request():146] handle_request: defer
+2024-05-03 14:07:54,738 INFO    HandlerThread:28164 [handler.py:handle_request_defer():172] handle defer: 11
+2024-05-03 14:07:54,739 INFO    HandlerThread:28164 [handler.py:finish():866] shutting down handler
+2024-05-03 14:07:54,739 INFO    WriterThread:28164 [datastore.py:close():296] close: /home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/wandb/run-20240503_140057-34ghr1ag/run-34ghr1ag.wandb
+2024-05-03 14:07:54,739 DEBUG   SenderThread:28164 [sender.py:send_request():406] send_request: defer
+2024-05-03 14:07:54,739 INFO    SenderThread:28164 [sender.py:send_request_defer():610] handle sender defer: 11
+2024-05-03 14:07:54,739 INFO    SenderThread:28164 [file_pusher.py:join():178] waiting for file pusher
+2024-05-03 14:07:54,743 INFO    SenderThread:28164 [sender.py:transition_state():614] send defer: 12
+2024-05-03 14:07:54,743 INFO    SenderThread:28164 [sender.py:finish():1546] shutting down sender
+2024-05-03 14:07:54,743 INFO    SenderThread:28164 [file_pusher.py:finish():172] shutting down file pusher
+2024-05-03 14:07:54,743 INFO    SenderThread:28164 [file_pusher.py:join():178] waiting for file pusher
+2024-05-03 14:07:54,743 INFO    SenderThread:28164 [file_stream.py:finish():614] file stream finish called
+2024-05-03 14:07:55,448 INFO    SenderThread:28164 [file_stream.py:finish():618] file stream finish is done

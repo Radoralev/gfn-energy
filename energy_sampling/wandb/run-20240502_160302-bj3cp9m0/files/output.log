@@ -1,0 +1,518 @@
+
+  0%|                                                                                                                                | 0/25001 [00:00<?, ?it/s]
+GFN(
+  (t_model): TimeEncodingPIS(
+    (t_model): Sequential(
+      (0): Linear(in_features=128, out_features=64, bias=True)
+      (1): GELU(approximate='none')
+      (2): Linear(in_features=64, out_features=64, bias=True)
+    )
+  )
+  (s_model): StateEncodingPIS(
+    (x_model): Linear(in_features=66, out_features=64, bias=True)
+  )
+  (joint_model): JointPolicyPIS(
+    (model): Sequential(
+      (0): GELU(approximate='none')
+      (1): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): GELU(approximate='none')
+      )
+      (2): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): GELU(approximate='none')
+      )
+      (3): Linear(in_features=64, out_features=132, bias=True)
+    )
+  )
+  (langevin_scaling_model): LangevinScalingModelPIS(
+    (lgv_model): Sequential(
+      (0): Linear(in_features=128, out_features=64, bias=True)
+      (1): Sequential(
+        (0): GELU(approximate='none')
+        (1): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (2): Sequential(
+        (0): GELU(approximate='none')
+        (1): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (3): GELU(approximate='none')
+      (4): Linear(in_features=64, out_features=1, bias=True)
+    )
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 19%|█████████████████████▌                                                                                             | 4701/25001 [32:42<2:21:15,  2.40it/s]
+Traceback (most recent call last):
+  File "train.py", line 351, in <module>
+    train()
+  File "train.py", line 318, in train
+    metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
+  File "train.py", line 236, in train_step
+    loss = bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std, it=it)
+  File "train.py", line 267, in bwd_train_step
+    local_search_samples, log_r = langevin_dynamics(samples, energy.log_reward, device, args)
+  File "/home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/langevin.py", line 38, in langevin_dynamics
+    log_r_new = log_reward(new_x)
+  File "/home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/energies/base_set.py", line 56, in log_reward
+    return -self.energy(x)
+  File "/home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/energies/alanine.py", line 73, in energy
+    energy = self._energy.energy(x)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/bgflow-0.3.0+19.gfbba56f-py3.8.egg/bgflow/distribution/energy/base.py", line 138, in energy
+    return self._energy(*xs, **kwargs) / temperature
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/bgflow-0.3.0+19.gfbba56f-py3.8.egg/bgflow/distribution/energy/base.py", line 315, in _energy
+    return _evaluate_bridge_energy(batch, self._bridge)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/torch/autograd/function.py", line 598, in apply
+    return super().apply(*args, **kwargs)  # type: ignore[misc]
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/bgflow-0.3.0+19.gfbba56f-py3.8.egg/bgflow/distribution/energy/base.py", line 220, in forward
+    energy, force, *_ = bridge.evaluate(input)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/bgflow-0.3.0+19.gfbba56f-py3.8.egg/bgflow/distribution/energy/openmm.py", line 134, in evaluate
+    energies, forces, new_positions, log_path_probability_ratio = self.context_wrapper.evaluate(
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/bgflow-0.3.0+19.gfbba56f-py3.8.egg/bgflow/distribution/energy/openmm.py", line 494, in evaluate
+    state = self._openmm_context.getState(
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/openmm/openmm.py", line 12111, in getState
+    state = _openmm.Context_getState(self, types, enforcePeriodicBox, groups_mask)
+KeyboardInterrupt

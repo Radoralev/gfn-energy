@@ -1,0 +1,174 @@
+GFN(
+  (t_model): TimeEncodingPIS(
+    (t_model): Sequential(
+      (0): Linear(in_features=128, out_features=64, bias=True)
+      (1): GELU(approximate='none')
+      (2): Linear(in_features=64, out_features=64, bias=True)
+    )
+  )
+  (s_model): StateEncodingPIS(
+    (x_model): Linear(in_features=66, out_features=64, bias=True)
+  )
+  (joint_model): JointPolicyPIS(
+    (model): Sequential(
+      (0): GELU(approximate='none')
+      (1): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): GELU(approximate='none')
+      )
+      (2): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): GELU(approximate='none')
+      )
+      (3): Linear(in_features=64, out_features=132, bias=True)
+    )
+  )
+  (langevin_scaling_model): LangevinScalingModelPIS(
+    (lgv_model): Sequential(
+      (0): Linear(in_features=128, out_features=64, bias=True)
+      (1): Sequential(
+        (0): GELU(approximate='none')
+        (1): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (2): Sequential(
+        (0): GELU(approximate='none')
+        (1): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (3): GELU(approximate='none')
+      (4): Linear(in_features=64, out_features=1, bias=True)
+    )
+  )
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  5%|█████▉                                                                                                             | 1290/25001 [08:34<2:37:41,  2.51it/s]
+Traceback (most recent call last):
+  File "train.py", line 348, in <module>
+    train()
+  File "train.py", line 315, in train
+    metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
+  File "train.py", line 231, in train_step
+    loss, states, _, _, log_r  = fwd_train_step(energy, gfn_model, exploration_std, return_exp=True)
+  File "train.py", line 250, in fwd_train_step
+    loss = get_gfn_forward_loss(args.mode_fwd, init_state, gfn_model, energy.log_reward, coeff_matrix,
+  File "/home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/utils.py", line 81, in get_gfn_forward_loss
+    loss = fwd_tb(init_state, gfn_model, log_reward, exploration_std, return_exp=return_exp)
+  File "/home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/gflownet_losses.py", line 6, in fwd_tb
+    states, log_pfs, log_pbs, log_fs = gfn.get_trajectory_fwd(initial_state, exploration_std, log_reward_fn)
+  File "/home/radoslavralev/Documents/Thesis/gfn-diffusion/energy_sampling/models/gfn.py", line 168, in get_trajectory_fwd
+    s_ = s + self.dt * pf_mean.detach() + np.sqrt(self.dt) * (
+KeyboardInterrupt

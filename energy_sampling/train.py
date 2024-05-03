@@ -32,7 +32,7 @@ parser.add_argument('--subtb_lambda', type=int, default=2)
 parser.add_argument('--t_scale', type=float, default=5.)
 parser.add_argument('--log_var_range', type=float, default=4.)
 parser.add_argument('--energy', type=str, default='9gmm',
-                    choices=('9gmm', '25gmm', 'hard_funnel', 'easy_funnel', 'many_well'))
+                    choices=('9gmm', '25gmm', 'hard_funnel', 'easy_funnel', 'many_well', 'alanine_vacuum_source', 'alanine_vacuum_target', 'alanine_vacuum_full'))
 parser.add_argument('--mode_fwd', type=str, default="tb", choices=('tb', 'tb-avg', 'db', 'subtb', "pis"))
 parser.add_argument('--mode_bwd', type=str, default="tb", choices=('tb', 'tb-avg', 'mle'))
 parser.add_argument('--both_ways', action='store_true', default=False)
@@ -130,6 +130,12 @@ def get_energy():
         energy = EasyFunnel(device=device)
     elif args.energy == 'many_well':
         energy = ManyWell(device=device)
+    elif args.energy == 'alanine_vacuum_source':
+        energy = Alanine(device=device, phi='source', temp=1000)
+    elif args.energy == 'alanine_vacuum_target':
+        energy = Alanine(device=device, phi='target', temp=1000)
+    elif args.energy == 'alanine_vacuum_full':
+        energy = Alanine(device=device, phi='full', temp=1000)
     return energy
 
 
@@ -156,10 +162,15 @@ def plot_step(energy, gfn_model, name):
                 "visualization/kdex23": wandb.Image(fig_to_image(fig_kde_x23)),
                 "visualization/samplesx13": wandb.Image(fig_to_image(fig_samples_x13)),
                 "visualization/samplesx23": wandb.Image(fig_to_image(fig_samples_x23))}
-
+    elif args.energy.startswith('alanine'):
+        samples = gfn_model.sample(plot_data_size, energy.log_reward)
+        samples_gt = energy.sample(plot_data_size)
+        fig, ax = energy.plot(samples)
+        fig_gt, ax_gt = energy.plot(samples_gt)
+        return {'visualization/rama_pred': wandb.Image(fig_to_image(fig)), 
+                'visualization/rama_gt': wandb.Image(fig_to_image(fig_gt))}
     elif energy.data_ndim != 2:
         return {}
-
     else:
         batch_size = plot_data_size
         samples = gfn_model.sample(batch_size, energy.log_reward)
@@ -223,7 +234,7 @@ def train_step(energy, gfn_model, gfn_optimizer, it, exploratory, buffer, buffer
         if it % 2 == 0:
             if args.sampling == 'buffer':
                 loss, states, _, _, log_r  = fwd_train_step(energy, gfn_model, exploration_std, return_exp=True)
-                buffer.add(states[:, -1],log_r)
+                buffer.add(states[:, -1], log_r)
             else:
                 loss = fwd_train_step(energy, gfn_model, exploration_std)
         else:
@@ -234,7 +245,10 @@ def train_step(energy, gfn_model, gfn_optimizer, it, exploratory, buffer, buffer
     else:
         loss = fwd_train_step(energy, gfn_model, exploration_std)
 
+    
+    #clip gradients
     loss.backward()
+    torch.nn.utils.clip_grad_norm_(gfn_model.parameters(), 1)
     gfn_optimizer.step()
     return loss.item()
 
@@ -256,6 +270,9 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
             if it % args.ls_cycle < 2:
                 samples, rewards = buffer.sample()
                 local_search_samples, log_r = langevin_dynamics(samples, energy.log_reward, device, args)
+                if len(local_search_samples) == 0:
+                    local_search_samples = samples
+                    log_r = rewards 
                 buffer_ls.add(local_search_samples, log_r)
         
             samples, rewards = buffer_ls.sample()
@@ -327,9 +344,6 @@ def final_eval(energy, gfn_model):
     results = eval_step(final_eval_data, energy, gfn_model, final_eval=True)
     return results
 
-
-def eval():
-    pass
 
 
 if __name__ == '__main__':

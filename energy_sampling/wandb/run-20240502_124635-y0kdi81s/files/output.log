@@ -1,0 +1,181 @@
+  0%|                                                                                    | 0/25001 [00:00<?, ?it/s]/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/bgflow-0.3.0+19.gfbba56f-py3.8.egg/bgflow/distribution/energy/openmm.py:513: UserWarning: Suppressed exception: Particle coordinate is NaN.  For more information, see https://github.com/openmm/openmm/wiki/Frequently-Asked-Questions#nan
+/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/ot/lp/__init__.py:571: UserWarning: Problem unbounded
+  check_result(result_code)
+  0%|                                                                                    | 0/25001 [00:01<?, ?it/s]
+Traceback (most recent call last):
+  File "train.py", line 341, in <module>
+    train()
+  File "train.py", line 319, in train
+    wandb.log(metrics, step=i)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 420, in wrapper
+    return func(self, *args, **kwargs)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 371, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 361, in wrapper
+    return func(self, *args, **kwargs)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1838, in log
+    self._log(data=data, step=step, commit=commit)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1602, in _log
+    self._partial_history_callback(data, step, commit)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1474, in _partial_history_callback
+    self._backend.interface.publish_partial_history(
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/interface/interface.py", line 596, in publish_partial_history
+    item.value_json = json_dumps_safer_history(v)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/util.py", line 842, in json_dumps_safer_history
+    return dumps(obj, cls=WandBHistoryJSONEncoder, **kwargs)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/json/__init__.py", line 234, in dumps
+    return cls(
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/util.py", line 804, in default
+    obj, compressed = maybe_compress_history(obj)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/util.py", line 705, in maybe_compress_history
+    return wandb.Histogram(obj, num_bins=32).to_json(), True
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/wandb/sdk/data_types/histogram.py", line 77, in __init__
+    self.histogram, self.bins = np.histogram(sequence, bins=num_bins)
+  File "<__array_function__ internals>", line 200, in histogram
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/numpy/lib/histograms.py", line 780, in histogram
+    bin_edges, uniform_bins = _get_bin_edges(a, bins, range, weights)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/numpy/lib/histograms.py", line 426, in _get_bin_edges
+    first_edge, last_edge = _get_outer_edges(a, range)
+  File "/home/radoslavralev/miniconda3/envs/gfn-diffusion/lib/python3.8/site-packages/numpy/lib/histograms.py", line 323, in _get_outer_edges
+    raise ValueError(
+ValueError: autodetected range of [nan, nan] is not finite
+GFN(
+  (t_model): TimeEncodingPIS(
+    (t_model): Sequential(
+      (0): Linear(in_features=128, out_features=64, bias=True)
+      (1): GELU(approximate='none')
+      (2): Linear(in_features=64, out_features=64, bias=True)
+    )
+  )
+  (s_model): StateEncodingPIS(
+    (x_model): Linear(in_features=66, out_features=64, bias=True)
+  )
+  (joint_model): JointPolicyPIS(
+    (model): Sequential(
+      (0): GELU(approximate='none')
+      (1): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): GELU(approximate='none')
+      )
+      (2): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): GELU(approximate='none')
+      )
+      (3): Linear(in_features=64, out_features=132, bias=True)
+    )
+  )
+  (langevin_scaling_model): LangevinScalingModelPIS(
+    (lgv_model): Sequential(
+      (0): Linear(in_features=128, out_features=64, bias=True)
+      (1): Sequential(
+        (0): GELU(approximate='none')
+        (1): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (2): Sequential(
+        (0): GELU(approximate='none')
+        (1): Linear(in_features=64, out_features=64, bias=True)
+      )
+      (3): GELU(approximate='none')
+      (4): Linear(in_features=64, out_features=1, bias=True)
+    )
+  )
+)
+tensor([[[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+           0.0000e+00,  0.0000e+00],
+         [ 5.7864e-02, -5.2476e-02, -2.9190e-02,  ...,  1.5684e-01,
+          -9.2661e-03, -1.2121e-03],
+         [ 3.2799e-01, -1.2351e-01, -1.6674e-01,  ...,  6.0176e-02,
+          -2.0737e-01, -1.3859e-01],
+         ...,
+         [-1.0290e+00, -2.0935e-01,  1.0630e-01,  ...,  6.9670e-01,
+          -1.2675e+00, -3.4304e-01],
+         [-8.8067e-01, -1.5346e-01, -4.0715e-02,  ...,  7.4138e-01,
+          -1.2752e+00, -4.9878e-01],
+         [-9.5096e-01, -7.3717e-02, -3.7168e-02,  ...,  7.6424e-01,
+          -1.4126e+00, -3.2284e-01]],
+        [[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+           0.0000e+00,  0.0000e+00],
+         [ 1.6577e-01,  8.4040e-02,  6.9421e-02,  ...,  3.6332e-02,
+          -9.6202e-02,  4.5840e-02],
+         [ 1.9850e-01, -4.4529e-03,  9.3260e-02,  ...,  4.0333e-03,
+          -1.5527e-01,  5.5186e-02],
+         ...,
+         [ 3.0553e+00,  3.0856e-01,  2.8457e-01,  ...,  1.0622e-01,
+          -5.6066e-01, -3.6521e-01],
+         [ 3.0604e+00,  2.9100e-01,  3.0341e-01,  ...,  1.0603e-01,
+          -6.8665e-01, -3.5164e-01],
+         [ 3.1653e+00,  2.7056e-01,  1.8531e-01,  ...,  8.5262e-02,
+          -7.1635e-01, -3.9061e-01]],
+        [[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+           0.0000e+00,  0.0000e+00],
+         [-2.3232e-01, -1.3019e-02,  1.4201e-01,  ..., -1.0042e-01,
+          -8.1281e-02,  1.3009e-01],
+         [-4.3120e-01, -8.8721e-03,  1.3430e-01,  ..., -2.3357e-01,
+          -1.6896e-01,  1.8328e-01],
+         ...,
+         [-3.1702e-01,  2.0669e+00, -2.2839e-02,  ...,  9.1406e-01,
+           5.7301e-01,  1.8716e-01],
+         [-3.0790e-01,  2.0934e+00, -9.3994e-03,  ...,  9.7123e-01,
+           6.7213e-01,  7.3933e-02],
+         [-1.9987e-01,  2.1036e+00,  1.3472e-01,  ...,  8.9468e-01,
+           8.5060e-01,  1.3433e-01]],
+        ...,
+        [[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+           0.0000e+00,  0.0000e+00],
+         [ 6.2963e-02,  1.1257e-01, -5.3009e-02,  ..., -7.1727e-02,
+          -1.0418e-01,  1.2747e-01],
+         [-4.3910e-02,  1.0835e-01,  1.8143e-02,  ..., -6.4747e-02,
+          -2.3597e-01,  1.5047e-01],
+         ...,
+         [ 4.8527e-02,  7.6326e-01,  4.9387e-01,  ..., -6.8638e-01,
+          -1.5410e+00, -3.6449e-01],
+         [-1.0987e-02,  8.5237e-01,  4.9351e-01,  ..., -5.4322e-01,
+          -1.6010e+00, -5.0495e-01],
+         [-8.1019e-02,  8.0107e-01,  4.6407e-01,  ..., -6.3472e-01,
+          -1.6259e+00, -4.3504e-01]],
+        [[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+           0.0000e+00,  0.0000e+00],
+         [ 6.0223e-03,  1.3745e-01, -8.9270e-03,  ..., -2.0846e-01,
+           2.8652e-03,  1.0376e-01],
+         [ 4.3880e-02,  2.6848e-01, -2.1486e-01,  ..., -1.6985e-01,
+          -2.7114e-02,  1.2818e-01],
+         ...,
+         [-7.7221e-01,  1.4360e+00,  4.9016e-01,  ..., -6.3698e-01,
+          -4.7233e-01,  9.4590e-02],
+         [-7.0403e-01,  1.4569e+00,  5.3835e-01,  ..., -5.7974e-01,
+          -4.6733e-01,  1.0191e-01],
+         [-8.7018e-01,  1.6392e+00,  6.4680e-01,  ..., -5.6944e-01,
+          -4.2581e-01,  1.2553e-01]],
+        [[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+           0.0000e+00,  0.0000e+00],
+         [ 6.1402e-02,  3.5359e-02, -3.0513e-03,  ...,  5.0963e-02,
+          -8.9695e-02, -8.2254e-02],
+         [ 7.0608e-02,  2.4345e-02, -2.0939e-01,  ...,  1.5121e-01,
+          -1.1743e-01,  6.6332e-02],
+         ...,
+         [-4.4552e-01,  7.1524e-02, -4.0353e-01,  ..., -3.3327e-01,
+          -9.3045e-01, -2.6773e+00],
+         [-5.3552e-01, -2.2932e-02, -3.0384e-01,  ..., -4.2699e-01,
+          -1.0218e+00, -2.6692e+00],
+         [-4.8950e-01,  9.9297e-02, -4.3702e-01,  ..., -4.1072e-01,
+          -1.1016e+00, -2.7832e+00]]], device='cuda:0')
+tensor([[-0.9510, -0.0737, -0.0372,  ...,  0.7642, -1.4126, -0.3228],
+        [ 3.1653,  0.2706,  0.1853,  ...,  0.0853, -0.7163, -0.3906],
+        [-0.1999,  2.1036,  0.1347,  ...,  0.8947,  0.8506,  0.1343],
+        ...,
+        [-0.0810,  0.8011,  0.4641,  ..., -0.6347, -1.6259, -0.4350],
+        [-0.8702,  1.6392,  0.6468,  ..., -0.5694, -0.4258,  0.1255],
+        [-0.4895,  0.0993, -0.4370,  ..., -0.4107, -1.1016, -2.7832]],
+       device='cuda:0')
+tensor([[nan, nan, nan,  ..., nan, nan, nan],
+        [nan, nan, nan,  ..., nan, nan, nan],
+        [nan, nan, nan,  ..., nan, nan, nan],
+        ...,
+        [nan, nan, nan,  ..., nan, nan, nan],
+        [nan, nan, nan,  ..., nan, nan, nan],
+        [nan, nan, nan,  ..., nan, nan, nan]], device='cuda:0')
+{'train/loss': inf, 'eval/log_Z': tensor([nan, nan, nan,  ..., nan, nan, nan], device='cuda:0'), 'eval/log_Z_lb': tensor(nan, device='cuda:0'), 'eval/log_Z_learned': tensor(nan, device='cuda:0'), 'eval/mean_log_likelihood': tensor(nan, device='cuda:0'), '1-Wasserstein': 0.0, '2-Wasserstein': 0.0, 'Linear_MMD': nan, 'Poly_MMD': nan, 'RBF_MMD': nan, 'Mean_MSE': nan, 'Mean_L2': nan, 'Mean_L1': nan, 'Median_MSE': nan, 'Median_L2': nan, 'Median_L1': nan}

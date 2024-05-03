@@ -1,0 +1,183 @@
+wandb_version: 1
+
+lr_policy:
+  desc: null
+  value: 0.001
+lr_flow:
+  desc: null
+  value: 0.1
+lr_back:
+  desc: null
+  value: 0.001
+hidden_dim:
+  desc: null
+  value: 64
+s_emb_dim:
+  desc: null
+  value: 64
+t_emb_dim:
+  desc: null
+  value: 64
+harmonics_dim:
+  desc: null
+  value: 64
+batch_size:
+  desc: null
+  value: 300
+epochs:
+  desc: null
+  value: 25000
+buffer_size:
+  desc: null
+  value: 600000
+T:
+  desc: null
+  value: 100
+subtb_lambda:
+  desc: null
+  value: 2
+t_scale:
+  desc: null
+  value: 1.0
+log_var_range:
+  desc: null
+  value: 4.0
+energy:
+  desc: null
+  value: alanine_vacuum
+mode_fwd:
+  desc: null
+  value: tb
+mode_bwd:
+  desc: null
+  value: tb
+both_ways:
+  desc: null
+  value: false
+local_search:
+  desc: null
+  value: false
+max_iter_ls:
+  desc: null
+  value: 200
+burn_in:
+  desc: null
+  value: 100
+ls_cycle:
+  desc: null
+  value: 100
+ld_step:
+  desc: null
+  value: 0.001
+ld_schedule:
+  desc: null
+  value: false
+target_acceptance_rate:
+  desc: null
+  value: 0.574
+beta:
+  desc: null
+  value: 1.0
+rank_weight:
+  desc: null
+  value: 0.01
+prioritized:
+  desc: null
+  value: rank
+bwd:
+  desc: null
+  value: false
+exploratory:
+  desc: null
+  value: false
+sampling:
+  desc: null
+  value: buffer
+langevin:
+  desc: null
+  value: false
+langevin_scaling_per_dimension:
+  desc: null
+  value: false
+conditional_flow_model:
+  desc: null
+  value: false
+learn_pb:
+  desc: null
+  value: false
+pb_scale_range:
+  desc: null
+  value: 0.1
+learned_variance:
+  desc: null
+  value: false
+partial_energy:
+  desc: null
+  value: false
+exploration_factor:
+  desc: null
+  value: 0.1
+exploration_wd:
+  desc: null
+  value: false
+clipping:
+  desc: null
+  value: true
+lgv_clip:
+  desc: null
+  value: 100.0
+gfn_clip:
+  desc: null
+  value: 10000.0
+zero_init:
+  desc: null
+  value: true
+pis_architectures:
+  desc: null
+  value: true
+lgv_layers:
+  desc: null
+  value: 3
+joint_layers:
+  desc: null
+  value: 2
+seed:
+  desc: null
+  value: 12345
+weight_decay:
+  desc: null
+  value: 1.0e-07
+use_weight_decay:
+  desc: null
+  value: false
+eval:
+  desc: null
+  value: false
+Experiment:
+  desc: null
+  value: '{args.energy}'
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.19
+    cli_version: 0.16.6
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1714646550.0
+    t:
+      1:
+      - 1
+      - 55
+      2:
+      - 1
+      - 55
+      3:
+      - 13
+      - 16
+      - 23
+      4: 3.8.19
+      5: 0.16.6
+      8:
+      - 5
+      13: linux-x86_64

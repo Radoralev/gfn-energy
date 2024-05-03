@@ -40,8 +40,7 @@ def langevin_dynamics(x, log_reward, device, args):
 
         log_q_fwd = -(torch.norm(new_x - x - ld_step * r_grad_original, p=2, dim=1) ** 2) / (4 * ld_step)
         log_q_bck = -(torch.norm(x - new_x - ld_step * r_grad_new, p=2, dim=1) ** 2) / (4 * ld_step)
-
-        log_accept = (log_r_new - log_r_original) + log_q_bck - log_q_fwd
+        log_accept = (log_r_new.squeeze() - log_r_original.squeeze()) + log_q_bck - log_q_fwd
         accept_mask = torch.rand(x.shape[0], device=device) < torch.exp(torch.clamp(log_accept, max=0))
         acceptance_count += accept_mask.sum().item()
         total_proposals += x.shape[0]
