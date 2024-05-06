@@ -141,7 +141,7 @@ class Alanine(BaseSet):
     def time_test(self):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # generate random data
-        x = torch.randn(300, self.data_ndim).to(device)
+        x = torch.randn(1024, self.data_ndim).to(device)
         time_now = time.time()
         energy = self.energy(x)
         print('Time taken to compute energy:', time.time()-time_now)

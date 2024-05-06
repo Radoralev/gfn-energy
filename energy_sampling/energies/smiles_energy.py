@@ -5,10 +5,14 @@ from rdkit.Chem import AllChem
 from bgflow import XTBEnergy, XTBBridge
 from .base_set import BaseSet
 from .alanine import load_data, plot_rama_traj
-from xtb.libxtb import VERBOSITY_MUTED
+from xtb.libxtb import VERBOSITY_MUTED, VERBOSITY_MINIMAL
+from xtb.interface import Calculator, Param, XTBException
+from xtb.ase.calculator import XTB
+from xtb.interface import Environment
+from .rdkit_conformer import RDKitConformer
 
-class MoleculeFromSMILES(BaseSet):
-    def __init__(self, smiles, temp=300, solvent="water"):
+class MoleculeFromSMILES_XTB(BaseSet):
+    def __init__(self, smiles, temp=300, solvate=False):
         # Initialize RDKit molecule
         self.smiles = smiles
         self.rdk_mol = Chem.MolFromSmiles(smiles)
@@ -16,14 +20,13 @@ class MoleculeFromSMILES(BaseSet):
         self.rdk_mol = Chem.AddHs(self.rdk_mol)
         AllChem.EmbedMolecule(self.rdk_mol)
         self.temp = temp
-        self.solvent = solvent
         
         # Extract atomic numbers
         self.atomic_numbers = np.array([atom.GetAtomicNum() for atom in self.rdk_mol.GetAtoms()])
         self.data_ndim = 3 * len(self.atomic_numbers)
         # Initialize XTB Energy
-       # self.target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent=solvent, method='gfnff', verbosity=VERBOSITY_MUTED))
-        # Get positions
+        solvent = 'water' if solvate else ''
+        self.target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent=solvent, method='gfnff', verbosity=VERBOSITY_MUTED))        # Get positions
         self.positions = self.rdk_mol.GetConformer().GetPositions()
     
     def energy(self, xyz):
@@ -33,9 +36,19 @@ class MoleculeFromSMILES(BaseSet):
     def sample(self, batch_size):
         return None
 
-# Example usage:
-smiles = "CC(C)C(=O)NC(C)C(=O)NC"
-molecule = MoleculeFromSMILES(smiles)
-xyz = molecule.positions
-energy = molecule.energy(xyz)
-print(f"Energy: {energy}")
+    def time_test(self):
+        import time
+        env = Environment()
+        
+        
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # generate random data
+        time_now = time.time()
+        target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=self.temp, solvent=self.solvent, method='gfnff', verbosity=0))
+        for i in range(25000):
+            for i in range(300):
+                x = torch.randn(1, int(self.data_ndim/3), 3).to(device)
+                #calc.set_verbosity(VERBOSITY_MINIMAL)
+                energy = target.energy(x)
+        print('Time taken to compute energy:', time.time()-time_now)
+

@@ -32,7 +32,9 @@ parser.add_argument('--subtb_lambda', type=int, default=2)
 parser.add_argument('--t_scale', type=float, default=5.)
 parser.add_argument('--log_var_range', type=float, default=4.)
 parser.add_argument('--energy', type=str, default='9gmm',
-                    choices=('9gmm', '25gmm', 'hard_funnel', 'xtb', 'easy_funnel', 'many_well', 'alanine_vacuum_source', 'alanine_vacuum_target', 'alanine_vacuum_full'))
+                    choices=('9gmm', '25gmm', 'hard_funnel', 'xtb', 
+                             'easy_funnel', 'many_well', 'alanine_vacuum_source', 
+                             'alanine_vacuum_target', 'alanine_vacuum_full', 'openmm'))
 parser.add_argument('--mode_fwd', type=str, default="tb", choices=('tb', 'tb-avg', 'db', 'subtb', "pis"))
 parser.add_argument('--mode_bwd', type=str, default="tb", choices=('tb', 'tb-avg', 'mle'))
 parser.add_argument('--both_ways', action='store_true', default=False)
@@ -96,9 +98,9 @@ parser.add_argument('--weight_decay', type=float, default=1e-7)
 parser.add_argument('--use_weight_decay', action='store_true', default=False)
 parser.add_argument('--eval', action='store_true', default=False)
 parser.add_argument('--continue_training', action='store_true', default=False)
-parser.add_argument('--smiles', type=str, default='CC(C)C(=O)NC(C)C(=O)NC')
+parser.add_argument('--smiles', type=str, default='CCCCCC(=O)OC') # First mol in FreeSolv
 parser.add_argument('--temperature', type=int, default=300)
-parser.add_argument('--solvent', type=str, default='water')
+parser.add_argument('--solvate', action='store_true', default=False, help="Solvate the molecule")
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -141,7 +143,9 @@ def get_energy():
     elif args.energy == 'alanine_vacuum_full':
         energy = Alanine(device=device, phi='full', temp=1000)
     elif args.energy == 'xtb':
-        energy = MoleculeFromSMILES(smiles=args.smiles, temp=args.temperature, solvent=args.solvent)
+        energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvent=args.solvate)
+    elif args.energy == 'openmm':
+        energy = OpenMMEnergy(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
     return energy
 
 

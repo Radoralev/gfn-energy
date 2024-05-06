@@ -4,4 +4,6 @@ from .hard_funnel import HardFunnel
 from .easy_funnel import EasyFunnel
 from .many_well import ManyWell
 from .alanine import Alanine
-from .smiles_energy import MoleculeFromSMILES
+from .smiles_energy import MoleculeFromSMILES_XTB
+from .rdkit_conformer import RDKitConformer
+from .openmm_energy import OpenMMEnergy

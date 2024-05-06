@@ -3,7 +3,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, TorsionFingerprints, rdMolTransforms
 from rdkit.Geometry.rdGeometry import Point3D
 
-import constants
+from . import constants
 
 
 def get_torsion_angles_atoms_list(mol):
