@@ -300,9 +300,8 @@ def train():
         os.makedirs(name)
 
     energy = get_energy()
- #   energy.time_test()
-#    return
-
+    #energy.time_test()
+    #return
     eval_data = energy.sample(eval_data_size)
 
     config = args.__dict__

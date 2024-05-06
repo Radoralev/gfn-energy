@@ -3,8 +3,10 @@ import bgflow as bg
 from openff.toolkit import Molecule
 from openmmforcefields.generators import SystemGenerator
 from .base_set import BaseSet
+import openmm
 from openmm import app, unit, LangevinIntegrator, Vec3, Platform
-from openmm.app import PDBFile, Simulation, Modeller, PDBReporter, StateDataReporter, DCDReporter
+from openmm.app import PDBFile, Simulation, Modeller, PDBReporter, StateDataReporter, DCDReporter, ForceField
+from openmmforcefields.generators import GAFFTemplateGenerator
 from tqdm import tqdm
 import os 
 import numpy as np
@@ -46,34 +48,44 @@ def create_simulation_implicit_solvent(smiles,
 
     ligand_mol = Molecule.from_smiles(smiles)
     ligand_mol.generate_conformers(n_conformers=1)
+    gaff = GAFFTemplateGenerator(molecules=ligand_mol)
     lig_top = ligand_mol.to_topology()
     print(lig_top.get_positions())
     modeller = Modeller(lig_top.to_openmm(), lig_top.get_positions().to_openmm())
 
-    forcefield_kwargs = {
-        'constraints': app.HBonds, 
-        'rigidWater': True, 
-        'removeCMMotion': False, 
-        'hydrogenMass': 4*unit.amu
-    }
-    forcefields = []
+    forcefield = ForceField()
     if solvate:
         print('Adding solvent.')
-        forcefields.append('implicit/gbn2.xml')
-    system_generator = SystemGenerator(
-        forcefields=forcefields, 
-        forcefield_kwargs=forcefield_kwargs,
-        small_molecule_forcefield=ligand_force_field)
-
+        forcefield = ForceField('amber10.xml', 'amber14/tip3pfb.xml')
+    forcefield.registerTemplateGenerator(gaff.generator)
     modeller = Modeller(ligand_mol.to_topology().to_openmm(),
                         ligand_mol.to_topology().get_positions().to_openmm())
+    print('System has %d atoms before solvation' % modeller.topology.getNumAtoms())
+
+    if solvate:
+        modeller.addSolvent(forcefield, model='tip3p', padding= 1.2 * unit.angstroms,
+                            #positiveIon='Na+', negativeIon='Cl-',
+                            ionicStrength=0 * unit.molar, neutralize=False) #boxSize=Vec3(5,5,5) * unit.nanometers)
+
+        print('System has %d atoms after solvation' % modeller.topology.getNumAtoms())
+    modeller.topology.setPeriodicBoxVectors(np.eye(3)*2.4)
 
     # Create the system
-    system = system_generator.create_system(modeller.topology,
-                                            molecules=ligand_mol)  # Example using OBC2 model
-    print(system)
+    system = forcefield.createSystem(modeller.topology, nonbondedMethod=app.CutoffPeriodic,
+        nonbondedCutoff=0.9*unit.nanometer, constraints=app.HBonds) 
+    if solvate:
+        system.addForce(openmm.MonteCarloBarostat(1 * unit.atmospheres, temperature, 25))
+    else:
+        system = forcefield.createSystem(modeller.topology)
+        
     friction_coeff = friction_coeff / unit.picosecond
     step_size = step_size * unit.picoseconds
+    
+    if system.usesPeriodicBoundaryConditions():
+        print('Default Periodic box: {}'.format(system.getDefaultPeriodicBoxVectors()))
+    else:
+        print('No Periodic Box')
+
 
     integrator = LangevinIntegrator(temperature, friction_coeff, step_size)
 
@@ -93,8 +105,11 @@ class OpenMMEnergy(BaseSet):
         self.data_ndim = 3 * n_atoms
         self.target = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=openmm_bridge).to(device)
         print(f'System has {n_atoms} atoms')
+        
     def energy(self, xyz):
-        return torch.clamp(self.target.energy(xyz), 0, 200)
+        energies = self.target.energy(xyz)
+        print('Batch mean energy:', energies.mean())
+        return torch.clamp(energies, 0, 1000)
     
     def sample(self, batch_size):
         return self.ligand.generate_conformers(n_conformers=batch_size)
