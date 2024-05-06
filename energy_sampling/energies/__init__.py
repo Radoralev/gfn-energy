@@ -4,3 +4,4 @@ from .hard_funnel import HardFunnel
 from .easy_funnel import EasyFunnel
 from .many_well import ManyWell
 from .alanine import Alanine
+from .smiles_energy import MoleculeFromSMILES

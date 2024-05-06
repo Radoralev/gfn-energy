@@ -32,7 +32,7 @@ parser.add_argument('--subtb_lambda', type=int, default=2)
 parser.add_argument('--t_scale', type=float, default=5.)
 parser.add_argument('--log_var_range', type=float, default=4.)
 parser.add_argument('--energy', type=str, default='9gmm',
-                    choices=('9gmm', '25gmm', 'hard_funnel', 'easy_funnel', 'many_well', 'alanine_vacuum_source', 'alanine_vacuum_target', 'alanine_vacuum_full'))
+                    choices=('9gmm', '25gmm', 'hard_funnel', 'xtb', 'easy_funnel', 'many_well', 'alanine_vacuum_source', 'alanine_vacuum_target', 'alanine_vacuum_full'))
 parser.add_argument('--mode_fwd', type=str, default="tb", choices=('tb', 'tb-avg', 'db', 'subtb', "pis"))
 parser.add_argument('--mode_bwd', type=str, default="tb", choices=('tb', 'tb-avg', 'mle'))
 parser.add_argument('--both_ways', action='store_true', default=False)
@@ -95,6 +95,10 @@ parser.add_argument('--seed', type=int, default=12345)
 parser.add_argument('--weight_decay', type=float, default=1e-7)
 parser.add_argument('--use_weight_decay', action='store_true', default=False)
 parser.add_argument('--eval', action='store_true', default=False)
+parser.add_argument('--continue_training', action='store_true', default=False)
+parser.add_argument('--smiles', type=str, default='CC(C)C(=O)NC(C)C(=O)NC')
+parser.add_argument('--temperature', type=int, default=300)
+parser.add_argument('--solvent', type=str, default='water')
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -136,6 +140,8 @@ def get_energy():
         energy = Alanine(device=device, phi='target', temp=1000)
     elif args.energy == 'alanine_vacuum_full':
         energy = Alanine(device=device, phi='full', temp=1000)
+    elif args.energy == 'xtb':
+        energy = MoleculeFromSMILES(smiles=args.smiles, temp=args.temperature, solvent=args.solvent)
     return energy
 
 
@@ -162,7 +168,7 @@ def plot_step(energy, gfn_model, name):
                 "visualization/kdex23": wandb.Image(fig_to_image(fig_kde_x23)),
                 "visualization/samplesx13": wandb.Image(fig_to_image(fig_samples_x13)),
                 "visualization/samplesx23": wandb.Image(fig_to_image(fig_samples_x23))}
-    elif args.energy.startswith('alanine'):
+    elif args.energy.startswith('alanine') or (args.energy.startswith('xtb') and args.smiles == 'CC(C)C(=O)NC(C)C(=O)NC'):
         samples = gfn_model.sample(plot_data_size, energy.log_reward)
         samples_gt = energy.sample(plot_data_size)
         fig, ax = energy.plot(samples)
@@ -270,9 +276,9 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
             if it % args.ls_cycle < 2:
                 samples, rewards = buffer.sample()
                 local_search_samples, log_r = langevin_dynamics(samples, energy.log_reward, device, args)
-                if len(local_search_samples) == 0:
-                    local_search_samples = samples
-                    log_r = rewards 
+                #if len(local_search_samples) == 0:
+                local_search_samples = samples
+                log_r = rewards 
                 buffer_ls.add(local_search_samples, log_r)
         
             samples, rewards = buffer_ls.sample()
@@ -290,7 +296,10 @@ def train():
         os.makedirs(name)
 
     energy = get_energy()
-    eval_data = energy.sample(eval_data_size).to(device)
+ #   energy.time_test()
+#    return
+
+    eval_data = energy.sample(eval_data_size)
 
     config = args.__dict__
     config["Experiment"] = "{args.energy}"
@@ -305,7 +314,11 @@ def train():
                     conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
                     pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers,
                     joint_layers=args.joint_layers, zero_init=args.zero_init, device=device).to(device)
-
+    
+    if args.continue_training:
+        gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
+        print('Loaded model.')
+        
 
     gfn_optimizer = get_gfn_optimizer(gfn_model, args.lr_policy, args.lr_flow, args.lr_back, args.learn_pb,
                                       args.conditional_flow_model, args.use_weight_decay, args.weight_decay)
@@ -321,13 +334,14 @@ def train():
     for i in trange(args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd)
-        if i % 100 == 0:
+        if i % 250 == 0:
             metrics.update(eval_step(eval_data, energy, gfn_model, final_eval=False))
             if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
                 del metrics['eval/log_Z_learned']
             images = plot_step(energy, gfn_model, name)
             metrics.update(images)
             plt.close('all')
+            #metrics = check_nan_in_metrics(metrics)
             wandb.log(metrics, step=i)
             if i % 1000 == 0:
                 torch.save(gfn_model.state_dict(), f'{name}model.pt')

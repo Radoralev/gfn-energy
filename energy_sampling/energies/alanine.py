@@ -11,6 +11,11 @@ from openmm import unit
 from bgflow.utils.types import assert_numpy
 from matplotlib.colors import LogNorm
 from matplotlib import pyplot as plt
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from bgflow import XTBEnergy, XTBBridge
+import time
+
 
 def plot_rama_traj(trajectory, w=None, get_phi=False, i=-1, model=None):
     def get_phi_psi(trajectory, i=-1, model=None):
@@ -90,29 +95,40 @@ class Alanine(BaseSet):
         self.temp = temp        
         self.phi = phi
         self.bgmol_model = get_bgmol_model(system_name, temperature=temp)
-        bridge = bg.OpenMMBridge(self.bgmol_model.system, 
-                                      openmm.LangevinIntegrator(temp*unit.kelvin, 1/unit.picosecond, 0.002*unit.picoseconds), 
-                                      n_workers=1)
-        self.data_ndim = 66
-        self._energy = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=bridge).to(device)
+        #bridge = bg.OpenMMBridge(self.bgmol_model.system, 
+        #                              openmm.LangevinIntegrator(temp*unit.kelvin, 1/unit.picosecond, 0.002*unit.picoseconds), 
+        #                              n_workers=1)
+        #self.data_ndim = 66
+        #self._energy = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=bridge).to(device)
         self.data = load_data(temp, self.bgmol_model, device, phi)
+        
+        self.rdk_mol = Chem.MolFromSmiles('CC(C(=O)O)N')
+        self.rdk_mol = Chem.AddHs(self.rdk_mol)
+        #AllChem.EmbedMolecule(self.rdk_mol)
+
+        # Extract atomic numbers
+        self.atomic_numbers = np.array([atom.GetAtomicNum() for atom in self.rdk_mol.GetAtoms()])
+        print(len(self.atomic_numbers))
+        self.data_ndim = 3 * len(self.atomic_numbers)
+        # Initialize XTB Energy
+        self._energy = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent='', method='gfnff')).to(device)
+        #time_now = time.time()
+        #self.energy_cap = self._energy.energy(self.data.reshape(-1, len(self.atomic_numbers), 3)).max()
+        #print('Time taken to compute energy cap:', time.time()-time_now)
         
     def energy(self, x):    
         #print(x)
-        energy = self._energy.energy(x)
-        energy = (energy - energy)
-        energy = torch.clamp(energy, 0, None) #/ 10000
+        energy = self._energy.energy(x.reshape(-1, len(self.atomic_numbers), 3))
+        energy = torch.clamp(energy, 0, 500) #/ 10000
         if self.phi != 'full':
-            x_spatial = x.view(-1, len(self.bgmol_model.positions), 3).detach().cpu().numpy()
+            x_spatial = x.view(-1, len(self.bgmol_model.positions), 3).clone().detach().cpu().numpy()
             phi = get_phi(x_spatial, self.bgmol_model)
             if self.phi == 'source':
                 valid = np.logical_and(0.0 < phi, phi < 2.15)
-                energy[np.logical_not(valid)] = torch.tensor(float(100))
+                energy[np.logical_not(valid)] = torch.tensor(float('inf'))
             elif self.phi == 'target':
                 valid = np.logical_or(phi < 0.0, 2.15 < phi)
-                energy[np.logical_not(valid)] = torch.tensor(float(100))
-        #energy[energy > 1000] = torch.tensor(float(1000))
-        # set a max energy value 
+                energy[np.logical_not(valid)] = torch.tensor(float('inf'))
         return energy
 
     def sample(self, batch_size):
@@ -121,3 +137,11 @@ class Alanine(BaseSet):
 
     def plot(self, x, w=None):
         return plot_rama_traj(x, w, get_phi=True, model=self.bgmol_model)
+    
+    def time_test(self):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # generate random data
+        x = torch.randn(300, self.data_ndim).to(device)
+        time_now = time.time()
+        energy = self.energy(x)
+        print('Time taken to compute energy:', time.time()-time_now)
