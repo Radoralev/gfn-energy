@@ -37,7 +37,7 @@ def get_platform(use_gpu=False):
 
     return platform
 
-def create_simulation_implicit_solvent(smiles, 
+def create_simulation_solvent(smiles, 
                                        step_size,
                                        friction_coeff,
                                        temperature,
@@ -98,9 +98,11 @@ class OpenMMEnergy(BaseSet):
         # Initialize RDKit molecule
         self.smiles = smiles
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        system, integrator, topology, self.ligand = create_simulation_implicit_solvent(smiles, 0.002, 1, temp, 'gaff-2.11', solvate=solvate)
+        system, integrator, topology, self.ligand = create_simulation_solvent(smiles, 0.002, 1, temp, 'gaff-2.11', solvate=solvate)
         
         n_atoms = topology.getNumAtoms()
+        self.atom_types = [atom.element.atomic_number for atom in topology.atoms()]
+        print(self.atom_types)
         openmm_bridge = bg.OpenMMBridge(system, integrator, n_workers=1)
         self.data_ndim = 3 * n_atoms
         self.target = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=openmm_bridge).to(device)

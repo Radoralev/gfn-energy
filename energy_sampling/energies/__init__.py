@@ -7,3 +7,4 @@ from .alanine import Alanine
 from .smiles_energy import MoleculeFromSMILES_XTB
 from .rdkit_conformer import RDKitConformer
 from .openmm_energy import OpenMMEnergy
+from .torchani_energy import TorchANIEnergy

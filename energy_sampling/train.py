@@ -1,8 +1,9 @@
 from plot_utils import *
 import argparse
 import torch
-import os
+import torchani
 
+import os
 from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimizer, get_gfn_forward_loss, \
     get_gfn_backward_loss, get_exploration_std, get_name
 from buffer import ReplayBuffer
@@ -34,7 +35,8 @@ parser.add_argument('--log_var_range', type=float, default=4.)
 parser.add_argument('--energy', type=str, default='9gmm',
                     choices=('9gmm', '25gmm', 'hard_funnel', 'xtb', 
                              'easy_funnel', 'many_well', 'alanine_vacuum_source', 
-                             'alanine_vacuum_target', 'alanine_vacuum_full', 'openmm'))
+                             'alanine_vacuum_target', 'alanine_vacuum_full', 'openmm',
+                             'torchani'))
 parser.add_argument('--mode_fwd', type=str, default="tb", choices=('tb', 'tb-avg', 'db', 'subtb', "pis"))
 parser.add_argument('--mode_bwd', type=str, default="tb", choices=('tb', 'tb-avg', 'mle'))
 parser.add_argument('--both_ways', action='store_true', default=False)
@@ -101,6 +103,7 @@ parser.add_argument('--continue_training', action='store_true', default=False)
 parser.add_argument('--smiles', type=str, default='CCCCCC(=O)OC') # First mol in FreeSolv
 parser.add_argument('--temperature', type=int, default=300)
 parser.add_argument('--solvate', action='store_true', default=False, help="Solvate the molecule")
+parser.add_argument('--torchani-model', type=str, default='ANI-1x_8x', help="TorchANI model to use")
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -146,6 +149,14 @@ def get_energy():
         energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvent=args.solvate)
     elif args.energy == 'openmm':
         energy = OpenMMEnergy(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
+    elif args.energy == 'torchani':
+        if args.torchani_model == 'ANI-1x_8x':
+            model = torchani.models.ANI1x(periodic_table_index=True)
+        elif args.torchani_model == 'ANI-2x':
+            model = torchani.models.ANI2x(periodic_table_index=True)
+        elif args.torchani_model == 'ANI-1ccx':
+            model = torchani.models.ANI1ccx(periodic_table_index=True)
+        energy = TorchANIEnergy(model, args.smiles, args.batch_size, args.solvate)
     return energy
 
 
