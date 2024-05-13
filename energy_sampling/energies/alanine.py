@@ -103,16 +103,12 @@ class Alanine(BaseSet):
         #self._energy = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=bridge).to(device)
         self.data = load_data(temp, self.bgmol_model, device, phi)
         
-        self.rdk_mol = Chem.MolFromSmiles('CC(C(=O)O)N')
-        self.rdk_mol = Chem.AddHs(self.rdk_mol)
-        #AllChem.EmbedMolecule(self.rdk_mol)
-
         # Extract atomic numbers
         self.atomic_numbers = torch.tensor([1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 0, 0,]).to(self.device)
 
         print(len(self.atomic_numbers))
         self.data_ndim = 3 * len(self.atomic_numbers)
-        # Initialize XTB Energy
+
         self._energy = torchani.models.ANI1x(periodic_table_index=True).to(self.device)
         #self._energy = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent='', method='gfnff')).to(device)
         #time_now = time.time()

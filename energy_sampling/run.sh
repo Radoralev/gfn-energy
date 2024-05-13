@@ -3,7 +3,7 @@ export TORCH_USE_CUDA_DSA=1
 
 python train.py --t_scale 1. \
     --batch_size 32 \
-    --energy xtb \
+    --energy alanine_vacuum_full \
     --smiles "CCCCCC(=O)OC" \
     --temperature 300 \
     --solvate \
