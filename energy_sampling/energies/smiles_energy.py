@@ -2,13 +2,13 @@ import torch
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from bgflow import XTBEnergy, XTBBridge
+from .xtb_energy import XTBEnergy, XTBBridge
 from .base_set import BaseSet
 from .alanine import load_data, plot_rama_traj
-from xtb.libxtb import VERBOSITY_MUTED, VERBOSITY_MINIMAL
-from xtb.interface import Calculator, Param, XTBException
-from xtb.ase.calculator import XTB
-from xtb.interface import Environment
+#from xtb.libxtb import VERBOSITY_MUTED, VERBOSITY_MINIMAL
+#from xtb.interface import Calculator, Param, XTBException
+#from xtb.ase.calculator import XTB
+#from xtb.interface import Environment
 from .rdkit_conformer import RDKitConformer
 
 class MoleculeFromSMILES_XTB(BaseSet):
