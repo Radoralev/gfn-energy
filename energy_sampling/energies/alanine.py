@@ -15,6 +15,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from bgflow import XTBEnergy, XTBBridge
 import time
+import torchani
 
 
 def plot_rama_traj(trajectory, w=None, get_phi=False, i=-1, model=None):
@@ -107,17 +108,23 @@ class Alanine(BaseSet):
         #AllChem.EmbedMolecule(self.rdk_mol)
 
         # Extract atomic numbers
-        self.atomic_numbers = np.array([atom.GetAtomicNum() for atom in self.rdk_mol.GetAtoms()])
+        self.atomic_numbers = torch.tensor([1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 0, 0,]).to(self.device)
+
         print(len(self.atomic_numbers))
         self.data_ndim = 3 * len(self.atomic_numbers)
         # Initialize XTB Energy
-        self._energy = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent='', method='gfnff')).to(device)
+        self._energy = torchani.models.ANI1x(periodic_table_index=True).to(self.device)
+        #self._energy = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent='', method='gfnff')).to(device)
         #time_now = time.time()
         #self.energy_cap = self._energy.energy(self.data.reshape(-1, len(self.atomic_numbers), 3)).max()
         #print('Time taken to compute energy cap:', time.time()-time_now)
         
     def energy(self, x):    
         #print(x)
+        an_bs = self.atomic_numbers.unsqueeze(0).repeat(x.size(0), 1).to(self.device)
+        energies = torch.clamp(self._energy((an_bs, x.reshape(-1, int(self.data_ndim/3), 3))).energies, 0, None)
+        return energies
+    
         energy = self._energy.energy(x.reshape(-1, len(self.atomic_numbers), 3))
         energy = torch.clamp(energy, 0, 500) #/ 10000
         if self.phi != 'full':
