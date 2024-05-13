@@ -110,7 +110,7 @@ set_seed(args.seed)
 if 'SLURM_PROCID' in os.environ:
     args.seed += int(os.environ["SLURM_PROCID"])
 
-eval_data_size = 2000
+eval_data_size = 128
 final_eval_data_size = 2000
 plot_data_size = 2000
 final_plot_data_size = 2000
@@ -146,7 +146,7 @@ def get_energy():
     elif args.energy == 'alanine_vacuum_full':
         energy = Alanine(device=device, phi='full', temp=1000)
     elif args.energy == 'xtb':
-        energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvent=args.solvate)
+        energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
     elif args.energy == 'openmm':
         energy = OpenMMEnergy(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
     elif args.energy == 'torchani':
