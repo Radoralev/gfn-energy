@@ -111,9 +111,9 @@ class Alanine(BaseSet):
             2 : 7,
             3 : 8,
         }
-        atoms = [atom_to_pt[atom] for atom in atoms]
+        self.atomic_numbers = torch.tensor([atom_to_pt[atom] for atom in atoms]).to(device)
     
-        print(len(self.atomic_numbers))
+        print('Number of atoms:', len(self.atomic_numbers))
         self.data_ndim = 3 * len(self.atomic_numbers)
 
         self._energy = torchani.models.ANI1x(periodic_table_index=True).to(self.device)
