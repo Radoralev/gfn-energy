@@ -11,7 +11,79 @@ from models.mace_modules.blocks import (
     RadialEmbeddingBlock,
 )
 from models.layers.tfn_layer import TensorProductConvLayer
+from torch_geometric.data import Data, Dataset, DataLoader, Batch
+from ogb.utils.features import (allowable_features, atom_to_feature_vector,
+ bond_to_feature_vector, atom_feature_vector_to_dict, bond_feature_vector_to_dict) 
+from rdkit import Chem
+import numpy as np
 
+def smiles2graph(smiles_string):
+    """
+    Converts SMILES string to graph Data object
+    :input: SMILES string (str)
+    :return: graph object
+    """
+
+    mol = Chem.MolFromSmiles(smiles_string)
+    mol = Chem.AddHs(mol)
+    #print(mol)
+    # atoms
+    atom_features_list = []
+    for atom in mol.GetAtoms():
+        atom_features_list.append(atom_to_feature_vector(atom))
+    x = np.array(atom_features_list, dtype = np.int64)
+
+    # bonds
+    num_bond_features = 3  # bond type, bond stereo, is_conjugated
+    if len(mol.GetBonds()) > 0: # mol has bonds
+        edges_list = []
+        edge_features_list = []
+        for bond in mol.GetBonds():
+            i = bond.GetBeginAtomIdx()
+            j = bond.GetEndAtomIdx()
+
+            edge_feature = bond_to_feature_vector(bond)
+
+            # add edges in both directions
+            edges_list.append((i, j))
+            edge_features_list.append(edge_feature)
+            edges_list.append((j, i))
+            edge_features_list.append(edge_feature)
+
+        # data.edge_index: Graph connectivity in COO format with shape [2, num_edges]
+        edge_index = np.array(edges_list, dtype = np.int64).T
+
+        # data.edge_attr: Edge feature matrix with shape [num_edges, num_edge_features]
+        edge_attr = np.array(edge_features_list, dtype = np.int64)
+
+    else:   # mol has no bonds
+        edge_index = np.empty((2, 0), dtype = np.int64)
+        edge_attr = np.empty((0, num_bond_features), dtype = np.int64)
+
+    graph = dict()
+    graph['edge_index'] = edge_index
+    graph['edge_feat'] = edge_attr
+    graph['node_feat'] = x
+    graph['num_nodes'] = len(x)
+
+    return graph 
+
+def prep_input(smiles, pos=None, device=None):
+    datalist = []
+    graph = smiles2graph(smiles)
+    for xyz in pos:
+        if pos is not None:
+            graph['pos'] = xyz  
+        #print('Number of atoms:', graph['node_feat'].shape[0])
+        data = Data(
+            atoms=torch.from_numpy(graph['node_feat'][:, 0]), 
+            edge_index=torch.from_numpy(graph['edge_index']), 
+            edge_attr=torch.from_numpy(graph['edge_feat']), 
+            pos=graph['pos'],).to(device)
+        data.validate(raise_on_error=True)
+        datalist.append(data)
+    batch = Batch.from_data_list(datalist)
+    return batch
 
 class MACEModel(torch.nn.Module):
     """
@@ -34,7 +106,8 @@ class MACEModel(torch.nn.Module):
         pool: str = "sum",
         batch_norm: bool = True,
         residual: bool = True,
-        equivariant_pred: bool = False
+        equivariant_pred: bool = False,
+        smiles: str = None,
     ):
         """
         Parameters:
@@ -72,7 +145,8 @@ class MACEModel(torch.nn.Module):
         self.batch_norm = batch_norm
         self.hidden_irreps = hidden_irreps
         self.equivariant_pred = equivariant_pred
-
+        self.smiles = smiles
+        self.in_dim = in_dim
         # Edge embedding
         self.radial_embedding = RadialEmbeddingBlock(
             r_max=r_max,
@@ -162,10 +236,19 @@ class MACEModel(torch.nn.Module):
                 torch.nn.Linear(emb_dim, out_dim)
             )
     
-    def forward(self, batch):
+    def forward(self, x):
+        #print(x.shape)
+        pos, t = x[:, :self.in_dim], x[:, self.in_dim:]
+        pos = pos.reshape(-1, int(self.in_dim / 3), 3)
+        bs, atom_num, _ = pos.shape
+        batch = prep_input(self.smiles, pos, device=self.emb_in.weight.device)
         # Node embedding
-        h = self.emb_in(batch.atoms)  # (n,) -> (n, d)
-
+        #atom_number = batch.num_nodes
+        h = self.emb_in(batch.atoms)  # (n,) -> (n, d) 
+        h = h.view(bs, atom_num, self.emb_dim)
+        t = t.unsqueeze(1).expand(h.size(0), h.size(1), h.size(2))
+        h = h + t
+        h = h.view(bs * atom_num, self.emb_dim)
         # Edge features
         vectors = batch.pos[batch.edge_index[0]] - batch.pos[batch.edge_index[1]]  # [n_edges, 3]
         lengths = torch.linalg.norm(vectors, dim=-1, keepdim=True)  # [n_edges, 1]

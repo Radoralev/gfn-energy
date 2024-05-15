@@ -4,6 +4,7 @@ from einops import rearrange
 from torch import nn
 import math
 
+from .mace import MACEModel
 
 class TimeConder(nn.Module):
     def __init__(self, channel, out_dim, num_layers):
@@ -128,22 +129,28 @@ class StateEncoding(nn.Module):
 
 class JointPolicy(nn.Module):
     def __init__(self, s_dim: int, s_emb_dim: int, t_dim: int, hidden_dim: int = 64, out_dim: int = None,
-                 zero_init: bool = False):
+                 zero_init: bool = False, model = None, smiles=None):
         super(JointPolicy, self).__init__()
         if out_dim is None:
             out_dim = 2 * s_dim
 
-        self.model = nn.Sequential(
-            nn.Linear(s_emb_dim + t_dim, hidden_dim),
-            nn.GELU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.GELU(),
-            nn.Linear(hidden_dim, out_dim)
-        )
 
-        if zero_init:
-            self.model[-1].weight.data.fill_(0.0)
-            self.model[-1].bias.data.fill_(0.0)
+        if model == 'mlp':
+            self.model = nn.Sequential(
+                nn.Linear(s_emb_dim + t_dim, hidden_dim),
+                nn.GELU(),
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.GELU(),
+                nn.Linear(hidden_dim, out_dim)
+            )
+            if zero_init:
+                self.model[-1].weight.data.fill_(0.0)
+                self.model[-1].bias.data.fill_(0.0)
+        elif model == 'mace':
+            self.model = MACEModel(in_dim=s_dim, out_dim=out_dim, mlp_dim=hidden_dim, emb_dim=t_dim, smiles=smiles, equivariant_pred=True, num_layers=1)
+            self.model.pred.weight.data.fill_(0.0)
+            self.model.pred.bias.data.fill_(0.0)
+    
 
     def forward(self, s, t):
         return self.model(torch.cat([s, t], dim=-1))

@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from .architectures import *
 from utils import gaussian_params
-
+from .mace import MACEModel
 logtwopi = math.log(2 * math.pi)
 
 
@@ -17,7 +17,7 @@ class GFN(nn.Module):
                  trajectory_length: int = 100, partial_energy: bool = False,
                  clipping: bool = False, lgv_clip: float = 1e2, gfn_clip: float = 1e4, pb_scale_range: float = 1.,
                  langevin_scaling_per_dimension: bool = True, conditional_flow_model: bool = False,
-                 learn_pb: bool = False,
+                 learn_pb: bool = False, model='mlp', smiles=None,
                  pis_architectures: bool = False, lgv_layers: int = 3, joint_layers: int = 2,
                  zero_init: bool = False, device=torch.device('cuda')):
         super(GFN, self).__init__()
@@ -25,7 +25,9 @@ class GFN(nn.Module):
         self.harmonics_dim = harmonics_dim
         self.t_dim = t_dim
         self.s_emb_dim = s_emb_dim
-
+        self.smiles = smiles
+        self.model = model
+        
         self.trajectory_length = trajectory_length
         self.langevin = langevin
         self.learned_variance = learned_variance
@@ -74,9 +76,9 @@ class GFN(nn.Module):
 
             self.t_model = TimeEncoding(harmonics_dim, t_dim, hidden_dim)
             self.s_model = StateEncoding(dim, hidden_dim, s_emb_dim)
-            self.joint_model = JointPolicy(dim, s_emb_dim, t_dim, hidden_dim, 2 * dim, zero_init)
+            self.joint_model = JointPolicy(dim, s_emb_dim, t_dim, hidden_dim, 2 * dim, zero_init, model=model, smiles=smiles).to(device)
             if learn_pb:
-                self.back_model = JointPolicy(dim, s_emb_dim, t_dim, hidden_dim, 2 * dim, zero_init)
+                self.back_model = JointPolicy(dim, s_emb_dim, t_dim, hidden_dim, 2 * dim, zero_init).to(device)
             self.pb_scale_range = pb_scale_range
 
             if self.conditional_flow_model:
@@ -111,7 +113,8 @@ class GFN(nn.Module):
         t_lgv = t
 
         t = self.t_model(t).repeat(bsz, 1)
-        s = self.s_model(s)
+        if not self.model == 'mace':
+            s = self.s_model(s)
         s_new = self.joint_model(s, t)
 
         flow = self.flow_model(s, t).squeeze(-1) if self.conditional_flow_model or self.partial_energy else self.flow_model

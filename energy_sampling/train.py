@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser(description='GFN Linear Regression')
 parser.add_argument('--lr_policy', type=float, default=1e-3)
 parser.add_argument('--lr_flow', type=float, default=1e-2)
 parser.add_argument('--lr_back', type=float, default=1e-3)
+parser.add_argument('--model', type=str, default='mlp', choices=['mace'])
 parser.add_argument('--hidden_dim', type=int, default=64)
 parser.add_argument('--s_emb_dim', type=int, default=64)
 parser.add_argument('--t_emb_dim', type=int, default=64)
@@ -141,10 +142,13 @@ def get_energy():
         energy = ManyWell(device=device)
     elif args.energy == 'alanine_vacuum_source':
         energy = Alanine(device=device, phi='source', temp=1000)
+        args.smiles = energy.smiles
     elif args.energy == 'alanine_vacuum_target':
         energy = Alanine(device=device, phi='target', temp=1000)
+        args.smiles = energy.smiles
     elif args.energy == 'alanine_vacuum_full':
         energy = Alanine(device=device, phi='full', temp=1000)
+        args.smiles = energy.smiles
     elif args.energy == 'xtb':
         energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
     elif args.energy == 'openmm':
@@ -323,7 +327,7 @@ def train():
                     trajectory_length=args.T, clipping=args.clipping, lgv_clip=args.lgv_clip, gfn_clip=args.gfn_clip,
                     langevin=args.langevin, learned_variance=args.learned_variance,
                     partial_energy=args.partial_energy, log_var_range=args.log_var_range,
-                    pb_scale_range=args.pb_scale_range,
+                    pb_scale_range=args.pb_scale_range, model = args.model, smiles=args.smiles,
                     t_scale=args.t_scale, langevin_scaling_per_dimension=args.langevin_scaling_per_dimension,
                     conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
                     pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers,

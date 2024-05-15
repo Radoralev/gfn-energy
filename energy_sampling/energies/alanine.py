@@ -102,10 +102,17 @@ class Alanine(BaseSet):
         #self.data_ndim = 66
         #self._energy = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=bridge).to(device)
         self.data = load_data(temp, self.bgmol_model, device, phi)
-        
+        self.smiles = 'C[C@@H](C(=O)NC)NC(=O)C'
         # Extract atomic numbers
-        self.atomic_numbers = torch.tensor([1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 0, 0,]).to(self.device)
-
+        atoms = [1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 0, 0,]
+        atom_to_pt = {
+            0 : 1,
+            1 : 6, 
+            2 : 7,
+            3 : 8,
+        }
+        atoms = [atom_to_pt[atom] for atom in atoms]
+    
         print(len(self.atomic_numbers))
         self.data_ndim = 3 * len(self.atomic_numbers)
 
