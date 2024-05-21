@@ -198,7 +198,9 @@ def plot_step(energy, gfn_model, name):
         return {}
     else:
         batch_size = plot_data_size
+        gfn_model.eval()
         samples = gfn_model.sample(batch_size, energy.log_reward)
+        gfn_model.train()
         gt_samples = energy.sample(batch_size)
 
         fig_contour, ax_contour = get_figure(bounds=(-13., 13.))
