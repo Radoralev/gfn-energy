@@ -90,6 +90,8 @@ class GFN(nn.Module):
                 self.langevin_scaling_model = LangevinScalingModel(s_emb_dim, t_dim, hidden_dim, dim, zero_init)
             else:
                 self.langevin_scaling_model = LangevinScalingModel(s_emb_dim, t_dim, hidden_dim, 1, zero_init)
+        # print number parameters
+        print('Number of parameters: ', self.num_parameters())
 
     def split_params(self, tensor):
         mean, logvar = gaussian_params(tensor)
@@ -129,6 +131,11 @@ class GFN(nn.Module):
         if self.clipping:
             s_new = torch.clip(s_new, -self.gfn_clip, self.gfn_clip)
         return s_new, flow.squeeze(-1)
+
+    
+    
+    def num_parameters(self):
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
     def get_trajectory_fwd(self, s, exploration_std, log_r, pis=False):
         bsz = s.shape[0]

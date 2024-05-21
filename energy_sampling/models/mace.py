@@ -82,7 +82,7 @@ def prep_input(smiles, pos=None, device=None):
             pos=graph['pos'],).to(device)
         data.validate(raise_on_error=True)
         datalist.append(data)
-    batch = Batch.from_data_list(datalist)
+    batch = Batch.from_data_list(datalist).to(device)
     return batch
 
 class MACEModel(torch.nn.Module):
