@@ -3,7 +3,7 @@ from torch.nn import functional as F
 from torch_geometric.nn import global_add_pool, global_mean_pool
 
 from models.layers.egnn_layer import EGNNLayer
-
+from models.mace import prep_input, smiles2graph
 
 class EGNNModel(torch.nn.Module):
     """
@@ -20,7 +20,8 @@ class EGNNModel(torch.nn.Module):
         aggr: str = "sum",
         pool: str = "sum",
         residual: bool = True,
-        equivariant_pred: bool = False
+        equivariant_pred: bool = False,
+        smiles: str = None
     ):
         """
         Initializes an instance of the EGNNModel class with the provided parameters.
@@ -40,10 +41,15 @@ class EGNNModel(torch.nn.Module):
         super().__init__()
         self.equivariant_pred = equivariant_pred
         self.residual = residual
-
+        self.smiles = smiles
+        self.smiles_graph = smiles2graph(smiles)
         # Embedding lookup for initial node features
         self.emb_in = torch.nn.Embedding(in_dim, emb_dim)
-
+        
+        self.down = torch.nn.Linear(2*emb_dim, emb_dim)
+        
+        self.in_dim = in_dim
+        self.emb_dim = emb_dim
         # Stack of GNN layers
         self.convs = torch.nn.ModuleList()
         for _ in range(num_layers):
@@ -63,10 +69,23 @@ class EGNNModel(torch.nn.Module):
                 torch.nn.Linear(emb_dim, out_dim)
             )
 
-    def forward(self, batch):
+    def forward(self, x):
         
+        pos, t = x[:, :self.in_dim], x[:, self.in_dim:]
+        pos = pos.reshape(-1, int(self.in_dim / 3), 3)
+        bs, atom_num, _ = pos.shape
+        batch = prep_input(self.smiles_graph, pos, device=self.emb_in.weight.device)
+        # Node embedding
+        #atom_number = batch.num_nodes
         h = self.emb_in(batch.atoms)  # (n,) -> (n, d)
-        pos = batch.pos  # (n, 3)   
+        h = h.view(bs, atom_num, self.emb_dim)
+        t = t.unsqueeze(1).expand(h.size(0), h.size(1), h.size(2))
+        h = torch.cat([h, t], dim=-1)
+
+        h = self.down(h)
+        h = h.view(bs * atom_num, self.emb_dim)
+            
+        pos = batch.pos  # (n, 3)
 
         for conv in self.convs:
             # Message passing layer

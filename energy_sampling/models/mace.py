@@ -68,9 +68,8 @@ def smiles2graph(smiles_string):
 
     return graph 
 
-def prep_input(smiles, pos=None, device=None):
+def prep_input(graph, pos=None, device=None):
     datalist = []
-    graph = smiles2graph(smiles)
     for xyz in pos:
         if pos is not None:
             graph['pos'] = xyz  
@@ -146,6 +145,7 @@ class MACEModel(torch.nn.Module):
         self.hidden_irreps = hidden_irreps
         self.equivariant_pred = equivariant_pred
         self.smiles = smiles
+        self.smiles_graph = smiles2graph(smiles)
         self.in_dim = in_dim
         # Edge embedding
         self.radial_embedding = RadialEmbeddingBlock(
@@ -174,7 +174,7 @@ class MACEModel(torch.nn.Module):
         # First layer: scalar only -> tensor
         self.convs.append(
             TensorProductConvLayer(
-                in_irreps=e3nn.o3.Irreps(f'{emb_dim}x0e'),
+                in_irreps=e3nn.o3.Irreps(f'{2*emb_dim}x0e'),
                 out_irreps=hidden_irreps,
                 sh_irreps=sh_irreps,
                 edge_feats_dim=self.radial_embedding.out_dim,
@@ -241,14 +241,17 @@ class MACEModel(torch.nn.Module):
         pos, t = x[:, :self.in_dim], x[:, self.in_dim:]
         pos = pos.reshape(-1, int(self.in_dim / 3), 3)
         bs, atom_num, _ = pos.shape
-        batch = prep_input(self.smiles, pos, device=self.emb_in.weight.device)
+        batch = prep_input(self.smiles_graph, pos, device=self.emb_in.weight.device)
         # Node embedding
         #atom_number = batch.num_nodes
-        h = self.emb_in(batch.atoms)  # (n,) -> (n, d) 
+        h = self.emb_in(batch.atoms)  # (n,) -> (n, d)
         h = h.view(bs, atom_num, self.emb_dim)
         t = t.unsqueeze(1).expand(h.size(0), h.size(1), h.size(2))
-        h = h + t
-        h = h.view(bs * atom_num, self.emb_dim)
+        #print(h.shape)
+        h = torch.cat([h, t], dim=-1)
+        #print(h.shape)
+        h = h.view(bs * atom_num, 2*self.emb_dim)
+        #print(h.shape)
         # Edge features
         vectors = batch.pos[batch.edge_index[0]] - batch.pos[batch.edge_index[1]]  # [n_edges, 3]
         lengths = torch.linalg.norm(vectors, dim=-1, keepdim=True)  # [n_edges, 1]

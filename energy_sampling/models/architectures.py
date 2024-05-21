@@ -5,6 +5,7 @@ from torch import nn
 import math
 
 from .mace import MACEModel
+from .egnn import EGNNModel
 
 class TimeConder(nn.Module):
     def __init__(self, channel, out_dim, num_layers):
@@ -150,7 +151,8 @@ class JointPolicy(nn.Module):
             self.model = MACEModel(in_dim=s_dim, out_dim=out_dim, mlp_dim=hidden_dim, emb_dim=t_dim, smiles=smiles, equivariant_pred=True, num_layers=1)
             self.model.pred.weight.data.fill_(0.0)
             self.model.pred.bias.data.fill_(0.0)
-    
+        elif model == 'egnn':
+            self.model = EGNNModel(in_dim=s_dim, out_dim=out_dim, emb_dim=hidden_dim, num_layers=1, equivariant_pred=True, smiles=smiles)
 
     def forward(self, s, t):
         return self.model(torch.cat([s, t], dim=-1))

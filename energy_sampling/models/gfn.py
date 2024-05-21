@@ -115,7 +115,7 @@ class GFN(nn.Module):
         t_lgv = t
 
         t = self.t_model(t).repeat(bsz, 1)
-        if not self.model == 'mace':
+        if self.model == 'mlp':
             s = self.s_model(s)
         s_new = self.joint_model(s, t)
 
