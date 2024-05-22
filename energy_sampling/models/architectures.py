@@ -152,7 +152,9 @@ class JointPolicy(nn.Module):
             self.model.pred.weight.data.fill_(0.0)
             self.model.pred.bias.data.fill_(0.0)
         elif model == 'egnn':
-            self.model = EGNNModel(in_dim=s_dim, out_dim=out_dim, emb_dim=hidden_dim, num_layers=1, equivariant_pred=True, smiles=smiles)
+            self.model = EGNNModel(in_dim=s_dim, out_dim=out_dim, emb_dim=hidden_dim, num_layers=2, equivariant_pred=True, smiles=smiles)
+            self.model.pred.weight.data.fill_(0.0)
+            self.model.pred.bias.data.fill_(0.0)
 
     def forward(self, s, t):
         return self.model(torch.cat([s, t], dim=-1))
