@@ -298,7 +298,7 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
                 samples, rewards = buffer.sample()
                 local_search_samples, log_r = langevin_dynamics(samples, energy.log_reward, device, args)
                 #if len(local_search_samples) == 0:
-                local_search_samples = samples
+                #local_search_samples = samples
                 log_r = rewards 
                 buffer_ls.add(local_search_samples, log_r)
         
