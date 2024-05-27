@@ -30,14 +30,18 @@ def process_file(input_file, base_dir):
                 print(f"Error: Unexpected line format: {line}")
                 continue
             smiles = fields[1]
-            safe_smiles = smiles.replace("/", "_").replace("\\", "_")
-            folder_name = os.path.join(base_dir, safe_smiles)
-            if not os.path.exists(folder_name):
-                os.makedirs(folder_name)
+            index = 0
+            while os.path.exists(os.path.join(base_dir, f"molecule_{index}")):
+                index += 1
+            folder_name = os.path.join(base_dir, f"molecule_{index}")
+            os.makedirs(folder_name)
             output_file = os.path.join(folder_name, "base.xyz")
             generate_conformer(smiles, output_file)
-            print(f"Generated conformer for {smiles} at {output_file}")
+            smiles_file = os.path.join(folder_name, "smiles.txt")
 
+            with open(smiles_file, "w") as f:
+                f.write(smiles)
+            print(f"Generated conformer for {smiles} at {output_file}")
 def main():
     parser = argparse.ArgumentParser(description="Generate conformers from a SMILES .txt file.")
     parser.add_argument("input_file", type=str, help="Path to the input .txt file.")
