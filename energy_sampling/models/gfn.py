@@ -19,7 +19,7 @@ class GFN(nn.Module):
                  langevin_scaling_per_dimension: bool = True, conditional_flow_model: bool = False,
                  learn_pb: bool = False, model='mlp', smiles=None,
                  pis_architectures: bool = False, lgv_layers: int = 3, joint_layers: int = 2,
-                 zero_init: bool = False, device=torch.device('cuda')):
+                 zero_init: bool = False, device=torch.device('cuda'), equivariant_architectures: bool = False):
         super(GFN, self).__init__()
         self.dim = dim
         self.harmonics_dim = harmonics_dim
@@ -41,7 +41,7 @@ class GFN(nn.Module):
         self.langevin_scaling_per_dimension = langevin_scaling_per_dimension
         self.conditional_flow_model = conditional_flow_model
         self.learn_pb = learn_pb
-
+        self.equivariant_architectures = equivariant_architectures
         self.pis_architectures = pis_architectures
         self.lgv_layers = lgv_layers
         self.joint_layers = joint_layers
@@ -51,6 +51,24 @@ class GFN(nn.Module):
         self.log_var_range = log_var_range
         self.device = device
 
+        if self.equivariant_architectures:
+            self.t_model = TimeEncodingPIS(harmonics_dim, t_dim, hidden_dim)
+            self.s_model = StateEncodingPIS(dim, hidden_dim, s_emb_dim)
+            self.joint_model = EquivariantPolicy(model, s_emb_dim, t_dim, hidden_dim, 2 * dim, joint_layers, smiles, zero_init)
+            if learn_pb:
+                self.back_model = EquivariantPolicy(dim, s_emb_dim, t_dim, hidden_dim, 2 * dim, joint_layers, smiles, zero_init)
+            self.pb_scale_range = pb_scale_range
+            if self.conditional_flow_model:
+                self.flow_model = FlowModelPIS(dim, s_emb_dim, t_dim, hidden_dim, 1, joint_layers)
+            else:
+                self.flow_model = torch.nn.Parameter(torch.tensor(0.).to(self.device))
+
+            if self.langevin_scaling_per_dimension:
+                self.langevin_scaling_model = LangevinScalingModelPIS(s_emb_dim, t_dim, hidden_dim, dim,
+                                                                      lgv_layers, zero_init)
+            else:
+                self.langevin_scaling_model = LangevinScalingModelPIS(s_emb_dim, t_dim, hidden_dim, 1,
+                                                                      lgv_layers, zero_init)
         if self.pis_architectures:
 
             self.t_model = TimeEncodingPIS(harmonics_dim, t_dim, hidden_dim)

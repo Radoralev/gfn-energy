@@ -1,0 +1,1 @@
+{"in_dim": 54, "out_dim": 1, "emb_dim": 32, "num_layers": 2, "lr": 0.0001, "epochs": 100, "patience": 5, "batch_size": 32}

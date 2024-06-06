@@ -1,21 +1,22 @@
-from plot_utils import *
 import argparse
+import json
+import os
 import torch
 import torchani
-
-import os
-from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimizer, get_gfn_forward_loss, \
-    get_gfn_backward_loss, get_exploration_std, get_name
+import matplotlib.pyplot as plt
+import wandb
+from tqdm import trange
 from buffer import ReplayBuffer
-from langevin import langevin_dynamics
-from models import GFN
-from gflownet_losses import *
 from energies import *
 from evaluations import *
+from gflownet_losses import *
+from langevin import langevin_dynamics
+from models import GFN, EGNNModel, MACEModel
+from plot_utils import *
 
-import matplotlib.pyplot as plt
-from tqdm import trange
-import wandb
+from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimizer, get_gfn_forward_loss, \
+    get_gfn_backward_loss, get_exploration_std, get_name
+
 
 parser = argparse.ArgumentParser(description='GFN Linear Regression')
 parser.add_argument('--lr_policy', type=float, default=1e-3)
@@ -37,7 +38,7 @@ parser.add_argument('--energy', type=str, default='9gmm',
                     choices=('9gmm', '25gmm', 'hard_funnel', 'xtb', 
                              'easy_funnel', 'many_well', 'alanine_vacuum_source', 
                              'alanine_vacuum_target', 'alanine_vacuum_full', 'openmm',
-                             'torchani'))
+                             'neural'))
 parser.add_argument('--mode_fwd', type=str, default="tb", choices=('tb', 'tb-avg', 'db', 'subtb', "pis"))
 parser.add_argument('--mode_bwd', type=str, default="tb", choices=('tb', 'tb-avg', 'mle'))
 parser.add_argument('--both_ways', action='store_true', default=False)
@@ -105,6 +106,8 @@ parser.add_argument('--smiles', type=str, default='CCCCCC(=O)OC') # First mol in
 parser.add_argument('--temperature', type=int, default=300)
 parser.add_argument('--solvate', action='store_true', default=False, help="Solvate the molecule")
 parser.add_argument('--torchani-model', type=str, default='ANI-1x_8x', help="TorchANI model to use")
+parser.add_argument('--local_model', type=str, default=None, help="Path to local model")
+parser.add_argument('--equivariant_architectures', action='store_true', default=False)
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -128,6 +131,8 @@ if args.both_ways and args.bwd:
 if args.local_search:
     args.both_ways = True
 
+if args.local_model:
+    args.torchani_model = ''
 
 def get_energy():
     if args.energy == '9gmm':
@@ -153,15 +158,30 @@ def get_energy():
         energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
     elif args.energy == 'openmm':
         energy = OpenMMEnergy(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
-    elif args.energy == 'torchani':
+    elif args.energy == 'neural':
         if args.torchani_model == 'ANI-1x_8x':
             model = torchani.models.ANI1x(periodic_table_index=True)
         elif args.torchani_model == 'ANI-2x':
             model = torchani.models.ANI2x(periodic_table_index=True)
         elif args.torchani_model == 'ANI-1ccx':
             model = torchani.models.ANI1ccx(periodic_table_index=True)
-        energy = TorchANIEnergy(model, args.smiles, args.batch_size, args.solvate)
+        elif args.local_model:
+            if args.local_model.split('/')[-1].startswith('egnn'):
+                model, model_args = load_model(model='egnn', filename=args.local_model)
+            elif args.local_model.split('/')[-1].startswith('mace'):
+                model, model_args = load_model(model='mace', filename=args.local_model)
+            energy = NeuralEnergy(model=model, smiles=args.smiles, batch_size=model_args['batch_size'])
     return energy
+
+def load_model(model, filename):
+    with open(filename + '.json', 'r') as f:
+        model_args = json.load(f)
+        if model == 'egnn':
+            model = EGNNModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], equivariant_pred=False)
+        elif model == 'mace':
+            model = MACEModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], equivariant_pred=False)
+    model.load_state_dict(torch.load(filename + '.pt'))
+    return model, model_args
 
 
 def plot_step(energy, gfn_model, name):
@@ -333,7 +353,7 @@ def train():
                     t_scale=args.t_scale, langevin_scaling_per_dimension=args.langevin_scaling_per_dimension,
                     conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
                     pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers,
-                    joint_layers=args.joint_layers, zero_init=args.zero_init, device=device).to(device)
+                    joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, equivariant_architectures=args.equivariant_architectures).to(device)
     
     if args.continue_training:
         gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
