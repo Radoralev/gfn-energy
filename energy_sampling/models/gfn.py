@@ -85,7 +85,7 @@ class GFN(nn.Module):
             else:
                 self.langevin_scaling_model = LangevinScalingModelPIS(s_emb_dim, t_dim, hidden_dim, 1,
                                                                       lgv_layers, zero_init)
-        if self.pis_architectures:
+        elif self.pis_architectures:
 
             self.t_model = TimeEncodingPIS(harmonics_dim, t_dim, hidden_dim)
             self.s_model = StateEncodingPIS(dim, hidden_dim, s_emb_dim)
