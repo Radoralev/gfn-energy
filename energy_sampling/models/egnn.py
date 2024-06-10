@@ -67,18 +67,15 @@ class EGNNModel(torch.nn.Module):
     
     def forward(self, batch, t=None):
         h = self.emb_in(batch.atoms)  # (n,) -> (n, d)
-        # print(h.shape)
-        if t:
-            bs, atom_num = batch.pos.shape
-            h = h.view(bs, atom_num, self.emb_dim)
-            t = t.unsqueeze(1).expand(h.size(0), h.size(1), h.size(2))
+        if t is not None:
+            # match h shape
+            t = t.repeat(h.shape[0]//t.shape[0], 1)
             h = h + t
             
         #TODO batch size is hardcoded here 
         #h = h.view(-1, batch.atoms.shape[0]//32, self.emb_dim)
         # print(batch.pos.shape/, h.shape)
         pos = batch.pos.reshape(-1, 3)
-        # print(pos.shape)
         for conv in self.convs:
             # Message passing layer
             # print(h.shape)

@@ -8,6 +8,7 @@ from .mace import MACEModel
 from .egnn import EGNNModel
 from .utils import smiles2graph, prep_input
 from torch_geometric.data import Batch
+from torch_geometric import loader 
 
 class TimeConder(nn.Module):
     def __init__(self, channel, out_dim, num_layers):
@@ -131,24 +132,27 @@ class StateEncoding(nn.Module):
 
 
 class EquivariantPolicy(nn.Module):
-    def __init__(self, model: str, s_dim: int, t_dim: int, hidden_dim: int = 64, out_dim: int = None, num_layers: int = 2, smiles: str = None, zero_init: bool = False):
+    def __init__(self, model: str = 'egnn', in_dim: int = 32, t_dim: int = 32, hidden_dim: int = 64, out_dim: int = None, num_layers: int = 2, smiles: str = None, zero_init: bool = False):
         super(EquivariantPolicy, self).__init__()
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.graph = smiles2graph(smiles)
         if model == 'mace':
-            self.model = MACEModel(in_dim=s_dim, out_dim=out_dim, mlp_dim=hidden_dim, emb_dim=t_dim, smiles=smiles, equivariant_pred=True, num_layers=num_layers)
+            self.model = MACEModel(in_dim=in_dim, out_dim=out_dim, mlp_dim=hidden_dim, emb_dim=t_dim, equivariant_pred=True, num_layers=num_layers).to(self.device)
             if zero_init:
                 self.model.pred.weight.data.fill_(0.0)
                 self.model.pred.bias.data.fill_(0.0)
         elif model == 'egnn':
-            self.model = EGNNModel(in_dim=s_dim, out_dim=out_dim, emb_dim=hidden_dim, num_layers=num_layers, equivariant_pred=True, smiles=smiles)
+            self.model = EGNNModel(in_dim=in_dim, out_dim=out_dim, emb_dim=hidden_dim, num_layers=num_layers, equivariant_pred=True).to(self.device)
             if zero_init:
                 self.model.pred.weight.data.fill_(0.0)
                 self.model.pred.bias.data.fill_(0.0)
 
     def forward(self, s, t):
-        data_list = prep_input(self.graph, s, device=self.model[0].weight.device)
-        batch = Batch.from_data_list(data_list).to(self.model[0].weight.device)
-        return self.model(batch, t)
+        print(s.shape)
+        data_list = prep_input(self.graph, s, device=self.device)
+        dl = loader.DataLoader(data_list, batch_size=s.shape[0])
+        batch = next(iter(dl))
+        return self.model(batch, None)
 
 class JointPolicy(nn.Module):
     def __init__(self, s_dim: int, s_emb_dim: int, t_dim: int, hidden_dim: int = 64, out_dim: int = None,

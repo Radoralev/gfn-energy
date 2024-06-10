@@ -56,7 +56,7 @@ class GFN(nn.Module):
             self.s_model = StateEncodingPIS(dim, hidden_dim, s_emb_dim)
             self.joint_model = EquivariantPolicy(
                 model=model, 
-                s_dim=s_emb_dim, 
+                in_dim=dim, 
                 t_dim=t_dim, 
                 hidden_dim=hidden_dim, 
                 out_dim=2 * dim, 
@@ -66,7 +66,7 @@ class GFN(nn.Module):
             if learn_pb:
                 self.back_model = EquivariantPolicy(
                 model=model, 
-                s_dim=s_emb_dim, 
+                in_dim=dim, 
                 t_dim=t_dim, 
                 hidden_dim=hidden_dim, 
                 out_dim=2 * dim, 
