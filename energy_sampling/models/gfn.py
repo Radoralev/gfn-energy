@@ -60,7 +60,7 @@ class GFN(nn.Module):
                 t_dim=t_dim, 
                 hidden_dim=hidden_dim, 
                 out_dim=2 * dim, 
-                joint_layers=joint_layers, 
+                num_layers=joint_layers, 
                 smiles=smiles, 
                 zero_init=zero_init)
             if learn_pb:
@@ -70,7 +70,7 @@ class GFN(nn.Module):
                 t_dim=t_dim, 
                 hidden_dim=hidden_dim, 
                 out_dim=2 * dim, 
-                joint_layers=joint_layers, 
+                num_layers=joint_layers, 
                 smiles=smiles, 
                 zero_init=zero_init)
             self.pb_scale_range = pb_scale_range
