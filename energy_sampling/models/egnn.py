@@ -71,7 +71,7 @@ class EGNNModel(torch.nn.Module):
             # match h shape
             t = t.repeat(h.shape[0]//t.shape[0], 1)
             h = h + t
-            
+        
         #TODO batch size is hardcoded here 
         #h = h.view(-1, batch.atoms.shape[0]//32, self.emb_dim)
         # print(batch.pos.shape/, h.shape)

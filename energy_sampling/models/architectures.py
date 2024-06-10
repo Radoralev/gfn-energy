@@ -136,6 +136,7 @@ class EquivariantPolicy(nn.Module):
         super(EquivariantPolicy, self).__init__()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.graph = smiles2graph(smiles)
+        self.in_dim = in_dim
         if model == 'mace':
             self.model = MACEModel(in_dim=in_dim, out_dim=out_dim, mlp_dim=hidden_dim, emb_dim=t_dim, equivariant_pred=True, num_layers=num_layers).to(self.device)
             if zero_init:
@@ -148,11 +149,10 @@ class EquivariantPolicy(nn.Module):
                 self.model.pred.bias.data.fill_(0.0)
 
     def forward(self, s, t):
-        print(s.shape)
-        data_list = prep_input(self.graph, s, device=self.device)
+        data_list = prep_input(self.graph, s.reshape(-1, self.in_dim//3, 3), device=self.device)
         dl = loader.DataLoader(data_list, batch_size=s.shape[0])
         batch = next(iter(dl))
-        return self.model(batch, None)
+        return self.model(batch, t)
 
 class JointPolicy(nn.Module):
     def __init__(self, s_dim: int, s_emb_dim: int, t_dim: int, hidden_dim: int = 64, out_dim: int = None,
