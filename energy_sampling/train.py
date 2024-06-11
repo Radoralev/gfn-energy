@@ -13,6 +13,7 @@ from gflownet_losses import *
 from langevin import langevin_dynamics
 from models import GFN, EGNNModel, MACEModel
 from plot_utils import *
+from openmm import unit
 
 from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimizer, get_gfn_forward_loss, \
     get_gfn_backward_loss, get_exploration_std, get_name
@@ -245,16 +246,21 @@ def plot_step(energy, gfn_model, name):
 def eval_step(eval_data, energy, gfn_model, final_eval=False):
     gfn_model.eval()
     metrics = dict()
+    if args.energy == 'neural':
+        k = unit.MOLAR_GAS_CONSTANT_R.value_in_unit(unit.kilocalorie_per_mole/unit.kelvin)
+        log_reward_func = energy.log_reward * 627.5095 / (k*298.15)
+    else:
+        log_reward_func = energy.log_reward
     if final_eval:
         init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
         samples, metrics['final_eval/log_Z'], metrics['final_eval/log_Z_lb'], metrics[
             'final_eval/log_Z_learned'] = log_partition_function(
-            init_state, gfn_model, energy.log_reward)
+            init_state, gfn_model, log_reward_func)
     else:
         init_state = torch.zeros(eval_data_size, energy.data_ndim).to(device)
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[
             'eval/log_Z_learned'] = log_partition_function(
-            init_state, gfn_model, energy.log_reward)
+            init_state, gfn_model, log_reward_func)
     if eval_data is None:
         log_elbo = None
         sample_based_metrics = None
