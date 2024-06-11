@@ -248,7 +248,7 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
     metrics = dict()
     if args.energy == 'neural':
         k = unit.MOLAR_GAS_CONSTANT_R.value_in_unit(unit.kilocalorie_per_mole/unit.kelvin)
-        log_reward_func = lambda x : energy.log_reward(x) * 627.5095 / (k*298.15)
+        log_reward_func = lambda x : energy.log_reward(x) * 627.5095 #/ (k*298.15)
     else:
         log_reward_func = energy.log_reward
     if final_eval:
