@@ -16,7 +16,7 @@ from rdkit.Chem import AllChem
 from bgflow import XTBEnergy, XTBBridge
 import time
 import torchani
-
+from energies.neural_energy import NeuralEnergy
 
 def plot_rama_traj(trajectory, w=None, get_phi=False, i=-1, model=None):
     def get_phi_psi(trajectory, i=-1, model=None):
@@ -90,56 +90,20 @@ def get_bgmol_model(system_name, temperature=None):
         return model
 
 class Alanine(BaseSet):
-    def __init__(self, device, phi='source', len_data=-2333, temp=300, system_name="AlanineDipeptideVacuum"):
+    def __init__(self, device, phi='source', len_data=-2333, temp=300, system_name="AlanineDipeptideVacuum", energy=None):
         super().__init__(len_data)
         self.device = device
         self.temp = temp        
         self.phi = phi
         self.bgmol_model = get_bgmol_model(system_name, temperature=temp)
-        #bridge = bg.OpenMMBridge(self.bgmol_model.system, 
-        #                              openmm.LangevinIntegrator(temp*unit.kelvin, 1/unit.picosecond, 0.002*unit.picoseconds), 
-        #                              n_workers=1)
-        #self.data_ndim = 66
-        #self._energy = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=bridge).to(device)
         self.data = load_data(temp, self.bgmol_model, device, phi)
         self.smiles = 'C[C@@H](C(=O)NC)NC(=O)C'
-        # Extract atomic numbers
-        atoms = [1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 1, 0, 0, 0, 1, 3, 2, 0, 1, 0, 0, 0,]
-        atom_to_pt = {
-            0 : 1,
-            1 : 6, 
-            2 : 7,
-            3 : 8,
-        }
-        self.atomic_numbers = torch.tensor([atom_to_pt[atom] for atom in atoms]).to(device)
-    
-        print('Number of atoms:', len(self.atomic_numbers))
-        self.data_ndim = 3 * len(self.atomic_numbers)
+        self.energy_model = energy
+        if self.energy_model:
+            self.data_ndim = self.energy_model.data_ndim
 
-        self._energy = torchani.models.ANI1x(periodic_table_index=True).to(self.device)
-        #self._energy = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent='', method='gfnff')).to(device)
-        #time_now = time.time()
-        #self.energy_cap = self._energy.energy(self.data.reshape(-1, len(self.atomic_numbers), 3)).max()
-        #print('Time taken to compute energy cap:', time.time()-time_now)
-        
     def energy(self, x):    
-        #print(x)
-        an_bs = self.atomic_numbers.unsqueeze(0).repeat(x.size(0), 1).to(self.device)
-        energies = torch.clamp(self._energy((an_bs, x.reshape(-1, int(self.data_ndim/3), 3))).energies, 0, None)
-        return energies
-    
-        energy = self._energy.energy(x.reshape(-1, len(self.atomic_numbers), 3))
-        energy = torch.clamp(energy, 0, 500) #/ 10000
-        if self.phi != 'full':
-            x_spatial = x.view(-1, len(self.bgmol_model.positions), 3).clone().detach().cpu().numpy()
-            phi = get_phi(x_spatial, self.bgmol_model)
-            if self.phi == 'source':
-                valid = np.logical_and(0.0 < phi, phi < 2.15)
-                energy[np.logical_not(valid)] = torch.tensor(float('inf'))
-            elif self.phi == 'target':
-                valid = np.logical_or(phi < 0.0, 2.15 < phi)
-                energy[np.logical_not(valid)] = torch.tensor(float('inf'))
-        return energy
+        return self.energy_model.energy(x)
 
     def sample(self, batch_size):
         indices = np.random.choice(len(self.data), size=batch_size, replace=False)

@@ -115,7 +115,7 @@ set_seed(args.seed)
 if 'SLURM_PROCID' in os.environ:
     args.seed += int(os.environ["SLURM_PROCID"])
 
-eval_data_size = 128
+eval_data_size = 512
 final_eval_data_size = 2000
 plot_data_size = 2000
 final_plot_data_size = 2000
@@ -153,7 +153,14 @@ def get_energy():
         energy = Alanine(device=device, phi='target', temp=1000)
         args.smiles = energy.smiles
     elif args.energy == 'alanine_vacuum_full':
-        energy = Alanine(device=device, phi='full', temp=1000)
+        if args.local_model:
+            if args.local_model.split('/')[-1].startswith('egnn'):
+                model, model_args = load_model(model='egnn', filename=args.local_model)
+            elif args.local_model.split('/')[-1].startswith('mace'):
+                model, model_args = load_model(model='mace', filename=args.local_model)
+        energy_alanine = Alanine(device=device, phi='full', temp=1000, energy=None)
+        energy_model = NeuralEnergy(model=model, smiles=energy_alanine.smiles, batch_size=model_args['batch_size'])
+        energy = Alanine(device=device, phi='full', temp=1000, energy=energy_model)
         args.smiles = energy.smiles
     elif args.energy == 'xtb':
         energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
@@ -246,16 +253,20 @@ def plot_step(energy, gfn_model, name):
 def eval_step(eval_data, energy, gfn_model, final_eval=False):
     gfn_model.eval()
     metrics = dict()
-    if args.energy == 'neural':
-        k = unit.MOLAR_GAS_CONSTANT_R.value_in_unit(unit.kilocalorie_per_mole/unit.kelvin)
-        log_reward_func = lambda x : energy.log_reward(x) * 627.5095 #/ (k*298.15)
-    else:
-        log_reward_func = energy.log_reward
+    log_reward_func = energy.log_reward
     if final_eval:
         init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
         samples, metrics['final_eval/log_Z'], metrics['final_eval/log_Z_lb'], metrics[
             'final_eval/log_Z_learned'] = log_partition_function(
             init_state, gfn_model, log_reward_func)
+        if args.energy == 'neural':
+            k = 3.1668*1e-6 
+            T = 298.15
+            hartree_to_kcal = 627.503
+            factor = k * T * hartree_to_kcal 
+            metrics['final_eval/log_Z'] = metrics['final_eval/log_Z'] * factor
+            metrics['final_eval/log_Z_lb'] = metrics['final_eval/log_Z_lb'] * factor
+            metrics['final_eval/log_Z_learned'] = metrics['final_eval/log_Z_learned'] * factor 
     else:
         init_state = torch.zeros(eval_data_size, energy.data_ndim).to(device)
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[

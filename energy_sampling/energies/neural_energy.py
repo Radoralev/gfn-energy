@@ -12,7 +12,7 @@ class NeuralEnergy(BaseSet):
         self.model.eval()
         self.batch_size = batch_size
         self.graph = smiles2graph(smiles)
-        self.data_ndim = 3 * len(self.graph['node_feat'])
+        self.data_ndim = 3 * self.graph['num_nodes']
         
     def energy(self, xyz):
         data_list = prep_input(self.graph, xyz.reshape(-1, self.data_ndim//3, 3), device=self.device)
