@@ -93,6 +93,14 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         fed_Z = float(logZ_vacuum) - float(logZ_solvation)
         fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
 
+        # Round values to the third significant digit
+        logZ_vacuum = f"{float(logZ_vacuum):.3g}"
+        logZlb_vacuum = f"{float(logZlb_vacuum):.3g}"
+        logZ_solvation = f"{float(logZ_solvation):.3g}"
+        logZlb_solvation = f"{float(logZlb_solvation):.3g}"
+        fed_Z = f"{fed_Z:.3g}"
+        fed_Z_lb = f"{fed_Z_lb:.3g}"
+
         # Get the current timestamp
         timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
