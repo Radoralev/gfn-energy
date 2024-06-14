@@ -81,5 +81,6 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
         # Write the results to the CSV file
         writer.writerow([smiles, experimental_val, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum])
+        outfile.flush()
 
 print("Processing complete. Results saved to", output_file)
