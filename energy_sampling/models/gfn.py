@@ -75,7 +75,7 @@ class GFN(nn.Module):
                 zero_init=zero_init)
             self.pb_scale_range = pb_scale_range
             if self.conditional_flow_model:
-                self.flow_model = FlowModelPIS(dim, s_emb_dim, t_dim, hidden_dim, 1, joint_layers)
+                self.flow_model = FlowModel(dim, t_dim, hidden_dim, 1)
             else:
                 self.flow_model = torch.nn.Parameter(torch.tensor(0.).to(self.device))
 
