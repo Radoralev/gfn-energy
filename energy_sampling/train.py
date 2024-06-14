@@ -407,8 +407,14 @@ def train():
     metrics.update(eval_results)
     #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
     #    del metrics['eval/log_Z_learned']
+    
     torch.save(gfn_model.state_dict(), f'{name}model_final.pt')
-    with open(f'{args.smiles}_{args.local_model}.txt', 'w') as f:
+    keyword = ''
+    if 'vacuum' in args.local_model:
+        keyword = 'vacuum'
+    elif 'solvent' in args.local_model:
+        keyword = 'solvent' 
+    with open(f'{args.smiles}_{keyword}.txt', 'w') as f:
         f.write(f"log_Z_lb: {metrics['final_eval/log_Z_lb']}\n")
         f.write(f"log_Z: {metrics['final_eval/log_Z']}\n")
 

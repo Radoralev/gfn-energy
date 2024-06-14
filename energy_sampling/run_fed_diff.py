@@ -24,7 +24,12 @@ def run_command(smiles, local_model):
 
 # Function to read the output file and extract the required value
 def read_output_file(smiles, local_model):
-    output_file = f'{smiles}_{local_model}.txt'
+    keyword = ''
+    if 'vacuum' in local_model:
+        keyword = 'vacuum'
+    elif 'solvent' in local_model:
+        keyword = 'solvent' 
+    output_file = f'{smiles}_{keyword}.txt'
     with open(output_file, 'r') as f:
         lines = f.readlines()
         for line in lines:
