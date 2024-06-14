@@ -412,8 +412,8 @@ def train():
     keyword = ''
     if 'vacuum' in args.local_model:
         keyword = 'vacuum'
-    elif 'solvent' in args.local_model:
-        keyword = 'solvent' 
+    elif 'solvation' in args.local_model:
+        keyword = 'solvation' 
     with open(f'{args.smiles}_{keyword}.txt', 'w') as f:
         f.write(f"log_Z_lb: {metrics['final_eval/log_Z_lb']}\n")
         f.write(f"log_Z: {metrics['final_eval/log_Z']}\n")

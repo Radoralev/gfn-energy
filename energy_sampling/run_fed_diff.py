@@ -27,8 +27,8 @@ def read_output_file(smiles, local_model):
     keyword = ''
     if 'vacuum' in local_model:
         keyword = 'vacuum'
-    elif 'solvent' in local_model:
-        keyword = 'solvent' 
+    elif 'solvation' in local_model:
+        keyword = 'solvation' 
     output_file = f'{smiles}_{keyword}.txt'
     with open(output_file, 'r') as f:
         lines = f.readlines()
