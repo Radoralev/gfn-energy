@@ -62,7 +62,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         writer.writerow(['SMILES', 'experimental_val', 'experimental_uncertainty', 'fed_Z', 'fed_Z_lb', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
 
     # Create a ThreadPoolExecutor with a maximum of 8 workers
-    with ThreadPoolExecutor(max_workers=40) as executor:
+    with ThreadPoolExecutor(max_workers=16) as executor:
         futures = []
 
         for row in reader:
@@ -84,7 +84,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
             futures.append(executor.submit(run_command, smiles, local_model_solvation))
 
             # Process results as they complete
-            if len(futures) >= 8:
+            if len(futures) >= 16:
                 for future in as_completed(futures):
                     future.result()
                     futures.remove(future)
