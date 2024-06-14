@@ -36,7 +36,7 @@ def read_output_file(smiles, local_model):
             if line.startswith('log_Z:'):
                 logZ = line.split(':')[1].strip()
             elif line.startswith('log_Z_lb:'):
-                logZlb = line.splits(':')[1].strip()
+                logZlb = line.split(':')[1].strip()
     return logZ, logZlb
 
 # Check if the output file already exists and read existing results
