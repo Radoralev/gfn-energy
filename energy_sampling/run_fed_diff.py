@@ -11,7 +11,7 @@ output_file = 'results.csv'
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '100', '--epochs', '5',
+        'python', 'train.py', '--t_scale', '1.', '--T', '100', '--epochs', '1000',
         '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb-avg', '--mode_bwd', 'tb-avg',
