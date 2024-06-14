@@ -34,6 +34,7 @@ def read_output_file(smiles, local_model):
     output_file = f'temp/{smiles}_{keyword}.txt'
     with open(output_file, 'r') as f:
         lines = f.readlines()
+        logZ, logZlb = None, None
         for line in lines:
             if line.startswith('log_Z:'):
                 logZ = line.split(':')[1].strip()
@@ -58,7 +59,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
     # Write the header if the file is new
     if not existing_results:
-        writer.writerow(['SMILES', 'experimental_val', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
+        writer.writerow(['SMILES', 'experimental_val', 'experimental_uncertainty', 'fed_Z', 'fed_Z_lb', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
 
     for row in reader:
         if row[0].startswith('#'):
@@ -66,6 +67,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
         smiles = row[1]
         experimental_val = row[3]
+        experimental_uncertainty = row[4]
 
         # Skip SMILES that have already been processed
         if smiles in existing_results:
@@ -87,11 +89,15 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         logZ_vacuum, logZlb_vacuum = read_output_file(smiles, local_model_vacuum)
         logZ_solvation, logZlb_solvation = read_output_file(smiles, local_model_solvation)
 
+        # Calculate fed_Z and fed_Z_lb
+        fed_Z = float(logZ_vacuum) - float(logZ_solvation)
+        fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
+
         # Get the current timestamp
         timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
         # Write the results to the CSV file
-        writer.writerow([smiles, experimental_val, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
+        writer.writerow([smiles, experimental_val, experimental_uncertainty, fed_Z, fed_Z_lb, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
         outfile.flush()
 
 print("Processing complete. Results saved to", output_file)
