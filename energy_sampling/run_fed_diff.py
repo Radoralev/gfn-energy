@@ -2,6 +2,7 @@ import csv
 import subprocess
 import os
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Define the input and output file paths
 input_file = 'database.txt'
@@ -51,14 +52,13 @@ if os.path.exists(output_file):
             existing_results[smiles] = row
 
 # Read the input file and process each line
-# Read the input file and process each line
 with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outfile:
     reader = csv.reader(infile, delimiter=';')
     writer = csv.writer(outfile)
 
     # Write the header if the file is new
     if not existing_results:
-        writer.writerow(['SMILES', 'experimental_val', 'val_solvation', 'val_vacuum', 'timestamp'])
+        writer.writerow(['SMILES', 'experimental_val', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
 
     for row in reader:
         if row[0].startswith('#'):
@@ -71,21 +71,27 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         if smiles in existing_results:
             continue
 
-        # Run the command with the first local_model
-        local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
-        run_command(smiles, local_model_vacuum)
-        val_vacuum = read_output_file(smiles, local_model_vacuum)
+        # Run the commands in parallel
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = []
+            local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
+            local_model_solvation = 'weights/egnn_solvation_batch_size_32'
+            futures.append(executor.submit(run_command, smiles, local_model_vacuum))
+            futures.append(executor.submit(run_command, smiles, local_model_solvation))
 
-        # Run the command with the second local_model
-        local_model_solvation = 'weights/egnn_solvation_batch_size_32'
-        run_command(smiles, local_model_solvation)
-        val_solvation = read_output_file(smiles, local_model_solvation)
+            # Wait for both commands to complete
+            for future in as_completed(futures):
+                future.result()
+
+        # Read the output files
+        logZ_vacuum, logZlb_vacuum = read_output_file(smiles, local_model_vacuum)
+        logZ_solvation, logZlb_solvation = read_output_file(smiles, local_model_solvation)
 
         # Get the current timestamp
         timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
-        # Write the results to the CSV file and flush
-        writer.writerow([smiles, experimental_val, val_solvation, val_vacuum, timestamp])
-        outfile.flush()  # Flush the output to the file
+        # Write the results to the CSV file
+        writer.writerow([smiles, experimental_val, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
+        outfile.flush()
 
 print("Processing complete. Results saved to", output_file)
