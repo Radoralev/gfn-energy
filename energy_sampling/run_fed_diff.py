@@ -61,82 +61,51 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
     if not existing_results:
         writer.writerow(['SMILES', 'experimental_val', 'experimental_uncertainty', 'fed_Z', 'fed_Z_lb', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
 
-    # Create a ThreadPoolExecutor with a maximum of 8 workers
-    with ThreadPoolExecutor(max_workers=16) as executor:
-        futures = []
+    for row in reader:
+        if row[0].startswith('#'):
+            continue  # Skip header or comment lines
 
-        for row in reader:
-            if row[0].startswith('#'):
-                continue  # Skip header or comment lines
+        smiles = row[1]
+        experimental_val = row[3]
+        experimental_uncertainty = row[4]
 
-            smiles = row[1]
-            experimental_val = row[3]
-            experimental_uncertainty = row[4]
+        # Skip SMILES that have already been processed
+        if smiles in existing_results:
+            continue
 
-            # Skip SMILES that have already been processed
-            if smiles in existing_results:
-                continue
-
-            # Submit tasks for running commands
+        # Run the commands in parallel
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = []
             local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
             local_model_solvation = 'weights/egnn_solvation_batch_size_32'
             futures.append(executor.submit(run_command, smiles, local_model_vacuum))
             futures.append(executor.submit(run_command, smiles, local_model_solvation))
 
-            # Process results as they complete
-            if len(futures) >= 16:
-                for future in as_completed(futures):
-                    future.result()
-                    futures.remove(future)
+            # Wait for both commands to complete
+            for future in as_completed(futures):
+                future.result()
 
-                    # Read the output files
-                    logZ_vacuum, logZlb_vacuum = read_output_file(smiles, local_model_vacuum)
-                    logZ_solvation, logZlb_solvation = read_output_file(smiles, local_model_solvation)
+        # Read the output files
+        logZ_vacuum, logZlb_vacuum = read_output_file(smiles, local_model_vacuum)
+        logZ_solvation, logZlb_solvation = read_output_file(smiles, local_model_solvation)
 
-                    # Calculate fed_Z and fed_Z_lb
-                    fed_Z = float(logZ_vacuum) - float(logZ_solvation)
-                    fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
+        # Calculate fed_Z and fed_Z_lb
+        fed_Z = float(logZ_vacuum) - float(logZ_solvation)
+        fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
 
-                    # Round values to the third significant digit
-                    logZ_vacuum = f"{float(logZ_vacuum):.3g}"
-                    logZlb_vacuum = f"{float(logZlb_vacuum):.3g}"
-                    logZ_solvation = f"{float(logZ_solvation):.3g}"
-                    logZlb_solvation = f"{float(logZlb_solvation):.3g}"
-                    fed_Z = f"{fed_Z:.3g}"
-                    fed_Z_lb = f"{fed_Z_lb:.3g}"
+        # Round values to the third significant digit
+        logZ_vacuum = f"{float(logZ_vacuum):.3g}"
+        logZlb_vacuum = f"{float(logZlb_vacuum):.3g}"
+        logZ_solvation = f"{float(logZ_solvation):.3g}"
+        logZlb_solvation = f"{float(logZlb_solvation):.3g}"
+        fed_Z = f"{fed_Z:.3g}"
+        fed_Z_lb = f"{fed_Z_lb:.3g}"
 
-                    # Get the current timestamp
-                    timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
+        # Get the current timestamp
+        timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
-                    # Write the results to the CSV file
-                    writer.writerow([smiles, experimental_val, experimental_uncertainty, fed_Z, fed_Z_lb, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
-                    outfile.flush()
-
-        # Ensure all remaining futures are processed
-        for future in as_completed(futures):
-            future.result()
-
-            # Read the output files
-            logZ_vacuum, logZlb_vacuum = read_output_file(smiles, local_model_vacuum)
-            logZ_solvation, logZlb_solvation = read_output_file(smiles, local_model_solvation)
-
-            # Calculate fed_Z and fed_Z_lb
-            fed_Z = float(logZ_vacuum) - float(logZ_solvation)
-            fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
-
-            # Round values to the third significant digit
-            logZ_vacuum = f"{float(logZ_vacuum):.3g}"
-            logZlb_vacuum = f"{float(logZlb_vacuum):.3g}"
-            logZ_solvation = f"{float(logZ_solvation):.3g}"
-            logZlb_solvation = f"{float(logZlb_solvation):.3g}"
-            fed_Z = f"{fed_Z:.3g}"
-            fed_Z_lb = f"{fed_Z_lb:.3g}"
-
-            # Get the current timestamp
-            timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
-
-            # Write the results to the CSV file
-            writer.writerow([smiles, experimental_val, experimental_uncertainty, fed_Z, fed_Z_lb, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
-            outfile.flush()
+        # Write the results to the CSV file
+        writer.writerow([smiles, experimental_val, experimental_uncertainty, fed_Z, fed_Z_lb, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
+        outfile.flush()
 
 print("Processing complete. Results saved to", output_file)
