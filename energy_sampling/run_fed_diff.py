@@ -11,7 +11,7 @@ output_file = 'results.csv'
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '100', '--epochs', '5',
+        'python', 'train.py', '--t_scale', '1.', '--T', '100', '--epochs', '1000',
         '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb-avg', '--mode_bwd', 'tb-avg',
@@ -62,7 +62,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         writer.writerow(['SMILES', 'experimental_val', 'experimental_uncertainty', 'fed_Z', 'fed_Z_lb', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
 
     # Create a ThreadPoolExecutor with a maximum of 8 workers
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=40) as executor:
         futures = []
 
         for row in reader:
