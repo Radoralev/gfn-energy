@@ -29,8 +29,10 @@ def read_output_file(smiles, local_model):
         lines = f.readlines()
         for line in lines:
             if line.startswith('log_Z:'):
-                return line.split(':')[1].strip()
-    return None
+                logZ = line.split(':')[1].strip()
+            elif line.startswith('log_Z_lb:'):
+                logZlb = line.splits(':')[1].strip()
+    return logZ, logZlb
 
 # Check if the output file already exists and read existing results
 existing_results = {}
@@ -49,7 +51,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
     # Write the header if the file is new
     if not existing_results:
-        writer.writerow(['SMILES', 'experimental_val', 'val_solvation', 'val_vacuum'])
+        writer.writerow(['SMILES', 'experimental_val', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum'])
 
     for row in reader:
         if row[0].startswith('#'):
@@ -65,14 +67,14 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         # Run the command with the first local_model
         local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
         run_command(smiles, local_model_vacuum)
-        val_vacuum = read_output_file(smiles, local_model_vacuum)
+        logZ_vacuum, logZlb_vacuum = read_output_file(smiles, local_model_vacuum)
 
         # Run the command with the second local_model
         local_model_solvation = 'weights/egnn_solvation_batch_size_32'
         run_command(smiles, local_model_solvation)
-        val_solvation = read_output_file(smiles, local_model_solvation)
+        logZ_solvation, logZlb_solvation = read_output_file(smiles, local_model_solvation)
 
         # Write the results to the CSV file
-        writer.writerow([smiles, experimental_val, val_solvation, val_vacuum])
+        writer.writerow([smiles, experimental_val, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum])
 
 print("Processing complete. Results saved to", output_file)
