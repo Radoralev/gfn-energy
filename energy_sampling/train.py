@@ -2,7 +2,6 @@ import argparse
 import json
 import os
 import torch
-import torchani
 import matplotlib.pyplot as plt
 import wandb
 from tqdm import trange
@@ -168,10 +167,13 @@ def get_energy():
         energy = OpenMMEnergy(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
     elif args.energy == 'neural':
         if args.torchani_model == 'ANI-1x_8x':
+            import torchani
             model = torchani.models.ANI1x(periodic_table_index=True)
         elif args.torchani_model == 'ANI-2x':
+            import torchani
             model = torchani.models.ANI2x(periodic_table_index=True)
         elif args.torchani_model == 'ANI-1ccx':
+            import torchani
             model = torchani.models.ANI1ccx(periodic_table_index=True)
         elif args.local_model:
             if args.local_model.split('/')[-1].startswith('egnn'):
