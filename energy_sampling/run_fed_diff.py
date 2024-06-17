@@ -6,12 +6,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'results.csv'
+output_file = 'results-T-10-5k-epochs.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '100', '--epochs', '5',
+        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '25',
         '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb-avg', '--mode_bwd', 'tb-avg',
@@ -22,6 +22,7 @@ def run_command(smiles, local_model):
         '--hidden_dim', '64', '--joint_layers', '2', '--s_emb_dim', '64',
         '--t_emb_dim', '64', '--harmonics_dim', '64'
     ]
+    print(command)
     subprocess.run(command)
 
 # Function to read the output file and extract the required value
@@ -40,7 +41,11 @@ def read_output_file(smiles, local_model):
                 logZ = line.split(':')[1].strip()
             elif line.startswith('log_Z_lb:'):
                 logZlb = line.split(':')[1].strip()
-    return logZ, logZlb
+            elif line.startswith('log_Z_lb_std:'):
+                logZlb_std = line.split(':')[1].strip()
+            elif line.startswith('log_Z_std:'):
+                logZ_std = line.split(':')[1].strip()
+    return logZ, logZlb, logZ_std, logZlb_std
 
 # Check if the output file already exists and read existing results
 existing_results = {}
@@ -59,10 +64,10 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
     # Write the header if the file is new
     if not existing_results:
-        writer.writerow(['SMILES', 'experimental_val', 'experimental_uncertainty', 'fed_Z', 'fed_Z_lb', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
+        writer.writerow(['SMILES', 'experimental_val', 'experimental_uncertainty', 'fed_Z', 'fed_Z_uncertainty', 'fed_Z_lb', 'fed_Z_uncertainty', 'logZ_solvation', 'logZlb_solvation', 'logZ_vacuum', 'logZlb_vacuum', 'timestamp'])
 
     # Create a ThreadPoolExecutor with a maximum of 8 workers
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         futures = []
         smiles_list = []
 
@@ -84,16 +89,24 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         def process_smiles(smiles, experimental_val, experimental_uncertainty):
             local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
             local_model_solvation = 'weights/egnn_solvation_batch_size_32'
-            run_command(smiles, local_model_vacuum)
-            run_command(smiles, local_model_solvation)
+            local_futures = []
+            with ThreadPoolExecutor(max_workers=2) as executor2:
+                local_futures.append(executor2.submit(run_command, smiles, local_model_vacuum))
+                local_futures.append(executor2.submit(run_command, smiles, local_model_solvation))
 
+            for future in as_completed(local_futures):
+                future.result()
             # Read the output files
-            logZ_vacuum, logZlb_vacuum = read_output_file(smiles, local_model_vacuum)
-            logZ_solvation, logZlb_solvation = read_output_file(smiles, local_model_solvation)
+            logZ_vacuum, logZlb_vacuum, logZ_std_vacuum, logZlb_std_vacuum = read_output_file(smiles, local_model_vacuum)
+            logZ_solvation, logZlb_solvation, logZ_std_solvation, logZlb_std_solvation = read_output_file(smiles, local_model_solvation)
 
             # Calculate fed_Z and fed_Z_lb
             fed_Z = float(logZ_vacuum) - float(logZ_solvation)
             fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
+
+            # Calculate fed uncertainty
+            fed_uncertainty = (float(logZ_std_vacuum)**2 + float(logZ_std_solvation)**2)**0.5
+            fed_uncertainty_lb = (float(logZlb_std_vacuum)**2 + float(logZlb_std_solvation)**2)**0.5
 
             # Round values to the third significant digit
             logZ_vacuum = f"{float(logZ_vacuum):.3g}"
@@ -107,7 +120,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
             timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
             # Write the results to the CSV file
-            writer.writerow([smiles, experimental_val, experimental_uncertainty, fed_Z, fed_Z_lb, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
+            writer.writerow([smiles, experimental_val, experimental_uncertainty, fed_Z, fed_uncertainty, fed_Z_lb, fed_uncertainty_lb, logZ_solvation, logZlb_solvation, logZ_vacuum, logZlb_vacuum, timestamp])
             outfile.flush()
 
         # Submit tasks for processing SMILES

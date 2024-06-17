@@ -6,8 +6,8 @@ from sklearn.metrics import mean_absolute_error, r2_score
 import numpy as np
 
 # Read the CSV file
-csv_file = 'results.csv'  # Replace with your actual file path
-data = pd.read_csv(csv_file)
+csv_file = 'results-T-10-5k-epochs.csv'  # Replace with your actual file path
+data = pd.read_csv(csv_file).iloc[:17]
 
 # Extract the necessary columns
 experimental_val = data['experimental_val']
@@ -47,3 +47,4 @@ plot_scatter(axes[1], experimental_val, fed_Z_lb, experimental_uncertainty, 'fed
 # Adjust layout and show plot
 plt.tight_layout()
 plt.show()
+plt.savefig('results.png')

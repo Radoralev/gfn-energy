@@ -257,18 +257,32 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
     metrics = dict()
     log_reward_func = energy.log_reward
     if final_eval:
-        init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
-        samples, metrics['final_eval/log_Z'], metrics['final_eval/log_Z_lb'], metrics[
-            'final_eval/log_Z_learned'] = log_partition_function(
-            init_state, gfn_model, log_reward_func)
+        logZs = []
+        logZlbs = []
+        logZlearned = []
+        for _ in range(10):
+            init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
+            samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
+            logZs.append(log_Z.item())
+            logZlbs.append(log_Z_lb.item())
+            logZlearned.append(log_Z_learned.item())
+        metrics['final_eval/mean_log_Z'] = torch.mean(torch.tensor(logZs))
+        metrics['final_eval/std_log_Z'] = torch.std(torch.tensor(logZs))
+        metrics['final_eval/mean_log_Z_lb'] = torch.mean(torch.tensor(logZlbs))
+        metrics['final_eval/std_log_Z_lb'] = torch.std(torch.tensor(logZlbs))
+        metrics['final_eval/mean_log_Z_learned'] = torch.mean(torch.tensor(logZlearned))
+        metrics['final_eval/std_log_Z_learned'] = torch.std(torch.tensor(logZlearned))
         if args.energy == 'neural':
-            k = 3.1668*1e-6 
+            k = 3.1668 * 1e-6
             T = 298.15
             hartree_to_kcal = 627.503
-            factor = k * T * hartree_to_kcal 
-            metrics['final_eval/log_Z'] = metrics['final_eval/log_Z'] * factor
-            metrics['final_eval/log_Z_lb'] = metrics['final_eval/log_Z_lb'] * factor
-            metrics['final_eval/log_Z_learned'] = metrics['final_eval/log_Z_learned'] * factor 
+            factor = k * T * hartree_to_kcal
+            metrics['final_eval/mean_log_Z'] = metrics['final_eval/mean_log_Z'] * factor
+            metrics['final_eval/std_log_Z'] = metrics['final_eval/std_log_Z'] * factor
+            metrics['final_eval/mean_log_Z_lb'] = metrics['final_eval/mean_log_Z_lb'] * factor
+            metrics['final_eval/std_log_Z_lb'] = metrics['final_eval/std_log_Z_lb'] * factor
+            metrics['final_eval/mean_log_Z_learned'] = metrics['final_eval/mean_log_Z_learned'] * factor
+            metrics['final_eval/std_log_Z_learned'] = metrics['final_eval/std_log_Z_learned'] * factor
     else:
         init_state = torch.zeros(eval_data_size, energy.data_ndim).to(device)
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[
@@ -407,8 +421,7 @@ def train():
 
     eval_results = final_eval(energy, gfn_model)#.to(device)
     metrics.update(eval_results)
-    #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
-    #    del metrics['eval/log_Z_learned']
+
     
     torch.save(gfn_model.state_dict(), f'{name}model_final.pt')
     keyword = ''
@@ -417,8 +430,11 @@ def train():
     elif 'solvation' in args.local_model:
         keyword = 'solvation' 
     with open(f'temp/{args.smiles}_{keyword}.txt', 'w') as f:
-        f.write(f"log_Z_lb: {metrics['final_eval/log_Z_lb']}\n")
-        f.write(f"log_Z: {metrics['final_eval/log_Z']}\n")
+        f.write(f"log_Z_lb: {metrics['final_eval/mean_log_Z_lb']}\n")
+        f.write(f"log_Z_lb_std: {metrics['final_eval/std_log_Z_lb']}\n")
+        f.write(f"log_Z: {metrics['final_eval/mean_log_Z']}\n")
+        f.write(f"log_Z_std: {metrics['final_eval/std_log_Z']}\n")
+
 
 
 def final_eval(energy, gfn_model):
