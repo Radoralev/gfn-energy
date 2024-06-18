@@ -6,21 +6,22 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'results-T-10-5k-epochs.csv'
+output_file = 'results-T-10-5k-epochs-uncertainty-egnn.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '25',
+        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '1000',
         '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
+        '--model', 'egnn',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--pis_architectures', '--mode_fwd', 'tb-avg', '--mode_bwd', 'tb-avg',
+        '--equivariant_architectures', '--mode_fwd', 'tb-avg', '--mode_bwd', 'tb-avg',
         '--lr_policy', '1e-3', '--lr_back', '1e-3', '--lr_flow', '1e-1',
         '--exploratory', '--exploration_wd', '--exploration_factor', '0.1',
         '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
         '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
-        '--hidden_dim', '64', '--joint_layers', '2', '--s_emb_dim', '64',
-        '--t_emb_dim', '64', '--harmonics_dim', '64'
+        '--hidden_dim', '128', '--joint_layers', '2', '--s_emb_dim', '128',
+        '--t_emb_dim', '128', '--harmonics_dim', '128'
     ]
     print(command)
     subprocess.run(command)
