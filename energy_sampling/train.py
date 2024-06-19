@@ -420,6 +420,9 @@ def train():
             metrics.update(images)
             plt.close('all')
             #metrics = check_nan_in_metrics(metrics)
+        if i % 5 == 0:
+            # log lr 
+            metrics['lr'] = gfn_optimizer.param_groups[0]['lr']
             wandb.log(metrics, step=i)
 
         
