@@ -420,6 +420,7 @@ def train():
             metrics.update(images)
             plt.close('all')
             #metrics = check_nan_in_metrics(metrics)
+        if i % 5 == 0:
             wandb.log(metrics, step=i)
 
         
