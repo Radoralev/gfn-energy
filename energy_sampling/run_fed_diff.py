@@ -3,10 +3,10 @@ import subprocess
 import os
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
+from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'results-T-10-10k-epochs-uncertainty.csv'
+output_file = 'fed_results/results-T-10-10k-epochs-uncertainty.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
@@ -91,8 +91,9 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
             local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
             local_model_solvation = 'weights/egnn_solvation_batch_size_32'
             local_futures = []
-            with ThreadPoolExecutor(max_workers=2) as executor2:
+            with ThreadPoolExecutor(max_workers=1) as executor2:
                 local_futures.append(executor2.submit(run_command, smiles, local_model_vacuum))
+                sleep(1)
                 local_futures.append(executor2.submit(run_command, smiles, local_model_solvation))
 
             for future in as_completed(local_futures):
