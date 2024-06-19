@@ -6,9 +6,10 @@ from sklearn.metrics import mean_absolute_error, r2_score
 import numpy as np
 
 # Read the CSV file
-csv_file = 'results-T-10-5k-epochs.csv'  # Replace with your actual file path
-data = pd.read_csv(csv_file).iloc[:17]
-
+csv_file = 'results-T-10-5k-epochs-uncertainty.csv'  # Replace with your actual file path
+data = pd.read_csv(csv_file)
+# Exclude rows with extremely large fedZ or fedZlb values
+data = data[(data['fed_Z'] < 100) & (data['fed_Z_lb'] < 100)]
 # Extract the necessary columns
 experimental_val = data['experimental_val']
 experimental_uncertainty = data['experimental_uncertainty']
