@@ -76,7 +76,8 @@ parser.add_argument('--rank_weight', type=float, default=1e-2)
 # three kinds of replay training: random, reward prioritized, rank-based
 parser.add_argument('--prioritized', type=str, default="rank", choices=('none', 'reward', 'rank'))
 ################################################################
-
+# patience
+parser.add_argument('--patience', type=int, default=500)
 parser.add_argument('--bwd', action='store_true', default=False)
 parser.add_argument('--exploratory', action='store_true', default=False)
 
@@ -404,6 +405,10 @@ def train():
     buffer_ls = ReplayBuffer(args.buffer_size, device, energy.log_reward,args.batch_size, data_ndim=energy.data_ndim, beta=args.beta,
                           rank_weight=args.rank_weight, prioritized=args.prioritized)
     gfn_model.train()
+    best_loss = float('inf')
+    early_stop_counter = 0
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(gfn_optimizer, patience=args.patience//2)
+
     for i in trange(args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd)
@@ -416,14 +421,30 @@ def train():
             plt.close('all')
             #metrics = check_nan_in_metrics(metrics)
             wandb.log(metrics, step=i)
-            if i % 1000 == 0:
-                torch.save(gfn_model.state_dict(), f'{name}model.pt')
 
+        
+        # Early stopping
+        if metrics['train/loss'] < best_loss:
+            best_loss = metrics['train/loss']
+            # savew weights
+            if early_stop_counter > 0:
+                torch.save(gfn_model.state_dict(), f'{name}model.pt')
+            early_stop_counter = 0
+        else:
+            early_stop_counter += 1
+            if early_stop_counter >= args.patience:
+                print('Early stopping triggered.')
+                break
+        
+        # Learning rate scheduler
+        scheduler.step(metrics['train/loss'])
+
+    # load best model
+    gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
     eval_results = final_eval(energy, gfn_model)#.to(device)
     metrics.update(eval_results)
 
     
-    torch.save(gfn_model.state_dict(), f'{name}model_final.pt')
     keyword = ''
     if 'vacuum' in args.local_model:
         keyword = 'vacuum'
