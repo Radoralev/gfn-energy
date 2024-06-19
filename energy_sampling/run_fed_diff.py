@@ -3,25 +3,25 @@ import subprocess
 import os
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
+from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'results-T-10-5k-epochs-uncertainty-egnn.csv'
+output_file = 'fed_results/results-T-10-10k-epochs-uncertainty.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '1000',
-        '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
-        '--model', 'egnn',
+        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '25000',
+        '--batch_size', '128', '--energy', 'neural', '--local_model', local_model,
+        #'--model', 'egnn',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--equivariant_architectures', '--mode_fwd', 'tb-avg', '--mode_bwd', 'tb-avg',
-        '--lr_policy', '1e-3', '--lr_back', '1e-3', '--lr_flow', '1e-1',
-        '--exploratory', '--exploration_wd', '--exploration_factor', '0.1',
-        '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
-        '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
-        '--hidden_dim', '128', '--joint_layers', '2', '--s_emb_dim', '128',
-        '--t_emb_dim', '128', '--harmonics_dim', '128'
+        '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
+        '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-2',
+      #  '--exploratory', '--exploration_wd', '--exploration_factor', '0.1',
+      #  '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
+      #  '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
+        '--hidden_dim', '512', '--joint_layers', '5', '--s_emb_dim', '512',
+        '--t_emb_dim', '512', '--harmonics_dim', '512'
     ]
     print(command)
     subprocess.run(command)
@@ -91,8 +91,9 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
             local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
             local_model_solvation = 'weights/egnn_solvation_batch_size_32'
             local_futures = []
-            with ThreadPoolExecutor(max_workers=2) as executor2:
+            with ThreadPoolExecutor(max_workers=1) as executor2:
                 local_futures.append(executor2.submit(run_command, smiles, local_model_vacuum))
+                sleep(1)
                 local_futures.append(executor2.submit(run_command, smiles, local_model_solvation))
 
             for future in as_completed(local_futures):
