@@ -1,8 +1,8 @@
 import random
 import numpy as np
 import math
-import PIL
-
+import PIL 
+from datetime import datetime
 from gflownet_losses import *
 
 
@@ -154,5 +154,6 @@ def get_name(args):
     name = f'{results}/{args.energy}/{name}gfn/{ways}/T_{args.T}/tscale_{args.t_scale}/lvr_{args.log_var_range}/'
 
     name = f'{name}/seed_{args.seed}/'
-
+    # add time
+    name = f'{name}{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}/'
     return name
