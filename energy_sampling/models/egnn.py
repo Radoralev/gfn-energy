@@ -46,7 +46,7 @@ class EGNNModel(torch.nn.Module):
         for _ in range(num_atom_features):
             self.embs.append(torch.nn.Embedding(in_dim, emb_dim))
         
-        
+        self.embedding_proj = torch.nn.Linear(emb_dim*num_atom_features, emb_dim)
         self.in_dim = in_dim
         self.emb_dim = emb_dim
         # Stack of GNN layers
@@ -72,6 +72,7 @@ class EGNNModel(torch.nn.Module):
     def forward(self, batch, t=None):
         # create a tensor of shape (n, d * num_atom_features)
         h = torch.cat([emb(batch.atoms[:, i]) for i, emb in enumerate(self.embs)], dim=-1)
+        h = self.embedding_proj(h)
         if t is not None:
             # match h shape
             t = t.repeat(h.shape[0]//t.shape[0], 1)
