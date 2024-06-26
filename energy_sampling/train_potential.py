@@ -244,9 +244,9 @@ def eval_model(model, dataloader, device):
     return running_loss/len(dataloader)
 
 data = []
-for dir in os.listdir(os.path.join(os.getcwd(),'..', '..', 'conformation_sampling', 'conformers')):
-    solvent_dir = os.path.join(os.getcwd(), '..', '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
-    vacuum_dir = os.path.join(os.getcwd(),'..', '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
+for dir in os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers')):
+    solvent_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
+    vacuum_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
     if args.solvation:
         solvent_graphs = extract_graphs(solvent_dir)
         data.extend(solvent_graphs)
