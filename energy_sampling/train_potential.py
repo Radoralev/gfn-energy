@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description='Train Potential')
 parser.add_argument('--solvation', action='store_true', help='Flag to indicate solvation')
 parser.add_argument('--output', type=str, default='output.txt', help='Output file string')
+parser.add_arguments('--lr', type=float, default=0.001, help='Learning rate')
 args = parser.parse_args()
 
 
@@ -273,7 +274,7 @@ dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
 emb_dim = 128
 num_layers = 5
-lr = 0.001
+lr = args.lr
 epochs=1000
 
 model, losses, dataloader_train = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=emb_dim, num_layers=num_layers, lr=lr, epochs=epochs, data=data[5000:], device='cuda', patience=6)
