@@ -64,8 +64,8 @@ def xyz_mol2graph(xyz_mol):
     """
 
     mol = xyz_mol
-    mol = Chem.AddHs(mol)
-    mol = Chem.RemoveHs(mol)
+    #mol = Chem.AddHs(mol)
+    #mol = Chem.RemoveHs(mol)
     pos = mol.GetConformer().GetPositions()
     #print(mol)
     # atoms
@@ -257,9 +257,9 @@ for dir in os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', '
 
 # find max number of atoms in a molecule
 max_atomic_el = 0
-for i, data in enumerate(data):
-    if data.atoms.max() > max_atomic_el:
-        max_atomic_el = data.atoms.max()
+for i, sample in enumerate(data):
+    if sample.atoms.max() > max_atomic_el:
+        max_atomic_el = sample.atoms.max()
         print(i, max_atomic_el)
 
 
