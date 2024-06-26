@@ -20,6 +20,7 @@ class EGNNModel(torch.nn.Module):
         pool: str = "sum",
         residual: bool = True,
         equivariant_pred: bool = False,
+        num_atom_features: int = 1
     ):
         """
         Initializes an instance of the EGNNModel class with the provided parameters.
@@ -40,7 +41,10 @@ class EGNNModel(torch.nn.Module):
         self.equivariant_pred = equivariant_pred
         self.residual = residual
         # Embedding lookup for initial node features
-        self.emb_in = torch.nn.Embedding(in_dim, emb_dim)
+        self.num_atom_features = num_atom_features
+        self.embs = torch.nn.ModuleList()
+        for _ in range(num_atom_features):
+            self.embs.append(torch.nn.Embedding(in_dim, emb_dim))
         
         
         self.in_dim = in_dim
@@ -66,7 +70,8 @@ class EGNNModel(torch.nn.Module):
 
     
     def forward(self, batch, t=None):
-        h = self.emb_in(batch.atoms)  # (n,) -> (n, d)
+        # create a tensor of shape (n, d * num_atom_features)
+        h = torch.cat([emb(batch.atoms[:, i]) for i, emb in enumerate(self.embs)], dim=-1)
         if t is not None:
             # match h shape
             t = t.repeat(h.shape[0]//t.shape[0], 1)
@@ -75,10 +80,9 @@ class EGNNModel(torch.nn.Module):
         #TODO batch size is hardcoded here 
         #h = h.view(-1, batch.atoms.shape[0]//32, self.emb_dim)
         # print(batch.pos.shape/, h.shape)
-        pos = batch.pos.reshape(-1, 3)
+        pos = batch.pos#.reshape(-1, 3)
         for conv in self.convs:
             # Message passing layer
-            # print(h.shape)
             h_update, pos_update = conv(h, pos, batch.edge_index)
 
             # Update node features (n, d) -> (n, d)
