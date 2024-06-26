@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description='Train Potential')
 parser.add_argument('--solvation', action='store_true', help='Flag to indicate solvation')
 parser.add_argument('--output', type=str, default='output.txt', help='Output file string')
-parser.add_arguments('--lr', type=float, default=0.001, help='Learning rate')
+parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
 args = parser.parse_args()
 
 
