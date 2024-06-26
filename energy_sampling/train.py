@@ -427,13 +427,13 @@ def train():
 
         
         # Early stopping
-        if metrics['train/loss'] < best_loss and i > 1000:
+        if metrics['train/loss'] < best_loss:
             best_loss = metrics['train/loss']
             # savew weights
             if early_stop_counter > 0:
                 torch.save(gfn_model.state_dict(), f'{name}model.pt')
             early_stop_counter = 0
-        elif i > 1000:
+        else:
             early_stop_counter += 1
             if early_stop_counter >= args.patience:
                 print('Early stopping triggered.')
