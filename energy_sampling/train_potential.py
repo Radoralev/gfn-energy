@@ -64,14 +64,25 @@ def xyz_mol2graph(xyz_mol):
     """
 
     mol = xyz_mol
-    #mol = Chem.AddHs(mol)
-    #mol = Chem.RemoveHs(mol)
+    mol = Chem.AddHs(mol)
+    mol = Chem.RemoveHs(mol)
     pos = mol.GetConformer().GetPositions()
     #print(mol)
     # atoms
     atom_features_list = []
+
     for atom in mol.GetAtoms():
-        atom_features_list.append([atom.GetAtomicNum()])
+        atom_features_list.append([
+            atom.GetAtomicNum(),
+            int(atom.GetChiralTag()),
+            atom.GetTotalDegree(),
+            atom.GetFormalCharge(),
+            atom.GetTotalNumHs(),
+            atom.GetNumRadicalElectrons(),
+            int(atom.GetHybridization()),
+            int(atom.GetIsAromatic()),
+            int(atom.IsInRing())
+        ])
     x = np.array(atom_features_list, dtype = np.int64)
 
     # bonds
@@ -113,21 +124,6 @@ def xyz_mol2graph(xyz_mol):
     return graph 
 
 
-def prep_input(graph, pos=None, device=None):
-    datalist = []
-    for xyz in pos:
-        if pos is not None:
-            graph['pos'] = xyz  
-        data = Data(
-            atoms=torch.from_numpy(graph['node_feat'][:, 0]), 
-            edge_index=torch.from_numpy(graph['edge_index']), 
-            edge_attr=torch.from_numpy(graph['edge_feat']), 
-            pos=graph['pos'],).to(device)
-        data.validate(raise_on_error=True)
-        datalist.append(data)
-    return datalist
-
-
 def extract_graphs(filename):
     mol_objects, mol_ens = get_mol_objects(filename)
     datalist = []
@@ -136,7 +132,7 @@ def extract_graphs(filename):
         if graph['num_bonds'] == 0:
             continue
         data = Data(
-            atoms=torch.from_numpy(graph['node_feat'][:, 0]), 
+            atoms=torch.from_numpy(graph['node_feat']), 
             edge_index=torch.from_numpy(graph['edge_index']), 
             edge_attr=torch.from_numpy(graph['edge_feat']), 
             pos=torch.from_numpy(graph['pos']),
@@ -160,7 +156,7 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, dataloader, device, patience):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
     # Define the model
@@ -180,9 +176,17 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     best_model_state = None
     patience_counter = 0
 
+    # Split the dataloader into train and validation sets
+    train_size = int(0.95 * len(data))
+    train_dataset, val_dataset = torch.utils.data.random_split(data, [train_size, len(data) - train_size])
+    
+    # Setup dataloaders
+    train_dataloader = loader.DataLoader(train_dataset, batch_size=32, shuffle=True)
+    val_dataloader = loader.DataLoader(val_dataset, batch_size=32, shuffle=False)
+
     for epoch in range(epochs):
         running_loss = 0.0
-        with tqdm(dataloader, unit="batch") as tepoch:
+        with tqdm(train_dataloader, unit="batch") as tepoch:
             for x in tepoch:
                 tepoch.set_description(f"Epoch {epoch+1}")
                 x = x.to(device)
@@ -204,31 +208,34 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
                 tepoch.set_postfix(loss=loss.item() * 627.503)
 
         # Calculate average loss for the epoch
-        avg_loss = running_loss / len(dataloader)
+        avg_loss = running_loss / len(train_dataloader)
         print(f"Epoch {epoch+1}, Loss: {avg_loss}")
 
         # Step the scheduler
         scheduler.step(avg_loss)
 
         # Check for early stopping
-        if avg_loss < best_loss:
-            best_loss = avg_loss
-            best_epoch = epoch
-            best_model_state = model.state_dict()
-            patience_counter = 0
-        else:
-            patience_counter += 1
+        if epoch % 10 == 0:
+            val_loss = eval_model(model, val_dataloader, device) * 627.503
+            print(f"Validation Loss: {val_loss}")
+            if val_loss < best_loss:
+                best_loss = val_loss
+                best_epoch = epoch
+                best_model_state = model.state_dict()
+                patience_counter = 0
+            else:
+                patience_counter += 1
 
-        if patience_counter >= patience:
-            print(f"Early stopping at epoch {epoch+1}")
-            break
+            if patience_counter >= patience:
+                print(f"Early stopping at epoch {epoch+1}")
+                break
 
     # Load the best model state
     if best_model_state is not None:
         model.load_state_dict(best_model_state)
         print(f"Best model from epoch {best_epoch+1} with loss {best_loss}")
 
-    return model, all_losses
+    return model, all_losses, train_dataloader
 
 
 def eval_model(model, dataloader, device):
@@ -244,7 +251,7 @@ def eval_model(model, dataloader, device):
     return running_loss/len(dataloader)
 
 data = []
-for dir in os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers')):
+for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers'))):
     solvent_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
     vacuum_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
     if args.solvation:
@@ -254,7 +261,6 @@ for dir in os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', '
         vacuum_graphs = extract_graphs(vacuum_dir)
         data.extend(vacuum_graphs)
 
-
 # find max number of atoms in a molecule
 max_atomic_el = 0
 for i, sample in enumerate(data):
@@ -263,7 +269,6 @@ for i, sample in enumerate(data):
         print(i, max_atomic_el)
 
 
-dataloader_train = loader.DataLoader(data[5000:], batch_size=32, shuffle=True)
 dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
 
@@ -272,7 +277,7 @@ num_layers = 5
 lr = 0.001
 epochs=1000
 
-model, losses = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=emb_dim, num_layers=num_layers, lr=lr, epochs=epochs, dataloader=dataloader_train, device='cuda', patience=6)
+model, losses, dataloader_train = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=emb_dim, num_layers=num_layers, lr=lr, epochs=epochs, data=data[5000:], device='cuda', patience=6)
 
 
 print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)

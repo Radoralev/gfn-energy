@@ -103,7 +103,7 @@ class NequipEnergy(BaseSet):
         print(self.data_ndim)
 
     def energy(self, xyz):
-        return self.energy_model.forward(xyz)
+        return self.energy_model(xyz)
 
     def sample(self, batch_size):
         return None
