@@ -38,7 +38,7 @@ parser.add_argument('--energy', type=str, default='9gmm',
                     choices=('9gmm', '25gmm', 'hard_funnel', 'xtb', 
                              'easy_funnel', 'many_well', 'alanine_vacuum_source', 
                              'alanine_vacuum_target', 'alanine_vacuum_full', 'openmm',
-                             'neural'))
+                             'neural', 'nequip'))
 parser.add_argument('--mode_fwd', type=str, default="tb", choices=('tb', 'tb-avg', 'db', 'subtb', "pis"))
 parser.add_argument('--mode_bwd', type=str, default="tb", choices=('tb', 'tb-avg', 'mle'))
 parser.add_argument('--both_ways', action='store_true', default=False)
@@ -182,6 +182,8 @@ def get_energy():
             elif args.local_model.split('/')[-1].startswith('mace'):
                 model, model_args = load_model(model='mace', filename=args.local_model)
             energy = NeuralEnergy(model=model, smiles=args.smiles, batch_size=model_args['batch_size'])
+    elif args.energy == 'nequip':
+        energy = NequipEnergy(args.local_model, smiles=args.smiles)
     return energy
 
 def load_model(model, filename):
@@ -369,7 +371,7 @@ def train():
     name = get_name(args)
     if not os.path.exists(name):
         os.makedirs(name)
-
+    print(args.energy)
     energy = get_energy()
     #energy.time_test()
     #return

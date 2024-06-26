@@ -6,22 +6,22 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/results-T-10-10k-epochs-uncertainty.csv'
+output_file = 'fed_results/results-T-10-10k-epochs-uncertainty-nequip.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '25000',
-        '--batch_size', '128', '--energy', 'neural', '--local_model', local_model,
-        #'--model', 'egnn',
+        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '1000',
+        '--batch_size', '128', '--energy', 'nequip', '--local_model', local_model,
+        '--learned_variance', '--log_var_range', '1', '--patience', '25000',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
         '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-2',
       #  '--exploratory', '--exploration_wd', '--exploration_factor', '0.1',
       #  '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
       #  '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
-        '--hidden_dim', '512', '--joint_layers', '5', '--s_emb_dim', '512',
-        '--t_emb_dim', '512', '--harmonics_dim', '512'
+        '--hidden_dim', '64', '--joint_layers', '5', '--s_emb_dim', '64',
+        '--t_emb_dim', '64', '--harmonics_dim', '64'
     ]
     print(command)
     subprocess.run(command)
@@ -88,8 +88,8 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
         # Function to process a single SMILES
         def process_smiles(smiles, experimental_val, experimental_uncertainty):
-            local_model_vacuum = 'weights/egnn_vacuum_batch_size_32'
-            local_model_solvation = 'weights/egnn_solvation_batch_size_32'
+            local_model_vacuum = 'weights/jax_vac.pkl'
+            local_model_solvation = 'weights/jax_solv.pkl'
             local_futures = []
             with ThreadPoolExecutor(max_workers=1) as executor2:
                 local_futures.append(executor2.submit(run_command, smiles, local_model_vacuum))
