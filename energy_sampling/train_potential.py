@@ -243,37 +243,40 @@ def eval_model(model, dataloader, device):
             running_loss += loss.item()
     return running_loss/len(dataloader)
 
-solvent_data = []
-vacuum_data = []
+data = []
 for dir in os.listdir(os.path.join(os.getcwd(),'..', '..', 'conformation_sampling', 'conformers')):
     solvent_dir = os.path.join(os.getcwd(), '..', '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
     vacuum_dir = os.path.join(os.getcwd(),'..', '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
-    solvent_graphs = extract_graphs(solvent_dir)
-    vacuum_graphs = extract_graphs(vacuum_dir)
-    solvent_data.extend(solvent_graphs)
-    vacuum_data.extend(vacuum_graphs)
-    # break
+    if args.solvation:
+        solvent_graphs = extract_graphs(solvent_dir)
+        data.extend(solvent_graphs)
+    else:        
+        vacuum_graphs = extract_graphs(vacuum_dir)
+        data.extend(vacuum_graphs)
 
 
 # find max number of atoms in a molecule
 max_atomic_el = 0
-for i, data in enumerate(solvent_data):
+for i, data in enumerate(data):
     if data.atoms.max() > max_atomic_el:
         max_atomic_el = data.atoms.max()
         print(i, max_atomic_el)
 
 
-
-train_dataloade_solv = loader.DataLoader(solvent_data[5000:], batch_size=32, shuffle=True)
-train_dataloade_vac = loader.DataLoader(vacuum_data[5000:], batch_size=32, shuffle=True)
-test_dataloade_solv = loader.DataLoader(solvent_data[:5000], batch_size=32, shuffle=True)
-test_dataloade_vac = loader.DataLoader(vacuum_data[:5000], batch_size=32, shuffle=True)
-
-model, losses = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=128, num_layers=5, lr=0.001, epochs=1000, dataloader=train_dataloade_solv, device='cuda', patience=6)
+dataloader_train = loader.DataLoader(data[5000:], batch_size=32, shuffle=True)
+dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
 
-print('MSE on train data:', eval_model(model, train_dataloade_solv, 'cuda') * 627.503)
-print('MSE on val data:', eval_model(model, test_dataloade_solv, 'cuda') * 627.503)
+emb_dim = 128
+num_layers = 5
+lr = 0.001
+epochs=1000
+
+model, losses = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=emb_dim, num_layers=num_layers, lr=lr, epochs=epochs, dataloader=dataloader_train, device='cuda', patience=6)
+
+
+print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
+print('MSE on val data:', eval_model(model, dataloader_test, 'cuda') * 627.503)
 
 
 #print number of parameters
@@ -288,12 +291,10 @@ torch.save(model.state_dict(), args.output+'.pt')
 model_params = {
     'in_dim': max_atomic_el.item()+1,
     'out_dim': 1,
-    'emb_dim': 32,
-    'num_layers': 2,
-    'lr': 0.0001,
-    'epochs': 100,
-    'patience': 5,
-    'batch_size': 32
+    'emb_dim': emb_dim,
+    'num_layers': num_layers,
+    'epochs': epochs,
+    'solvation': args.solvation
 }
 with open(args.output+'.json', 'w') as f:
     json.dump(model_params, f)
