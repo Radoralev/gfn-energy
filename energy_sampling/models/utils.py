@@ -74,7 +74,7 @@ def prep_input(graph, pos=None, device=None):
     datalist = []
     for xyz in pos:
         data = Data(
-            atoms=torch.from_numpy(graph['node_feat'][:, 0]), 
+            atoms=torch.from_numpy(graph['node_feat']), 
             edge_index=torch.from_numpy(graph['edge_index']), 
             edge_attr=torch.from_numpy(graph['edge_feat']), 
             pos=xyz).to(device)
