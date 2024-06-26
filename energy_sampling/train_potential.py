@@ -163,7 +163,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     if model_type == 'mace':
         model = MACEModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, batch_norm=False).to(device, dtype=torch.float64)
     elif model_type == 'egnn':
-        model = EGNNModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False).to(device, dtype=torch.float64)
+        model = EGNNModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=9).to(device, dtype=torch.float64)
     else:
         raise ValueError("Invalid model type. Choose either 'mace' or 'egnn'.")
 
