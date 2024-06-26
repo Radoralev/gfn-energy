@@ -272,7 +272,7 @@ num_layers = 5
 lr = 0.001
 epochs=1000
 
-model, losses = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=128, num_layers=5, lr=0.001, epochs=1000, dataloader=dataloader_train, device='cuda', patience=6)
+model, losses = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=emb_dim, num_layers=num_layers, lr=lr, epochs=epochs, dataloader=dataloader_train, device='cuda', patience=6)
 
 
 print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
@@ -291,12 +291,10 @@ torch.save(model.state_dict(), args.output+'.pt')
 model_params = {
     'in_dim': max_atomic_el.item()+1,
     'out_dim': 1,
-    'emb_dim': 32,
-    'num_layers': 2,
-    'lr': 0.0001,
-    'epochs': 100,
-    'patience': 5,
-    'batch_size': 32
+    'emb_dim': emb_dim,
+    'num_layers': num_layers,
+    'epochs': epochs,
+    'solvation': args.solvation
 }
 with open(args.output+'.json', 'w') as f:
     json.dump(model_params, f)
