@@ -215,20 +215,19 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
         scheduler.step(avg_loss)
 
         # Check for early stopping
-        if epoch % 10 == 0:
-            val_loss = eval_model(model, val_dataloader, device) * 627.503
-            print(f"Validation Loss: {val_loss}")
-            if val_loss < best_loss:
-                best_loss = val_loss
-                best_epoch = epoch
-                best_model_state = model.state_dict()
-                patience_counter = 0
-            else:
-                patience_counter += 1
+        val_loss = eval_model(model, val_dataloader, device) * 627.503
+        print(f"Validation Loss: {val_loss}")
+        if val_loss < best_loss:
+            best_loss = val_loss
+            best_epoch = epoch
+            best_model_state = model.state_dict()
+            patience_counter = 0
+        else:
+            patience_counter += 1
 
-            if patience_counter >= patience:
-                print(f"Early stopping at epoch {epoch+1}")
-                break
+        if patience_counter >= patience:
+            print(f"Early stopping at epoch {epoch+1}")
+            break
 
     # Load the best model state
     if best_model_state is not None:
