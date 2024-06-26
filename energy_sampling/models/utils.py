@@ -14,11 +14,22 @@ def smiles2graph(smiles_string):
 
     mol = Chem.MolFromSmiles(smiles_string)
     mol = Chem.AddHs(mol)
+    mol = Chem.RemoveHs(mol)
     #print(mol)
     # atoms
     atom_features_list = []
     for atom in mol.GetAtoms():
-        atom_features_list.append(atom_to_feature_vector(atom))
+        atom_features_list.append([
+            atom.GetAtomicNum(),
+            int(atom.GetChiralTag()),
+            atom.GetTotalDegree(),
+            atom.GetFormalCharge(),
+            atom.GetTotalNumHs(),
+            atom.GetNumRadicalElectrons(),
+            int(atom.GetHybridization()),
+            int(atom.GetIsAromatic()),
+            int(atom.IsInRing())
+        ])
     x = np.array(atom_features_list, dtype = np.int64)
 
     # bonds
@@ -45,6 +56,7 @@ def smiles2graph(smiles_string):
         edge_attr = np.array(edge_features_list, dtype = np.int64)
 
     else:   # mol has no bonds
+        print('Mol has no bonds :()')
         edge_index = np.empty((2, 0), dtype = np.int64)
         edge_attr = np.empty((0, num_bond_features), dtype = np.int64)
 
@@ -52,7 +64,9 @@ def smiles2graph(smiles_string):
     graph['edge_index'] = edge_index
     graph['edge_feat'] = edge_attr
     graph['node_feat'] = x
+   # graph['pos'] = pos
     graph['num_nodes'] = len(x)
+    graph['num_bonds'] = len(mol.GetBonds())
 
     return graph 
 
