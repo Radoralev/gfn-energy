@@ -100,6 +100,7 @@ class NequipEnergy(BaseSet):
 
         self.energy_model = jax2torch(energy_jax)
         self.data_ndim = 3*graph['num_nodes']
+        print(self.data_ndim)
 
     def energy(self, xyz):
         return self.energy_model.forward(xyz)
