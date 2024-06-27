@@ -11,4 +11,4 @@ from .torchani_energy import TorchANIEnergy
 from .xtb_energy import XTBEnergy, XTBBridge
 from .base import _BridgeEnergy, _Bridge
 from .neural_energy import NeuralEnergy
-from .nequip_energy import NequipEnergy
+# from .nequip_energy import NequipEnergy
