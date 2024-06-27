@@ -173,7 +173,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     patience_counter = 0
 
     # Split the dataloader into train and validation sets
-    train_size = int(0.95 * len(data))
+    train_size = int(0.9 * len(data))
     train_dataset, val_dataset = torch.utils.data.random_split(data, [train_size, len(data) - train_size])
     
     # Setup dataloaders
