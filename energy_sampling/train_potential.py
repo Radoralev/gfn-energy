@@ -151,7 +151,7 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience, mean_y=0, var_y=1):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
     print(in_dim)
@@ -190,7 +190,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
                 optimizer.zero_grad()
 
                 # Forward pass
-                outputs = model(x) * var_y + mean_y
+                outputs = model(x)
                 loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
 
                 # Backward pass and optimize
@@ -211,7 +211,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
         scheduler.step(avg_loss)
 
         # Check for early stopping
-        val_loss = eval_model(model, val_dataloader, device, mean_y=mean_y, var_y=var_y) * 627.503
+        val_loss = eval_model(model, val_dataloader, device) * 627.503
         print(f"Validation Loss: {val_loss}")
         if val_loss < best_loss:
             best_loss = val_loss
@@ -233,14 +233,14 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     return model, all_losses, train_dataloader
 
 
-def eval_model(model, dataloader, device, mean_y, var_y):
+def eval_model(model, dataloader, device):
     model.eval()
     criterion = torch.nn.MSELoss()
     running_loss = 0.0
     with torch.no_grad():
         for x in dataloader:
             x = x.to(device)
-            outputs = model(x) * var_y + mean_y
+            outputs = model(x)
             loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
             running_loss += loss.item()
     return running_loss/len(dataloader)
@@ -270,6 +270,9 @@ var_y = y.var()
 print('Mean:', y.mean())
 print('Variance:', y.var())
 
+for sample in data:
+    sample.y = (sample.y - mean_y) / var_y
+
 dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
 
@@ -293,8 +296,8 @@ model, losses, dataloader_train = train_model(
     var_y=var_y)
 
 
-print('MSE on train data:', eval_model(model, dataloader_train, 'cuda', mean_y=mean_y, var_y=var_y) * 627.503)
-print('MSE on val data:', eval_model(model, dataloader_test, 'cuda', mean_y=mean_y, var_y=var_y) * 627.503)
+print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
+print('MSE on val data:', eval_model(model, dataloader_test, 'cuda') * 627.503)
 
 
 #print number of parameters
