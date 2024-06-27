@@ -80,7 +80,7 @@ def xyz_mol2graph(xyz_mol):
             # int(atom.GetIsAromatic()),
             # int(atom.IsInRing())
         ])
-    x = np.array(atom_features_list, dtype = np.int64)
+    x = np.array(atom_features_list, dtype = np.int32)
 
     # bonds
     num_bond_features = 3  # bond type, bond stereo, is_conjugated
@@ -100,15 +100,15 @@ def xyz_mol2graph(xyz_mol):
             edge_features_list.append(edge_feature)
 
         # data.edge_index: Graph connectivity in COO format with shape [2, num_edges]
-        edge_index = np.array(edges_list, dtype = np.int64).T
+        edge_index = np.array(edges_list, dtype = np.int32).T
 
         # data.edge_attr: Edge feature matrix with shape [num_edges, num_edge_features]
-        edge_attr = np.array(edge_features_list, dtype = np.int64)
+        edge_attr = np.array(edge_features_list, dtype = np.int32)
 
     else:   # mol has no bonds
         print(f'Mol has no bonds :(')
-        edge_index = np.empty((2, 0), dtype = np.int64)
-        edge_attr = np.empty((0, num_bond_features), dtype = np.int64)
+        edge_index = np.empty((2, 0), dtype = np.int32)
+        edge_attr = np.empty((0, num_bond_features), dtype = np.int32)
 
     graph = dict()
     graph['edge_index'] = edge_index
@@ -159,7 +159,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     print(in_dim)
     # Define the model
     if model_type == 'mace':
-        model = MACEModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, batch_norm=False).to(device, dtype=torch.float64)
+        model = MACEModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, batch_norm=False).to(device, dtype=torch.float32)
     elif model_type == 'egnn':
         model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float32)
     else:
