@@ -18,7 +18,7 @@ class NeuralEnergy(BaseSet):
         data_list = prep_input(self.graph, xyz.reshape(-1, self.data_ndim//3, 3), device=self.device)
         batch = Batch.from_data_list(data_list)
         energies = self.model(batch).squeeze()
-        return energies*self.std_y + self.mean_y
+        return energies
     
     def sample(self, batch_size):
         return None
