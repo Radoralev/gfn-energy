@@ -23,8 +23,9 @@ from models.mace import MACEModel
 import matplotlib.pyplot as plt
 
 
-
 parser = argparse.ArgumentParser(description='Train Potential')
+parser.add_argument('--num_layers', type=int, default=3, help='Number of layers')
+parser.add_argument('--emb_dim', type=int, default=128, help='Embedding size')
 parser.add_argument('--solvation', action='store_true', help='Flag to indicate solvation')
 parser.add_argument('--output', type=str, default='output.txt', help='Output file string')
 parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
@@ -268,8 +269,8 @@ print(max_atom_features.tolist())
 dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
 
-emb_dim = 128
-num_layers = 3
+emb_dim = args.emb_dim
+num_layers = args.num_layers
 lr = args.lr
 epochs=1000
 
