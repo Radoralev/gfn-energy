@@ -21,14 +21,14 @@ def smiles2graph(smiles_string):
     for atom in mol.GetAtoms():
         atom_features_list.append([
             atom.GetAtomicNum(),
-            int(atom.GetChiralTag()),
+            # int(atom.GetChiralTag()),
             atom.GetTotalDegree(),
-            atom.GetFormalCharge(),
+            # atom.GetFormalCharge(),
             atom.GetTotalNumHs(),
             atom.GetNumRadicalElectrons(),
             int(atom.GetHybridization()),
-            int(atom.GetIsAromatic()),
-            int(atom.IsInRing())
+            # int(atom.GetIsAromatic()),
+            # int(atom.IsInRing())
         ])
     x = np.array(atom_features_list, dtype = np.int64)
 
