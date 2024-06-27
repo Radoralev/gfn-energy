@@ -181,7 +181,7 @@ def get_energy():
                 model, model_args = load_model(model='egnn', filename=args.local_model)
             elif args.local_model.split('/')[-1].startswith('mace'):
                 model, model_args = load_model(model='mace', filename=args.local_model)
-            energy = NeuralEnergy(model=model, smiles=args.smiles, batch_size=model_args['batch_size'])
+            energy = NeuralEnergy(model=model, smiles=args.smiles, batch_size=model_args['batch_size'], mean_y=model_args.get('mean_y', 0), std_y=model_args.get('std_y', 1))
     elif args.energy == 'nequip':
         energy = NequipEnergy(args.local_model, smiles=args.smiles)
     return energy
