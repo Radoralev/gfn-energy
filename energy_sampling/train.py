@@ -188,7 +188,7 @@ def load_model(model, filename):
     with open(filename + '.json', 'r') as f:
         model_args = json.load(f)
         if model == 'egnn':
-            model = EGNNModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], num_atom_features=9, equivariant_pred=False)
+            model = EGNNModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], num_atom_features=model_args['num_atom_features'], equivariant_pred=False)
         elif model == 'mace':
             model = MACEModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], equivariant_pred=False)
     model.load_state_dict(torch.load(filename + '.pt'))
