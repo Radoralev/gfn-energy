@@ -261,7 +261,7 @@ for sample in data:
     for i in range(5):
         max_atom_features[i] = max(max_atom_features[i], sample.atoms[:, i].max())
 
-print(max_atom_features)
+print(max_atom_features.tolist())
 # calculate mean and variance of .y 
 
 dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
@@ -298,7 +298,7 @@ torch.save(model.state_dict(), args.output+'.pt')
 
 # save all model parameters in a json in the same folder
 model_params = {
-    'in_dim': max_atom_features.item()+1,
+    'in_dim': (max_atom_features+1).tolist(),
     'out_dim': 1,
     'emb_dim': emb_dim,
     'num_layers': num_layers,
