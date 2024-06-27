@@ -151,7 +151,7 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience, mean_y, var_y):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
     print(in_dim)
@@ -201,7 +201,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
                 running_loss += loss.item()
                 all_losses.append(loss.item())
 
-                tepoch.set_postfix(loss=(loss.item() * var_y + mean_y) * 627.503)
+                tepoch.set_postfix(loss=(loss.item()) * 627.503)
         # Calculate average loss for the epoch
         avg_loss = running_loss / len(train_dataloader)
         print(f"Epoch {epoch+1}, Loss: {avg_loss}")
@@ -210,7 +210,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
         scheduler.step(avg_loss)
 
         # Check for early stopping
-        val_loss = (eval_model(model, val_dataloader, device) * var_y + mean_y) * 627.503
+        val_loss = (eval_model(model, val_dataloader, device)) * 627.503
         print(f"Validation Loss: {val_loss}")
         if val_loss < best_loss:
             best_loss = val_loss
@@ -263,14 +263,6 @@ for sample in data:
 
 print(max_atom_features)
 # calculate mean and variance of .y 
-y = torch.tensor([sample.y for sample in data])
-mean_y = y.mean()
-var_y = y.var()
-print('Mean:', y.mean())
-print('Variance:', y.var())
-
-for sample in data:
-    sample.y = (sample.y - mean_y) / var_y
 
 dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
@@ -290,10 +282,7 @@ model, losses, dataloader_train = train_model(
     epochs=epochs, 
     data=data[5000:], 
     device='cuda', 
-    patience=6,
-    mean_y=mean_y,
-    var_y=var_y)
-
+    patience=6,)
 
 print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
 print('MSE on val data:', eval_model(model, dataloader_test, 'cuda') * 627.503)
@@ -315,8 +304,6 @@ model_params = {
     'num_layers': num_layers,
     'epochs': epochs,
     'solvation': args.solvation,
-    'mean_y': mean_y.item(),
-    'var_y': var_y.item(),
 }
 with open(args.output+'.json', 'w') as f:
     json.dump(model_params, f)
