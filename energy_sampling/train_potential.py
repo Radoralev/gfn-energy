@@ -211,7 +211,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
         scheduler.step(avg_loss)
 
         # Check for early stopping
-        val_loss = eval_model(model, val_dataloader, device) * 627.503
+        val_loss = eval_model(model, val_dataloader, device, mean_y=mean_y, var_y=var_y) * 627.503
         print(f"Validation Loss: {val_loss}")
         if val_loss < best_loss:
             best_loss = val_loss
@@ -233,14 +233,14 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     return model, all_losses, train_dataloader
 
 
-def eval_model(model, dataloader, device):
+def eval_model(model, dataloader, device, mean_y, var_y):
     model.eval()
     criterion = torch.nn.MSELoss()
     running_loss = 0.0
     with torch.no_grad():
         for x in dataloader:
             x = x.to(device)
-            outputs = model(x)
+            outputs = model(x) * var_y + mean_y
             loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
             running_loss += loss.item()
     return running_loss/len(dataloader)
@@ -293,8 +293,8 @@ model, losses, dataloader_train = train_model(
     var_y=var_y)
 
 
-print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
-print('MSE on val data:', eval_model(model, dataloader_test, 'cuda') * 627.503)
+print('MSE on train data:', eval_model(model, dataloader_train, 'cuda', mean_y=mean_y, var_y=var_y) * 627.503)
+print('MSE on val data:', eval_model(model, dataloader_test, 'cuda', mean_y=mean_y, var_y=var_y) * 627.503)
 
 
 #print number of parameters
@@ -307,7 +307,7 @@ torch.save(model.state_dict(), args.output+'.pt')
 
 # save all model parameters in a json in the same folder
 model_params = {
-    'in_dim': max_atomic_el.item()+1,
+    'in_dim': max_atom_features.item()+1,
     'out_dim': 1,
     'emb_dim': emb_dim,
     'num_layers': num_layers,
