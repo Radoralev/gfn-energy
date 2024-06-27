@@ -80,7 +80,7 @@ def xyz_mol2graph(xyz_mol):
             # int(atom.GetIsAromatic()),
             # int(atom.IsInRing())
         ])
-    x = np.array(atom_features_list, dtype = np.int32)
+    x = np.array(atom_features_list, dtype = np.int64)
 
     # bonds
     num_bond_features = 3  # bond type, bond stereo, is_conjugated
@@ -100,15 +100,15 @@ def xyz_mol2graph(xyz_mol):
             edge_features_list.append(edge_feature)
 
         # data.edge_index: Graph connectivity in COO format with shape [2, num_edges]
-        edge_index = np.array(edges_list, dtype = np.int32).T
+        edge_index = np.array(edges_list, dtype = np.int64).T
 
         # data.edge_attr: Edge feature matrix with shape [num_edges, num_edge_features]
-        edge_attr = np.array(edge_features_list, dtype = np.int32)
+        edge_attr = np.array(edge_features_list, dtype = np.int64)
 
     else:   # mol has no bonds
         print(f'Mol has no bonds :(')
-        edge_index = np.empty((2, 0), dtype = np.int32)
-        edge_attr = np.empty((0, num_bond_features), dtype = np.int32)
+        edge_index = np.empty((2, 0), dtype = np.int64)
+        edge_attr = np.empty((0, num_bond_features), dtype = np.int64)
 
     graph = dict()
     graph['edge_index'] = edge_index
@@ -259,7 +259,7 @@ for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation
         data.extend(vacuum_graphs)
 
 # find max number of each atom feature in a molecule
-max_atom_features = np.zeros(5, dtype=np.int32)
+max_atom_features = np.zeros(5, dtype=np.int64)
 for sample in data:
     for i in range(5):
         max_atom_features[i] = max(max_atom_features[i], sample.atoms[:, i].max())
