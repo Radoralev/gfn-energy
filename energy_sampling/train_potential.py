@@ -151,7 +151,7 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience, mean_y, var_y):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
     print(in_dim)
@@ -201,8 +201,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
                 running_loss += loss.item()
                 all_losses.append(loss.item())
 
-                tepoch.set_postfix(loss=loss.item() * 627.503)
-
+                tepoch.set_postfix(loss=(loss.item() * var_y + mean_y) * 627.503)
         # Calculate average loss for the epoch
         avg_loss = running_loss / len(train_dataloader)
         print(f"Epoch {epoch+1}, Loss: {avg_loss}")
@@ -211,7 +210,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
         scheduler.step(avg_loss)
 
         # Check for early stopping
-        val_loss = eval_model(model, val_dataloader, device) * 627.503
+        val_loss = (eval_model(model, val_dataloader, device) * var_y + mean_y) * 627.503
         print(f"Validation Loss: {val_loss}")
         if val_loss < best_loss:
             best_loss = val_loss
