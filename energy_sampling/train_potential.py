@@ -29,6 +29,7 @@ parser.add_argument('--num_layers', type=int, default=3, help='Number of layers'
 parser.add_argument('--emb_dim', type=int, default=128, help='Embedding size')
 parser.add_argument('--solvation', action='store_true', help='Flag to indicate solvation')
 parser.add_argument('--output', type=str, default='output.txt', help='Output file string')
+parser.add_argument('--weight_decay', type=float, default=0.0, help='Weight decay')
 parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
 args = parser.parse_args()
 
@@ -167,7 +168,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     # print sum params
     print('Parameter number:', sum(p.numel() for p in model.parameters()))
     # Define the optimizer, loss function, and learning rate scheduler, weight decay
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.weight_decay)
     criterion = torch.nn.MSELoss()
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=patience//2, factor=0.5, verbose=True)
     all_losses = []
