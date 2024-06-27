@@ -166,7 +166,8 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
         raise ValueError("Invalid model type. Choose either 'mace' or 'egnn'.")
     # print sum params
     print('Parameter number:', sum(p.numel() for p in model.parameters()))
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    # Define the optimizer, loss function, and learning rate scheduler, weight decay
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-5)
     criterion = torch.nn.MSELoss()
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=patience//2, factor=0.5, verbose=True)
     all_losses = []
