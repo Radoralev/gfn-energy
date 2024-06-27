@@ -159,10 +159,11 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     if model_type == 'mace':
         model = MACEModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, batch_norm=False).to(device, dtype=torch.float64)
     elif model_type == 'egnn':
-        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float64)
+        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float32)
     else:
         raise ValueError("Invalid model type. Choose either 'mace' or 'egnn'.")
-
+    # print sum params
+    print('Parameter number:', sum(p.numel() for p in model.parameters()))
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = torch.nn.MSELoss()
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=patience//2, factor=0.5, verbose=True)
@@ -191,7 +192,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
 
                 # Forward pass
                 outputs = model(x)
-                loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
+                loss = criterion(outputs.squeeze(), x.y.to(torch.float32).squeeze())
 
                 # Backward pass and optimize
                 loss.backward()
@@ -240,7 +241,7 @@ def eval_model(model, dataloader, device):
         for x in dataloader:
             x = x.to(device)
             outputs = model(x)
-            loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
+            loss = criterion(outputs.squeeze(), x.y.to(torch.float32).squeeze())
             running_loss += loss.item()
     return running_loss/len(dataloader)
 
@@ -268,7 +269,7 @@ dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
 
 emb_dim = 128
-num_layers = 5
+num_layers = 3
 lr = args.lr
 epochs=1000
 
@@ -287,9 +288,6 @@ model, losses, dataloader_train = train_model(
 print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
 print('MSE on val data:', eval_model(model, dataloader_test, 'cuda') * 627.503)
 
-
-#print number of parameters
-print('Parameter number:', sum(p.numel() for p in model.parameters()))
 
 
 # save model
