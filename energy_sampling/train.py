@@ -181,7 +181,7 @@ def get_energy():
                 model, model_args = load_model(model='egnn', filename=args.local_model)
             elif args.local_model.split('/')[-1].startswith('mace'):
                 model, model_args = load_model(model='mace', filename=args.local_model)
-            energy = NeuralEnergy(model=model, smiles=args.smiles, mean_y=model_args.get('mean_y', 0), std_y=model_args.get('std_y', 1))
+            energy = NeuralEnergy(model=model, smiles=args.smiles)
     return energy
 
 def load_model(model, filename):
