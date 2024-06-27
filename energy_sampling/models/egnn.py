@@ -42,11 +42,6 @@ class EGNNModel(torch.nn.Module):
         self.residual = residual
         # Embedding lookup for initial node features
         self.num_atom_features = num_atom_features
-        self.embs = torch.nn.ModuleList()
-        #if type(num_atom_features) == list: 
-        # for i, num_feat in enumerate(num_atom_features):
-            # self.embs.append(torch.nn.Embedding(num_feat.item(), emb_dim//4))
-        #
         self.embedding = torch.nn.Embedding(in_dim, emb_dim) 
         self.embedding_proj = torch.nn.Linear(emb_dim+len(num_atom_features)-1, emb_dim)
         self.in_dim = in_dim
@@ -72,7 +67,6 @@ class EGNNModel(torch.nn.Module):
 
     
     def forward(self, batch, t=None):
-        # create a tensor of shape (n, d * num_atom_features)
         h = self.embedding(batch.atoms[:, 0])
         h = torch.cat([h, batch.atoms[:, 1:]], dim=-1)
         h = self.embedding_proj(h)
@@ -84,7 +78,7 @@ class EGNNModel(torch.nn.Module):
         #TODO batch size is hardcoded here 
         #h = h.view(-1, batch.atoms.shape[0]//32, self.emb_dim)
         # print(batch.pos.shape/, h.shape)
-        pos = batch.pos#.reshape(-1, 3)
+        pos = batch.pos.to(dtype=torch.float32)#.reshape(-1, 3)
         for conv in self.convs:
             # Message passing layer
             h_update, pos_update = conv(h, pos, batch.edge_index)
