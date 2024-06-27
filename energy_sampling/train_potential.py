@@ -21,7 +21,8 @@ from models.egnn import EGNNModel
 from models.mace import MACEModel
 
 import matplotlib.pyplot as plt
-
+#torch set float32
+torch.set_default_dtype(torch.float32)
 
 parser = argparse.ArgumentParser(description='Train Potential')
 parser.add_argument('--num_layers', type=int, default=3, help='Number of layers')
