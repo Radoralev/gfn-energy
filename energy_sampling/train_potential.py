@@ -58,12 +58,6 @@ get_mol_path(0)
 
 
 def xyz_mol2graph(xyz_mol):
-    """
-    Converts SMILES string to graph Data object
-    :input: SMILES string (str)
-    :return: graph object
-    """
-
     mol = xyz_mol
     mol = Chem.AddHs(mol)
     mol = Chem.RemoveHs(mol)
@@ -75,14 +69,14 @@ def xyz_mol2graph(xyz_mol):
     for atom in mol.GetAtoms():
         atom_features_list.append([
             atom.GetAtomicNum(),
-            int(atom.GetChiralTag()),
+            # int(atom.GetChiralTag()),
             atom.GetTotalDegree(),
-            atom.GetFormalCharge(),
+            # atom.GetFormalCharge(),
             atom.GetTotalNumHs(),
             atom.GetNumRadicalElectrons(),
             int(atom.GetHybridization()),
-            int(atom.GetIsAromatic()),
-            int(atom.IsInRing())
+            # int(atom.GetIsAromatic()),
+            # int(atom.IsInRing())
         ])
     x = np.array(atom_features_list, dtype = np.int64)
 
@@ -110,7 +104,7 @@ def xyz_mol2graph(xyz_mol):
         edge_attr = np.array(edge_features_list, dtype = np.int64)
 
     else:   # mol has no bonds
-        print('Mol has no bonds :()')
+        print(f'Mol has no bonds :(')
         edge_index = np.empty((2, 0), dtype = np.int64)
         edge_attr = np.empty((0, num_bond_features), dtype = np.int64)
 
@@ -157,14 +151,15 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience, mean_y=0, var_y=1):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
+    print(in_dim)
     # Define the model
     if model_type == 'mace':
         model = MACEModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, batch_norm=False).to(device, dtype=torch.float64)
     elif model_type == 'egnn':
-        model = EGNNModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=9).to(device, dtype=torch.float64)
+        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float64)
     else:
         raise ValueError("Invalid model type. Choose either 'mace' or 'egnn'.")
 
@@ -195,7 +190,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
                 optimizer.zero_grad()
 
                 # Forward pass
-                outputs = model(x)
+                outputs = model(x) * var_y + mean_y
                 loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
 
                 # Backward pass and optimize
@@ -261,13 +256,19 @@ for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation
         vacuum_graphs = extract_graphs(vacuum_dir)
         data.extend(vacuum_graphs)
 
-# find max number of atoms in a molecule
-max_atomic_el = 0
-for i, sample in enumerate(data):
-    if sample.atoms.max() > max_atomic_el:
-        max_atomic_el = sample.atoms.max()
-        print(i, max_atomic_el)
+# find max number of each atom feature in a molecule
+max_atom_features = np.zeros(5, dtype=np.int32)
+for sample in data:
+    for i in range(5):
+        max_atom_features[i] = max(max_atom_features[i], sample.atoms[:, i].max())
 
+print(max_atom_features)
+# calculate mean and variance of .y 
+y = torch.tensor([sample.y for sample in data])
+mean_y = y.mean()
+var_y = y.var()
+print('Mean:', y.mean())
+print('Variance:', y.var())
 
 dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
@@ -277,7 +278,19 @@ num_layers = 5
 lr = args.lr
 epochs=1000
 
-model, losses, dataloader_train = train_model('egnn', in_dim=max_atomic_el+1, out_dim=1, emb_dim=emb_dim, num_layers=num_layers, lr=lr, epochs=epochs, data=data[5000:], device='cuda', patience=6)
+model, losses, dataloader_train = train_model(
+    'egnn', 
+    in_dim=max_atom_features+1, 
+    out_dim=1, 
+    emb_dim=emb_dim, 
+    num_layers=num_layers, 
+    lr=lr, 
+    epochs=epochs, 
+    data=data[5000:], 
+    device='cuda', 
+    patience=6,
+    mean_y=mean_y,
+    var_y=var_y)
 
 
 print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
@@ -299,7 +312,9 @@ model_params = {
     'emb_dim': emb_dim,
     'num_layers': num_layers,
     'epochs': epochs,
-    'solvation': args.solvation
+    'solvation': args.solvation,
+    'mean_y': mean_y.item(),
+    'var_y': var_y.item(),
 }
 with open(args.output+'.json', 'w') as f:
     json.dump(model_params, f)

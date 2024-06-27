@@ -43,10 +43,11 @@ class EGNNModel(torch.nn.Module):
         # Embedding lookup for initial node features
         self.num_atom_features = num_atom_features
         self.embs = torch.nn.ModuleList()
-        for _ in range(num_atom_features):
-            self.embs.append(torch.nn.Embedding(in_dim, emb_dim))
+        #if type(num_atom_features) == list: 
+        for i, num_feat in enumerate(num_atom_features):
+            self.embs.append(torch.nn.Embedding(num_feat.item(), emb_dim//4))
         
-        self.embedding_proj = torch.nn.Linear(emb_dim*num_atom_features, emb_dim)
+        self.embedding_proj = torch.nn.Linear(emb_dim//4*len(num_atom_features), emb_dim)
         self.in_dim = in_dim
         self.emb_dim = emb_dim
         # Stack of GNN layers
