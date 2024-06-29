@@ -89,9 +89,9 @@ class GFN(nn.Module):
 
             self.t_model = TimeEncodingPIS(harmonics_dim, t_dim, hidden_dim)
             self.s_model = StateEncodingPIS(dim, hidden_dim, s_emb_dim)
-            self.joint_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, 2 * dim, joint_layers, zero_init)
+            self.joint_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, dim, joint_layers, zero_init)
             if learn_pb:
-                self.back_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, 2 * dim, joint_layers, zero_init)
+                self.back_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, dim, joint_layers, zero_init)
             self.pb_scale_range = pb_scale_range
 
             if self.conditional_flow_model:
@@ -128,12 +128,13 @@ class GFN(nn.Module):
         print('Number of parameters: ', self.num_parameters())
 
     def split_params(self, tensor):
-        mean, logvar = gaussian_params(tensor)
-        if not self.learned_variance:
-            logvar = torch.zeros_like(logvar)
-        else:
-            logvar = torch.tanh(logvar) * self.log_var_range
-        return mean, logvar + np.log(self.pf_std_per_traj) * 2.
+        return tensor, torch.zeros_like(tensor)    
+        # mean, logvar = gaussian_params(tensor)
+        # if not self.learned_variance:
+        #     logvar = torch.zeros_like(logvar)
+        # else:
+        #     logvar = torch.tanh(logvar) * self.log_var_range
+        # return mean, logvar + np.log(self.pf_std_per_traj) * 2.
 
     def predict_next_state(self, s, t, log_r):
         if self.langevin:
