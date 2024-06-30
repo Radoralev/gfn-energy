@@ -2,7 +2,6 @@ import csv
 import subprocess
 import os
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
@@ -18,7 +17,7 @@ def run_command(smiles, local_model):
         '--conditional_flow_model',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb',# '--mode_bwd', 'tb',
-        '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-2', 
+        '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-3', 
        # '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
        # '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
        # '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
@@ -71,7 +70,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
     # Write the header if the file is new
     if not existing_results:
-        writer.writerow(['SMILES', 'experimental_val', 'fed_Z', 'fed_Z_lb', 'fed_Z_learned', 'timestamp'])
+        writer.writerow(['SMILES', 'experimental_val', 'fed_Z_learned', 'fed_Z', 'fed_Z_lb', 'timestamp'])
 
     for row in reader:
         if row[0].startswith('#'):
@@ -114,7 +113,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
         # Write the results to the CSV file
-        writer.writerow([smiles, experimental_val+' ± '+experimental_uncertainty, fed_Z, fed_Z_lb, fed_Z_learned, timestamp])
+        writer.writerow([smiles, experimental_val+' ± '+experimental_uncertainty, fed_Z_learned, fed_Z, fed_Z_lb, timestamp])
         outfile.flush()
 
 print("Processing complete. Results saved to", output_file)
