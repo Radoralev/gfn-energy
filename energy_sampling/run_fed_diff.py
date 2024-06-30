@@ -6,18 +6,18 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tb_no_var_10k_epochs_small_lr1e5.csv'
+output_file = 'fed_results/tb_no_var_1k_epochs_small_lr1e5.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '10000',
-        '--batch_size', '128', '--energy', 'neural', '--local_model', local_model,
+        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '1000',
+        '--batch_size', '256', '--energy', 'neural', '--local_model', local_model,
        # '--learned_variance', '--log_var_range', '1', 
         '--patience', '25000',
         '--conditional_flow_model',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
+        '--pis_architectures', '--mode_fwd', 'tb',# '--mode_bwd', 'tb',
         '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-2', 
        # '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
        # '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
@@ -119,15 +119,15 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
             fed_uncertainty_learned = (float(logZ_learned_std_vacuum)**2 + float(logZ_learned_std_solvation)**2)**0.5
 
             # Round values to the third significant digit
-            fed_Z = f"{fed_Z:.3g}±{fed_uncertainty:.3g}"
-            fed_Z_lb = f"{fed_Z_lb:.3g}±{fed_uncertainty_lb:.3g}"
-            fed_Z_learned = f"{fed_Z_learned:.3g}±{fed_uncertainty_learned:.3g}"
+            fed_Z = f"{fed_Z:.3g} ± {fed_uncertainty:.3g}"
+            fed_Z_lb = f"{fed_Z_lb:.3g} ± {fed_uncertainty_lb:.3g}"
+            fed_Z_learned = f"{fed_Z_learned:.3g} ± {fed_uncertainty_learned:.3g}"
 
             # Get the current timestamp
             timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
             # Write the results to the CSV file
-            writer.writerow([smiles, experimental_val+'±'+experimental_uncertainty, fed_Z, fed_Z_lb, fed_Z_learned, timestamp])
+            writer.writerow([smiles, experimental_val+' ± '+experimental_uncertainty, fed_Z, fed_Z_lb, fed_Z_learned, timestamp])
             outfile.flush()
 
         # Submit tasks for processing SMILES
