@@ -73,69 +73,48 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
     if not existing_results:
         writer.writerow(['SMILES', 'experimental_val', 'fed_Z', 'fed_Z_lb', 'fed_Z_learned', 'timestamp'])
 
-    # Create a ThreadPoolExecutor with a maximum of 8 workers
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        futures = []
-        smiles_list = []
+    for row in reader:
+        if row[0].startswith('#'):
+            continue  # Skip header or comment lines
 
-        for row in reader:
-            if row[0].startswith('#'):
-                continue  # Skip header or comment lines
+        smiles = row[1]
+        experimental_val = row[3]
+        experimental_uncertainty = row[4]
 
-            smiles = row[1]
-            experimental_val = row[3]
-            experimental_uncertainty = row[4]
+        # Skip SMILES that have already been processed
+        if smiles in existing_results:
+            continue
 
-            # Skip SMILES that have already been processed
-            if smiles in existing_results:
-                continue
+        local_model_vacuum = 'weights/egnn_vacuum_small'
+        local_model_solvation = 'weights/egnn_solvation_small'
 
-            smiles_list.append((smiles, experimental_val, experimental_uncertainty))
+        run_command(smiles, local_model_vacuum)
+        run_command(smiles, local_model_solvation)
 
-        # Function to process a single SMILES
-        def process_smiles(smiles, experimental_val, experimental_uncertainty):
-            local_model_vacuum = 'weights/egnn_vacuum_small'
-            local_model_solvation = 'weights/egnn_solvation_small'
-            local_futures = []
-            with ThreadPoolExecutor(max_workers=1) as executor2:
-                local_futures.append(executor2.submit(run_command, smiles, local_model_vacuum))
-                sleep(10)
-                local_futures.append(executor2.submit(run_command, smiles, local_model_solvation))
+        # Read the output files
+        logZ_vacuum, logZlb_vacuum, logZ_std_vacuum, logZlb_std_vacuum, logZ_learned_vacuum, logZ_learned_std_vacuum = read_output_file(smiles, local_model_vacuum)
+        logZ_solvation, logZlb_solvation, logZ_std_solvation, logZlb_std_solvation, logZ_learned_solvation, logZ_learned_std_solvation = read_output_file(smiles, local_model_solvation)
 
-            for future in as_completed(local_futures):
-                future.result()
-            # Read the output files
-            logZ_vacuum, logZlb_vacuum, logZ_std_vacuum, logZlb_std_vacuum, logZ_learned_vacuum, logZ_learned_std_vacuum = read_output_file(smiles, local_model_vacuum)
-            logZ_solvation, logZlb_solvation, logZ_std_solvation, logZlb_std_solvation, logZ_learned_solvation, logZ_learned_std_solvation = read_output_file(smiles, local_model_solvation)
+        # Calculate fed_Z and fed_Z_lb
+        fed_Z = float(logZ_vacuum) - float(logZ_solvation)
+        fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
+        fed_Z_learned = float(logZ_learned_vacuum) - float(logZ_learned_solvation)
 
-            # Calculate fed_Z and fed_Z_lb
-            fed_Z = float(logZ_vacuum) - float(logZ_solvation)
-            fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
-            fed_Z_learned = float(logZ_learned_vacuum) - float(logZ_learned_solvation)
+        # Calculate fed uncertainty
+        fed_uncertainty = (float(logZ_std_vacuum)**2 + float(logZ_std_solvation)**2)**0.5
+        fed_uncertainty_lb = (float(logZlb_std_vacuum)**2 + float(logZlb_std_solvation)**2)**0.5
+        fed_uncertainty_learned = (float(logZ_learned_std_vacuum)**2 + float(logZ_learned_std_solvation)**2)**0.5
 
-            # Calculate fed uncertainty
-            fed_uncertainty = (float(logZ_std_vacuum)**2 + float(logZ_std_solvation)**2)**0.5
-            fed_uncertainty_lb = (float(logZlb_std_vacuum)**2 + float(logZlb_std_solvation)**2)**0.5
-            fed_uncertainty_learned = (float(logZ_learned_std_vacuum)**2 + float(logZ_learned_std_solvation)**2)**0.5
+        # Round values to the third significant digit
+        fed_Z = f"{fed_Z:.3g} ± {fed_uncertainty:.3g}"
+        fed_Z_lb = f"{fed_Z_lb:.3g} ± {fed_uncertainty_lb:.3g}"
+        fed_Z_learned = f"{fed_Z_learned:.3g} ± {fed_uncertainty_learned:.3g}"
 
-            # Round values to the third significant digit
-            fed_Z = f"{fed_Z:.3g} ± {fed_uncertainty:.3g}"
-            fed_Z_lb = f"{fed_Z_lb:.3g} ± {fed_uncertainty_lb:.3g}"
-            fed_Z_learned = f"{fed_Z_learned:.3g} ± {fed_uncertainty_learned:.3g}"
+        # Get the current timestamp
+        timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
 
-            # Get the current timestamp
-            timestamp = datetime.now().strftime('%d-%m-%Y %H-%M')
-
-            # Write the results to the CSV file
-            writer.writerow([smiles, experimental_val+' ± '+experimental_uncertainty, fed_Z, fed_Z_lb, fed_Z_learned, timestamp])
-            outfile.flush()
-
-        # Submit tasks for processing SMILES
-        for smiles, experimental_val, experimental_uncertainty in smiles_list:
-            futures.append(executor.submit(process_smiles, smiles, experimental_val, experimental_uncertainty))
-
-        # Ensure all futures are processed
-        for future in as_completed(futures):
-            future.result()
+        # Write the results to the CSV file
+        writer.writerow([smiles, experimental_val+' ± '+experimental_uncertainty, fed_Z, fed_Z_lb, fed_Z_learned, timestamp])
+        outfile.flush()
 
 print("Processing complete. Results saved to", output_file)
