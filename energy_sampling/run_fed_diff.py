@@ -93,8 +93,8 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
 
         # Function to process a single SMILES
         def process_smiles(smiles, experimental_val, experimental_uncertainty):
-            local_model_vacuum = 'weights/egnn_solvation_small'
-            local_model_solvation = 'weights/egnn_vacuum_small'
+            local_model_vacuum = 'weights/egnn_vacuum_small'
+            local_model_solvation = 'weights/egnn_solvation_small'
             local_futures = []
             with ThreadPoolExecutor(max_workers=1) as executor2:
                 local_futures.append(executor2.submit(run_command, smiles, local_model_vacuum))
