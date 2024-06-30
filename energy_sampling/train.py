@@ -116,7 +116,7 @@ if 'SLURM_PROCID' in os.environ:
     args.seed += int(os.environ["SLURM_PROCID"])
 
 eval_data_size = 512
-final_eval_data_size = 2000
+final_eval_data_size = 1024 * 8
 plot_data_size = 2000
 final_plot_data_size = 2000
 
@@ -262,11 +262,12 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
         logZlbs = []
         logZlearned = []
         for _ in range(10):
-            init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
-            samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
-            logZs.append(log_Z.item())
-            logZlbs.append(log_Z_lb.item())
-            logZlearned.append(log_Z_learned.item())
+            for _ in range(0, final_eval_data_size, 1024):
+                init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
+                samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
+                logZs.append(log_Z.item())
+                logZlbs.append(log_Z_lb.item())
+                logZlearned.append(log_Z_learned.item())
         metrics['final_eval/mean_log_Z'] = torch.mean(torch.tensor(logZs))
         metrics['final_eval/std_log_Z'] = torch.std(torch.tensor(logZs))
         metrics['final_eval/mean_log_Z_lb'] = torch.mean(torch.tensor(logZlbs))
@@ -458,7 +459,8 @@ def train():
         f.write(f"log_Z_lb_std: {metrics['final_eval/std_log_Z_lb']}\n")
         f.write(f"log_Z: {metrics['final_eval/mean_log_Z']}\n")
         f.write(f"log_Z_std: {metrics['final_eval/std_log_Z']}\n")
-
+        f.write(f"log_Z_learned: {metrics['final_eval/mean_log_Z_learned']}\n")
+        f.write(f"log_Z_learned_std: {metrics['final_eval/std_log_Z_learned']}\n")
 
 
 def final_eval(energy, gfn_model):
