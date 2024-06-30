@@ -116,7 +116,7 @@ if 'SLURM_PROCID' in os.environ:
     args.seed += int(os.environ["SLURM_PROCID"])
 
 eval_data_size = 512
-final_eval_data_size = 1024 * 8
+final_eval_data_size = 1024 * 2
 plot_data_size = 2000
 final_plot_data_size = 2000
 
