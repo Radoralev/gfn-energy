@@ -63,7 +63,7 @@ get_mol_path(0)
 def xyz_mol2graph(xyz_mol):
     mol = xyz_mol
     mol = Chem.AddHs(mol)
-    mol = Chem.RemoveHs(mol)
+    #mol = Chem.RemoveHs(mol)
     pos = mol.GetConformer().GetPositions()
     #print(mol)
     # atoms
@@ -287,7 +287,7 @@ model, losses, dataloader_train = train_model(
     epochs=epochs, 
     data=data[5000:], 
     device='cuda', 
-    patience=6,)
+    patience=50,)
 
 print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
 print('MSE on val data:', eval_model(model, dataloader_test, 'cuda') * 627.503)

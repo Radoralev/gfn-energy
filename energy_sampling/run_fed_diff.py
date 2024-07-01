@@ -5,24 +5,24 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tb_no_var_1k_epochs_small_lr1e5.csv'
+output_file = 'fed_results/tb_both_ways_no_var_ls_expl_langevin_2k_epochs_small_lr1e5_withHs.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '1000',
-        '--batch_size', '256', '--energy', 'neural', '--local_model', local_model,
+        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '2000',
+        '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
        # '--learned_variance', '--log_var_range', '1', 
         '--patience', '25000',
         '--conditional_flow_model',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--pis_architectures', '--mode_fwd', 'tb',# '--mode_bwd', 'tb',
-        '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-3', 
-       # '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
-       # '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
-       # '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
-        '--hidden_dim', '64', '--joint_layers', '5', '--s_emb_dim', '64',
-        '--t_emb_dim', '64', '--harmonics_dim', '64'
+        '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
+        '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-4', 
+       '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
+       '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
+       '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
+        '--hidden_dim', '128', '--joint_layers', '5', '--s_emb_dim', '128',
+        '--t_emb_dim', '128', '--harmonics_dim', '128'
     ]
     print(command)
     subprocess.run(command)
@@ -84,8 +84,8 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         if smiles in existing_results:
             continue
 
-        local_model_vacuum = 'weights/egnn_vacuum_small'
-        local_model_solvation = 'weights/egnn_solvation_small'
+        local_model_vacuum = 'weights/egnn_vacuum_small_with_hs'
+        local_model_solvation = 'weights/egnn_solvation_small_with_hs'
 
         run_command(smiles, local_model_vacuum)
         run_command(smiles, local_model_solvation)
@@ -95,9 +95,9 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         logZ_solvation, logZlb_solvation, logZ_std_solvation, logZlb_std_solvation, logZ_learned_solvation, logZ_learned_std_solvation = read_output_file(smiles, local_model_solvation)
 
         # Calculate fed_Z and fed_Z_lb
-        fed_Z = float(logZ_vacuum) - float(logZ_solvation)
-        fed_Z_lb = float(logZlb_vacuum) - float(logZlb_solvation)
-        fed_Z_learned = float(logZ_learned_vacuum) - float(logZ_learned_solvation)
+        fed_Z = float(logZ_solvation) - float(logZ_vacuum)
+        fed_Z_lb = float(logZlb_solvation) - float(logZlb_vacuum) 
+        fed_Z_learned = float(logZ_learned_solvation) - float(logZ_learned_vacuum)
 
         # Calculate fed uncertainty
         fed_uncertainty = (float(logZ_std_vacuum)**2 + float(logZ_std_solvation)**2)**0.5
