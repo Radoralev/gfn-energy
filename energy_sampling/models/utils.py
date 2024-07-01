@@ -14,7 +14,7 @@ def smiles2graph(smiles_string):
 
     mol = Chem.MolFromSmiles(smiles_string)
     mol = Chem.AddHs(mol)
-    mol = Chem.RemoveHs(mol)
+    # mol = Chem.RemoveHs(mol)
     #print(mol)
     # atoms
     atom_features_list = []

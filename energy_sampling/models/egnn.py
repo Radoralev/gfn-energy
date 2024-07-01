@@ -67,8 +67,8 @@ class EGNNModel(torch.nn.Module):
 
     
     def forward(self, batch, t=None):
-        h = self.embedding(batch.atoms[:, 0])
-        h = torch.cat([h, batch.atoms[:, 1:]], dim=-1)
+        h = self.embedding(batch.atoms[..., 0])
+        h = torch.cat([h, batch.atoms[..., 1:]], dim=-1)
         h = self.embedding_proj(h)
         if t is not None:
             # match h shape

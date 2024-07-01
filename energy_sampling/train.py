@@ -261,13 +261,12 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
         logZs = []
         logZlbs = []
         logZlearned = []
-        for _ in range(10):
-            for _ in range(0, final_eval_data_size, 1024):
-                init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
-                samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
-                logZs.append(log_Z.item())
-                logZlbs.append(log_Z_lb.item())
-                logZlearned.append(log_Z_learned.item())
+        for _ in range(2):
+            init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
+            samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
+            logZs.append(log_Z.item())
+            logZlbs.append(log_Z_lb.item())
+            logZlearned.append(log_Z_learned.item())
         metrics['final_eval/mean_log_Z'] = torch.mean(torch.tensor(logZs))
         metrics['final_eval/std_log_Z'] = torch.std(torch.tensor(logZs))
         metrics['final_eval/mean_log_Z_lb'] = torch.mean(torch.tensor(logZlbs))
@@ -415,14 +414,12 @@ def train():
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd)
         if i % 250 == 0:
             metrics.update(eval_step(eval_data, energy, gfn_model, final_eval=False))
-            if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
-                del metrics['eval/log_Z_learned']
+            #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
+            #    del metrics['eval/log_Z_learned']
             images = plot_step(energy, gfn_model, name)
             metrics.update(images)
             plt.close('all')
             #metrics = check_nan_in_metrics(metrics)
-        if i % 5 == 0:
-            # log lr 
             metrics['lr'] = gfn_optimizer.param_groups[0]['lr']
             wandb.log(metrics, step=i)
 
