@@ -5,23 +5,33 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, r2_score
 import numpy as np
 
+# Function to parse values with uncertainties
+def parse_value_with_uncertainty(value):
+    mean, uncertainty = value.split(' ± ')
+    return float(mean), float(uncertainty)
+
 # Read the CSV file
 csv_file = 'results-T-10-5k-epochs-uncertainty.csv'  # Replace with your actual file path
 data = pd.read_csv(csv_file)
 
+# Parse the values and uncertainties
+data[['experimental_val_mean', 'experimental_val_uncertainty']] = data['experimental_val'].apply(lambda x: pd.Series(parse_value_with_uncertainty(x)))
+data[['fed_Z_mean', 'fed_Z_uncertainty']] = data['fed_Z'].apply(lambda x: pd.Series(parse_value_with_uncertainty(x)))
+data[['fed_Z_lb_mean', 'fed_Z_lb_uncertainty']] = data['fed_Z_lb'].apply(lambda x: pd.Series(parse_value_with_uncertainty(x)))
+
 # Exclude rows with extremely large fedZ or fedZlb values
-data = data[(data['fed_Z'].abs() < 100) & (data['fed_Z_lb'].abs() < 100)]
+data = data[(data['fed_Z_mean'].abs() < 100) & (data['fed_Z_lb_mean'].abs() < 100)]
+
 # Extract the necessary columns
-experimental_val = data['experimental_val']
-experimental_uncertainty = data['experimental_uncertainty']
-fed_Z = data['fed_Z']
-fed_Z_lb = data['fed_Z_lb']
+experimental_val = data['experimental_val_mean']
+experimental_uncertainty = data['experimental_val_uncertainty']
+fed_Z = data['fed_Z_mean']
+fed_Z_lb = data['fed_Z_lb_mean']
 
 # Function to plot scatter plot with linear regression and statistics
 def plot_scatter(ax, x, y, xerr, title):
     sns.scatterplot(x=x, y=y, ax=ax, hue=np.abs(x-y), palette='coolwarm', legend=False)
     ax.errorbar(x, y, xerr=xerr, fmt='o', ecolor='gray', alpha=0.5)
-  #  ax.plot([-10, 10], [-10, 10], 'k--', lw=1)
     
     # Linear regression
     model = LinearRegression().fit(x.values.reshape(-1, 1), y)
@@ -36,8 +46,6 @@ def plot_scatter(ax, x, y, xerr, title):
     ax.set_title(f'{title}\nAUE = {aue:.2f} kcal/mol, cor = {cor:.2f}\n1 kcal/mol = {within_1_kcal:.0f}%')
     ax.set_xlabel('ΔG_exp, kcal/mol')
     ax.set_ylabel('ΔG_calc, kcal/mol')
-  #  ax.set_xlim(-10, 10)
-  #  ax.set_ylim(-10, 10)
 
 # Create subplots
 fig, axes = plt.subplots(1, 2, figsize=(18, 6))
