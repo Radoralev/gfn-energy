@@ -16,12 +16,13 @@ def parse_value_with_uncertainty(value):
 parser = argparse.ArgumentParser(description='Analyze results')
 parser.add_argument('--input', type=str, help='Path to the input CSV file')
 parser.add_argument('--output', type=str, help='Path to save the output plot')
+parser.add_argument('--rows', type=int, default=None, help='Number of rows to include from the CSV')
 
 # Parse command line arguments
 args = parser.parse_args()
 
 # Read the CSV file
-data = pd.read_csv(args.input)
+data = pd.read_csv(args.input, nrows=args.rows)
 
 # Parse the values and uncertainties
 data[['experimental_val_mean', 'experimental_val_uncertainty']] = data['experimental_val'].apply(lambda x: pd.Series(parse_value_with_uncertainty(x)))
@@ -68,5 +69,5 @@ plot_scatter(axes[2], experimental_val, fed_Z_learned, experimental_uncertainty,
 
 # Adjust layout and show plot
 plt.tight_layout()
-plt.show()
+# plt.show()
 plt.savefig(args.output)
