@@ -132,7 +132,7 @@ class StateEncoding(nn.Module):
 
 
 class EquivariantPolicy(nn.Module):
-    def __init__(self, model: str = 'egnn', in_dim: int = 32, t_dim: int = 32, hidden_dim: int = 64, out_dim: int = None, num_layers: int = 2, smiles: str = None, zero_init: bool = False):
+    def __init__(self, model: str = 'egnn', in_dim: int = 32, t_dim: int = 32, hidden_dim: int = 64, out_dim: int = None, num_layers: int = 2, smiles: str = None, zero_init: bool = False, model_args: dict = None):
         super(EquivariantPolicy, self).__init__()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.graph = smiles2graph(smiles)
@@ -143,7 +143,7 @@ class EquivariantPolicy(nn.Module):
                 self.model.pred.weight.data.fill_(0.0)
                 self.model.pred.bias.data.fill_(0.0)
         elif model == 'egnn':
-            self.model = EGNNModel(in_dim=in_dim, out_dim=out_dim, emb_dim=hidden_dim, num_layers=num_layers, equivariant_pred=True).to(self.device)
+            self.model = EGNNModel(in_dim=model_args['in_dim'][0], out_dim=out_dim, emb_dim=hidden_dim, num_layers=num_layers, equivariant_pred=True, num_atom_features=model_args['in_dim']).to(self.device)
             if zero_init:
                 self.model.pred.weight.data.fill_(0.0)
                 self.model.pred.bias.data.fill_(0.0)

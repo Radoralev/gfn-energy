@@ -18,7 +18,7 @@ class GFN(nn.Module):
                  clipping: bool = False, lgv_clip: float = 1e2, gfn_clip: float = 1e4, pb_scale_range: float = 1.,
                  langevin_scaling_per_dimension: bool = True, conditional_flow_model: bool = False,
                  learn_pb: bool = False, model='mlp', smiles=None,
-                 pis_architectures: bool = False, lgv_layers: int = 3, joint_layers: int = 2,
+                 pis_architectures: bool = False, lgv_layers: int = 3, joint_layers: int = 2, model_args: dict = None,
                  zero_init: bool = False, device=torch.device('cuda'), equivariant_architectures: bool = False):
         super(GFN, self).__init__()
         self.dim = dim
@@ -27,7 +27,7 @@ class GFN(nn.Module):
         self.s_emb_dim = s_emb_dim
         self.smiles = smiles
         self.model = model
-        
+        self.model_args = model_args
         self.trajectory_length = trajectory_length
         self.langevin = langevin
         self.learned_variance = learned_variance
@@ -62,7 +62,8 @@ class GFN(nn.Module):
                 out_dim=2 * dim, 
                 num_layers=joint_layers, 
                 smiles=smiles, 
-                zero_init=zero_init)
+                zero_init=zero_init,
+                model_args=model_args)
             if learn_pb:
                 self.back_model = EquivariantPolicy(
                 model=model, 
@@ -72,7 +73,8 @@ class GFN(nn.Module):
                 out_dim=2 * dim, 
                 num_layers=joint_layers, 
                 smiles=smiles, 
-                zero_init=zero_init)
+                zero_init=zero_init,
+                model_args=model_args)
             self.pb_scale_range = pb_scale_range
             if self.conditional_flow_model:
                 self.flow_model = FlowModel(dim, t_dim, hidden_dim, 1)
@@ -156,7 +158,7 @@ class GFN(nn.Module):
         flow = self.flow_model(s, t).squeeze(-1) if self.conditional_flow_model or self.partial_energy else self.flow_model
 
         if self.langevin:
-            if self.pis_architectures:
+            if self.pis_architectures or self.equivariant_architectures:
                 scale = self.langevin_scaling_model(t_lgv)
             else:
                 scale = self.langevin_scaling_model(s, t)

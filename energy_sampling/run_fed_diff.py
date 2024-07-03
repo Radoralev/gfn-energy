@@ -5,22 +5,22 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tb_both_ways_no_var_ls_expl_langevin_2k_epochs_small_lr1e5_withHs.csv'
+output_file = 'fed_results/tb_both_ways_learned_var_expl_ls_egnn_2.5k_epochs_small_lr1e5_withHs.csv'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '2000',
+        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '2500',
         '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
-       # '--learned_variance', '--log_var_range', '1', 
-        '--patience', '25000',
-        '--conditional_flow_model',
+       '--learned_variance', '--log_var_range', '1', 
+        '--patience', '25000', '--model', 'egnn',
+        '--conditional_flow_model', '--langevin',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
+        '--equivariant_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
         '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-4', 
-       '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
-       '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
-       '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
+        '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
+        '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
+        '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
         '--hidden_dim', '128', '--joint_layers', '5', '--s_emb_dim', '128',
         '--t_emb_dim', '128', '--harmonics_dim', '128'
     ]
