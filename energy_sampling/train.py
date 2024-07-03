@@ -136,6 +136,7 @@ if args.local_model:
     args.torchani_model = ''
 
 def get_energy():
+    model_args = None
     if args.energy == '9gmm':
         energy = NineGaussianMixture(device=device)
     elif args.energy == '25gmm':
@@ -182,7 +183,7 @@ def get_energy():
             elif args.local_model.split('/')[-1].startswith('mace'):
                 model, model_args = load_model(model='mace', filename=args.local_model)
             energy = NeuralEnergy(model=model, smiles=args.smiles)
-    return energy
+    return energy, model_args
 
 def load_model(model, filename):
     with open(filename + '.json', 'r') as f:
@@ -370,7 +371,7 @@ def train():
     if not os.path.exists(name):
         os.makedirs(name)
     print(args.energy)
-    energy = get_energy()
+    energy, model_args = get_energy()
     #energy.time_test()
     #return
     eval_data = energy.sample(eval_data_size)
@@ -386,7 +387,7 @@ def train():
                     pb_scale_range=args.pb_scale_range, model = args.model, smiles=args.smiles,
                     t_scale=args.t_scale, langevin_scaling_per_dimension=args.langevin_scaling_per_dimension,
                     conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
-                    pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers,
+                    pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers, model_args=model_args,
                     joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, equivariant_architectures=args.equivariant_architectures).to(device)
     
     if args.continue_training:
