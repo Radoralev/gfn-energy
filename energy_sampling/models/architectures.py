@@ -143,7 +143,7 @@ class EquivariantPolicy(nn.Module):
                 self.model.pred.weight.data.fill_(0.0)
                 self.model.pred.bias.data.fill_(0.0)
         elif model == 'egnn':
-            self.model = EGNNModel(in_dim=model_args['in_dim'][0], out_dim=out_dim, emb_dim=hidden_dim, num_layers=num_layers, equivariant_pred=True, num_atom_features=model_args['in_dim']).to(self.device)
+            self.model = EGNNModel(in_dim=model_args['in_dim'][0], emb_dim=model_args['emb_dim'], out_dim=out_dim, num_layers=model_args['num_layers'], num_atom_features=model_args['in_dim'], equivariant_pred=True)
             if zero_init:
                 self.model.pred.weight.data.fill_(0.0)
                 self.model.pred.bias.data.fill_(0.0)
