@@ -207,6 +207,7 @@ class GFN(nn.Module):
                     else:
                         pflogvars_sample = torch.logaddexp(pflogvars, add_log_var).detach()
 
+            # Equation (2) in the paper
             if pis:
                 s_ = s + self.dt * pf_mean + np.sqrt(self.dt) * (
                         pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)

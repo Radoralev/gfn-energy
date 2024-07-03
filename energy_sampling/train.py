@@ -185,6 +185,30 @@ def get_energy():
             energy = NeuralEnergy(model=model, smiles=args.smiles)
     return energy, model_args
 
+def copy_specific_layers(model1, model2):
+    """
+    Copy specific layers' weights from model1 to model2.
+
+    Args:
+    model1 (torch.nn.Module): Source model from which to copy weights.
+    model2 (torch.nn.Module): Target model to which to copy weights.
+    """
+    # Get state dictionaries
+    state_dict1 = model1.state_dict()
+    state_dict2 = model2.state_dict()
+
+    # Copy specific layer weights
+    for layer_name in state_dict1:
+        if layer_name in state_dict2:
+            with torch.no_grad():
+                state_dict2[layer_name].copy_(state_dict1[layer_name])
+        else:
+            print(f"Layer {layer_name} not found in model 2. Skipping...")
+
+    # Load the updated state dictionary into model2
+    model2.load_state_dict(state_dict2)
+
+
 def load_model(model, filename):
     with open(filename + '.json', 'r') as f:
         model_args = json.load(f)
@@ -390,6 +414,12 @@ def train():
                     pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers, model_args=model_args,
                     joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, equivariant_architectures=args.equivariant_architectures).to(device)
     
+    if args.model == 'egnn' and args.equivariant_architectures:
+        copy_specific_layers(model1=energy.model, model2=gfn_model.joint_model.model)
+        if args.learn_pb:
+            copy_specific_layers(model1=energy.model, model2=gfn_model.back_model.model)
+
+
     if args.continue_training:
         gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
         print('Loaded model.')
