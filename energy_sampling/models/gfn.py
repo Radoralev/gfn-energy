@@ -91,9 +91,14 @@ class GFN(nn.Module):
 
             self.t_model = TimeEncodingPIS(harmonics_dim, t_dim, hidden_dim)
             self.s_model = StateEncodingPIS(dim, hidden_dim, s_emb_dim)
-            self.joint_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, 2*dim, joint_layers, zero_init)
-            if learn_pb:
-                self.back_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, 2*dim, joint_layers, zero_init)
+            if model == 'mlp':
+                self.joint_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, 2*dim, joint_layers, zero_init)
+                if learn_pb:
+                    self.back_model = JointPolicyPIS(dim, s_emb_dim, t_dim, hidden_dim, 2*dim, joint_layers, zero_init)
+            elif model == 'attention':
+                self.joint_model = AttentionPolicy(in_dim=dim, t_dim=t_dim, hidden_dim=hidden_dim, out_dim=2*dim, num_layers=joint_layers, zero_init=zero_init, smiles=smiles)
+                if learn_pb:
+                    self.back_model = AttentionPolicy(in_dim=dim, t_dim=t_dim, hidden_dim=hidden_dim, out_dim=2*dim, num_layers=joint_layers, zero_init=zero_init, smiles=smiles)
             self.pb_scale_range = pb_scale_range
 
             if self.conditional_flow_model:
