@@ -6,6 +6,7 @@ import math
 
 from .mace import MACEModel
 from .egnn import EGNNModel
+from .attention import AtomAttention
 from .utils import smiles2graph, prep_input
 from torch_geometric.data import Batch
 from torch_geometric import loader 
@@ -153,6 +154,23 @@ class EquivariantPolicy(nn.Module):
         dl = loader.DataLoader(data_list, batch_size=s.shape[0])
         batch = next(iter(dl))
         return self.model(batch, t)
+
+
+class AttentionPolicy(nn.Module):
+    def __init__(self, in_dim: int = 32, t_dim: int = 32, hidden_dim: int = 64, out_dim: int = None, num_layers: int = 2, smiles: str = None, zero_init: bool = False):
+        super(AttentionPolicy, self).__init__()
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.graph = smiles2graph(smiles)
+        self.in_dim = in_dim
+        self.model = AtomAttention(embeddings_dim=3, output_dim=out_dim, t_dim=t_dim, kernel_size=self.graph['num_nodes']).to(self.device)
+        if zero_init:
+            self.model.output.net[-1].weight.data.fill_(0.0)
+            self.model.output.net[-1].bias.data.fill_(0.0)
+        self.atom_types = torch.from_numpy(self.graph['node_feat'][:, 0]).to(self.device)
+
+    def forward(self, s, t):
+        return self.model(s, t, self.atom_types)
+
 
 class JointPolicy(nn.Module):
     def __init__(self, s_dim: int, s_emb_dim: int, t_dim: int, hidden_dim: int = 64, out_dim: int = None,
