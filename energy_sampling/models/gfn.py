@@ -102,7 +102,10 @@ class GFN(nn.Module):
             self.pb_scale_range = pb_scale_range
 
             if self.conditional_flow_model:
-                self.flow_model = FlowModelPIS(dim, s_emb_dim, t_dim, hidden_dim, 1, joint_layers)
+                if model == 'attention':
+                    self.flow_model = AttentionPolicy(in_dim=dim, t_dim=t_dim, hidden_dim=hidden_dim, out_dim=1, num_layers=joint_layers, zero_init=False, smiles=smiles)#
+                else:
+                    self.flow_model = FlowModelPIS(dim, s_emb_dim, t_dim, hidden_dim, 1, joint_layers)
             else:
                 self.flow_model = torch.nn.Parameter(torch.tensor(0.).to(self.device))
 
