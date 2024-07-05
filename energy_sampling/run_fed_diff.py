@@ -5,36 +5,36 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tb_both_ways_learned_var_expl_ls_egnn_2.5k_epochs_small_lr1e5_withHs.csv'
+output_file = 'fed_results/tb_both_ways_learned_var_expl_ls_lp_tscale2_2.5k_epochs_small_lr1e5_withHs.csv'
 
 # Function to run the command and capture the output
-def run_command(smiles, local_model):
+def run_command(smiles, local_model, output_dir):
     command = [
-        'python', 'train.py', '--t_scale', '1.', '--T', '10', '--epochs', '2500',
+        'python', 'train.py', '--t_scale', '2', '--T', '10', '--epochs', '25',
         '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
-       '--learned_variance', '--log_var_range', '1', 
-        '--patience', '25000', '--model', 'egnn',
-        '--conditional_flow_model', '--langevin',
+       '--learned_variance', '--log_var_range', '1', '--output_dir',  output_dir,
+        '--patience', '25000', #'--model', 'attention',
+        '--conditional_flow_model', '--langevin', '--ld_step', '0.1', '--ld_schedule',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--equivariant_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
+        '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
         '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-4', 
         '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
         '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
-        '--ld_step', '0.1', '--ld_schedule', '--target_acceptance_rate', '0.574',
-        '--hidden_dim', '128', '--joint_layers', '5', '--s_emb_dim', '128',
-        '--t_emb_dim', '128', '--harmonics_dim', '128'
+        '--target_acceptance_rate', '0.574',
+        '--hidden_dim', '64', '--joint_layers', '2', '--s_emb_dim', '64',
+        '--t_emb_dim', '64', '--harmonics_dim', '64'
     ]
     print(command)
-    subprocess.run(command)
+    subprocess.Popen(command).wait(timeout=600)
 
 # Function to read the output file and extract the required value
-def read_output_file(smiles, local_model):
+def read_output_file(smiles, local_model, output_dir):
     keyword = ''
     if 'vacuum' in local_model:
         keyword = 'vacuum'
     elif 'solvation' in local_model:
         keyword = 'solvation' 
-    output_file = f'temp/{smiles}_{keyword}.txt'
+    output_file = f'temp/{output_dir}/{smiles}_{keyword}.txt'
     with open(output_file, 'r') as f:
         lines = f.readlines()
         logZ, logZlb = None, None
@@ -67,7 +67,9 @@ if os.path.exists(output_file):
 with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outfile:
     reader = csv.reader(infile, delimiter=';')
     writer = csv.writer(outfile)
-
+    
+    # create unique ID for output directory
+    output_dir = str(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     # Write the header if the file is new
     if not existing_results:
         writer.writerow(['SMILES', 'experimental_val', 'fed_Z_learned', 'fed_Z', 'fed_Z_lb', 'timestamp'])
@@ -87,12 +89,12 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         local_model_vacuum = 'weights/egnn_vacuum_small_with_hs'
         local_model_solvation = 'weights/egnn_solvation_small_with_hs'
 
-        run_command(smiles, local_model_vacuum)
-        run_command(smiles, local_model_solvation)
+        run_command(smiles, local_model_vacuum, output_dir)
+        run_command(smiles, local_model_solvation, output_dir)
 
         # Read the output files
-        logZ_vacuum, logZlb_vacuum, logZ_std_vacuum, logZlb_std_vacuum, logZ_learned_vacuum, logZ_learned_std_vacuum = read_output_file(smiles, local_model_vacuum)
-        logZ_solvation, logZlb_solvation, logZ_std_solvation, logZlb_std_solvation, logZ_learned_solvation, logZ_learned_std_solvation = read_output_file(smiles, local_model_solvation)
+        logZ_vacuum, logZlb_vacuum, logZ_std_vacuum, logZlb_std_vacuum, logZ_learned_vacuum, logZ_learned_std_vacuum = read_output_file(smiles, local_model_vacuum, output_dir)
+        logZ_solvation, logZlb_solvation, logZ_std_solvation, logZlb_std_solvation, logZ_learned_solvation, logZ_learned_std_solvation = read_output_file(smiles, local_model_solvation, output_dir)
 
         # Calculate fed_Z and fed_Z_lb
         fed_Z = float(logZ_solvation) - float(logZ_vacuum)

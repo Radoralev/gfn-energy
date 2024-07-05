@@ -4,6 +4,7 @@ import os
 import torch
 import matplotlib.pyplot as plt
 import wandb
+wandb.require("core")
 from tqdm import trange
 from buffer import ReplayBuffer
 from energies import *
@@ -109,6 +110,8 @@ parser.add_argument('--solvate', action='store_true', default=False, help="Solva
 parser.add_argument('--torchani-model', type=str, default='ANI-1x_8x', help="TorchANI model to use")
 parser.add_argument('--local_model', type=str, default=None, help="Path to local model")
 parser.add_argument('--equivariant_architectures', action='store_true', default=False)
+parser.add_argument('--output_dir', type=str, default='')
+
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -283,32 +286,9 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
     metrics = dict()
     log_reward_func = energy.log_reward
     if final_eval:
-        logZs = []
-        logZlbs = []
-        logZlearned = []
-        for _ in range(2):
-            init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
-            samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
-            logZs.append(log_Z.item())
-            logZlbs.append(log_Z_lb.item())
-            logZlearned.append(log_Z_learned.item())
-        metrics['final_eval/mean_log_Z'] = torch.mean(torch.tensor(logZs))
-        metrics['final_eval/std_log_Z'] = torch.std(torch.tensor(logZs))
-        metrics['final_eval/mean_log_Z_lb'] = torch.mean(torch.tensor(logZlbs))
-        metrics['final_eval/std_log_Z_lb'] = torch.std(torch.tensor(logZlbs))
-        metrics['final_eval/mean_log_Z_learned'] = torch.mean(torch.tensor(logZlearned))
-        metrics['final_eval/std_log_Z_learned'] = torch.std(torch.tensor(logZlearned))
+        calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func)
         if args.energy == 'neural':
-            k = 3.1668 * 1e-6
-            T = 298.15
-            hartree_to_kcal = 627.503
-            factor = k * T * hartree_to_kcal
-            metrics['final_eval/mean_log_Z'] = metrics['final_eval/mean_log_Z'] * factor
-            metrics['final_eval/std_log_Z'] = metrics['final_eval/std_log_Z'] * factor
-            metrics['final_eval/mean_log_Z_lb'] = metrics['final_eval/mean_log_Z_lb'] * factor
-            metrics['final_eval/std_log_Z_lb'] = metrics['final_eval/std_log_Z_lb'] * factor
-            metrics['final_eval/mean_log_Z_learned'] = metrics['final_eval/mean_log_Z_learned'] * factor
-            metrics['final_eval/std_log_Z_learned'] = metrics['final_eval/std_log_Z_learned'] * factor
+            convertMetricsToKcal(metrics)
     else:
         init_state = torch.zeros(eval_data_size, energy.data_ndim).to(device)
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[
@@ -329,6 +309,35 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
         metrics.update(get_sample_metrics(samples, eval_data, final_eval))
     gfn_model.train()
     return metrics
+
+def calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func):
+    logZs = []
+    logZlbs = []
+    logZlearned = []
+    for _ in range(2):
+        init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
+        samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
+        logZs.append(log_Z.item())
+        logZlbs.append(log_Z_lb.item())
+        logZlearned.append(log_Z_learned.item())
+    metrics['final_eval/mean_log_Z'] = torch.mean(torch.tensor(logZs))
+    metrics['final_eval/std_log_Z'] = torch.std(torch.tensor(logZs))
+    metrics['final_eval/mean_log_Z_lb'] = torch.mean(torch.tensor(logZlbs))
+    metrics['final_eval/std_log_Z_lb'] = torch.std(torch.tensor(logZlbs))
+    metrics['final_eval/mean_log_Z_learned'] = torch.mean(torch.tensor(logZlearned))
+    metrics['final_eval/std_log_Z_learned'] = torch.std(torch.tensor(logZlearned))
+
+def convertMetricsToKcal(metrics):
+    k = 3.1668 * 1e-6
+    T = 298.15
+    hartree_to_kcal = 627.503
+    factor = k * T * hartree_to_kcal
+    metrics['final_eval/mean_log_Z'] = metrics['final_eval/mean_log_Z'] * factor
+    metrics['final_eval/std_log_Z'] = metrics['final_eval/std_log_Z'] * factor
+    metrics['final_eval/mean_log_Z_lb'] = metrics['final_eval/mean_log_Z_lb'] * factor
+    metrics['final_eval/std_log_Z_lb'] = metrics['final_eval/std_log_Z_lb'] * factor
+    metrics['final_eval/mean_log_Z_learned'] = metrics['final_eval/mean_log_Z_learned'] * factor
+    metrics['final_eval/std_log_Z_learned'] = metrics['final_eval/std_log_Z_learned'] * factor
 
 
 def train_step(energy, gfn_model, gfn_optimizer, it, exploratory, buffer, buffer_ls, exploration_factor, exploration_wd):
@@ -471,25 +480,33 @@ def train():
         # Learning rate scheduler
         scheduler.step(metrics['train/loss'])
 
-    # load best model
-    gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
+    # load best model if file exists
+    if os.path.exists(f'{name}model.pt'):
+        gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
     eval_results = final_eval(energy, gfn_model)#.to(device)
     metrics.update(eval_results)
 
-    
     keyword = ''
     if 'vacuum' in args.local_model:
         keyword = 'vacuum'
     elif 'solvation' in args.local_model:
         keyword = 'solvation' 
-    with open(f'temp/{args.smiles}_{keyword}.txt', 'w') as f:
+
+    # if temp/args.output_dir doesn't exist create it
+    if not os.path.exists(f'temp/{args.output_dir}'):
+        os.makedirs(f'temp/{args.output_dir}')
+    # write a string version of the arguments to a file
+    with open(f'temp/{args.output_dir}/{args.smiles}_{keyword}_command.txt', 'w') as f:
+        f.write(str(args))
+    # write the results to a file
+    with open(f'temp/{args.output_dir}/{args.smiles}_{keyword}.txt', 'w') as f:
         f.write(f"log_Z_lb: {metrics['final_eval/mean_log_Z_lb']}\n")
         f.write(f"log_Z_lb_std: {metrics['final_eval/std_log_Z_lb']}\n")
         f.write(f"log_Z: {metrics['final_eval/mean_log_Z']}\n")
         f.write(f"log_Z_std: {metrics['final_eval/std_log_Z']}\n")
         f.write(f"log_Z_learned: {metrics['final_eval/mean_log_Z_learned']}\n")
         f.write(f"log_Z_learned_std: {metrics['final_eval/std_log_Z_learned']}\n")
-
+    wandb.finish()
 
 def final_eval(energy, gfn_model):
     final_eval_data = energy.sample(final_eval_data_size)
