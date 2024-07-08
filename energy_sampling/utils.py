@@ -156,5 +156,5 @@ def get_name(args):
     name = f'{name}/seed_{args.seed}/'
     # add time
     name = f'{name}/{args.smiles}'
-    name = f'{name}{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}/'
+    name = f'{name}/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}/'
     return name
