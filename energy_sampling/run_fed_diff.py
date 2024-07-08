@@ -10,7 +10,7 @@ output_file = 'fed_results/tb_both_ways_learned_var_expl_ls_tscale1_25k_attentio
 # Function to run the command and capture the output
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
-        'python', 'train.py', '--t_scale', '1', '--T', '10', '--epochs', '25000',
+        'python', 'train.py', '--t_scale', '1', '--T', '10', '--epochs', '1000',
         '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
        '--learned_variance', '--log_var_range', '1', '--output_dir',  output_dir,
         '--patience', '25000', '--model', 'attention',
@@ -18,12 +18,14 @@ def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
         '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-4', 
-        '--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
-        '--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
-        '--target_acceptance_rate', '0.574', '--load_from_most_recent' if load_from_most_recent else '',
+        #'--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
+        #'--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
+        #'--target_acceptance_rate', '0.574', 
         '--hidden_dim', '128', '--joint_layers', '2', '--s_emb_dim', '128',
         '--t_emb_dim', '128', '--harmonics_dim', '128'
     ]
+    if load_from_most_recent:
+        command.append('--load_from_most_recent')
     print(command)
     subprocess.run(command)
 
