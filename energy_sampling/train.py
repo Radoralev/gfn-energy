@@ -111,7 +111,7 @@ parser.add_argument('--torchani-model', type=str, default='ANI-1x_8x', help="Tor
 parser.add_argument('--local_model', type=str, default=None, help="Path to local model")
 parser.add_argument('--equivariant_architectures', action='store_true', default=False)
 parser.add_argument('--output_dir', type=str, default='')
-
+parser.add_argument('--load_from_most_recent', action='store_true', default=False)
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -432,7 +432,21 @@ def train():
     if args.continue_training:
         gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
         print('Loaded model.')
-        
+    
+    if args.load_from_most_recent:
+        # parent folder
+        name_old = '/'.join(name.split('/')[:-2])
+        # get folder inside parent folder that has the most recent timestamp as name and has something inside it
+        folders = [f'{name_old}/{x}' for x in os.listdir(name_old) if os.path.isdir(f'{name_old}/{x}') and len(os.listdir(f'{name_old}/{x}')) > 0]
+        if folders:
+            name_old = max(folders)
+            gfn_model.load_state_dict(torch.load(f'{name_old}/model.pt'))
+            print('Loaded model from most recent folder.')
+        else:
+            name_old = ''
+            print('No model to load.')
+
+
 
     gfn_optimizer = get_gfn_optimizer(gfn_model, args.lr_policy, args.lr_flow, args.lr_back, args.learn_pb,
                                       args.conditional_flow_model, args.use_weight_decay, args.weight_decay)
@@ -506,7 +520,6 @@ def train():
         f.write(f"log_Z_std: {metrics['final_eval/std_log_Z']}\n")
         f.write(f"log_Z_learned: {metrics['final_eval/mean_log_Z_learned']}\n")
         f.write(f"log_Z_learned_std: {metrics['final_eval/std_log_Z_learned']}\n")
-    wandb.finish()
 
 def final_eval(energy, gfn_model):
     final_eval_data = energy.sample(final_eval_data_size)
