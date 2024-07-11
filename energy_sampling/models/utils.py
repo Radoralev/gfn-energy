@@ -72,16 +72,10 @@ def smiles2graph(smiles_string):
 
 def prep_input(graph, pos=None, device=None):
     datalist = []
+    atoms = torch.from_numpy(graph['node_feat'])
+    edge_index = torch.from_numpy(graph['edge_index'])
+    edge_attr = torch.from_numpy(graph['edge_feat'])
     for xyz in pos:
-        data = Data(
-            atoms=torch.from_numpy(graph['node_feat']), 
-            edge_index=torch.from_numpy(graph['edge_index']), 
-            edge_attr=torch.from_numpy(graph['edge_feat']), 
-            pos=xyz).to(device)
-        try:
-            data.validate(raise_on_error=True)
-        except:
-            print('Error in data:', data)
-            raise ValueError('Data is not valid.')
+        data = Data(atoms=atoms, edge_index=edge_index, edge_attr=edge_attr, pos=xyz).to(device)
         datalist.append(data)
     return datalist
