@@ -185,7 +185,7 @@ def get_energy():
                 model, model_args = load_model(model='egnn', filename=args.local_model)
             elif args.local_model.split('/')[-1].startswith('mace'):
                 model, model_args = load_model(model='mace', filename=args.local_model)
-            energy = NeuralEnergy(model=model, smiles=args.smiles)
+            energy = NeuralEnergy(model=model, smiles=args.smiles, batch_size_train=args.batch_size)
     return energy, model_args
 
 def copy_specific_layers(model1, model2):
@@ -372,6 +372,7 @@ def fwd_train_step(energy, gfn_model, exploration_std, return_exp=False):
     init_state = torch.zeros(args.batch_size, energy.data_ndim).to(device)
     loss = get_gfn_forward_loss(args.mode_fwd, init_state, gfn_model, energy.log_reward, coeff_matrix,
                                 exploration_std=exploration_std, return_exp=return_exp)
+    
     return loss
 
 
@@ -385,9 +386,6 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
             if it % args.ls_cycle < 2:
                 samples, rewards = buffer.sample()
                 local_search_samples, log_r = langevin_dynamics(samples, energy.log_reward, device, args)
-                #if len(local_search_samples) == 0:
-                #local_search_samples = samples
-                #log_r = rewards 
                 buffer_ls.add(local_search_samples, log_r)
         
             samples, rewards = buffer_ls.sample()
@@ -466,7 +464,7 @@ def train():
     for i in trange(args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd)
-        if i % 250 == 0:
+        if i % 3 == 0:
             metrics.update(eval_step(eval_data, energy, gfn_model, final_eval=False))
             #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
             #    del metrics['eval/log_Z_learned']
@@ -533,3 +531,5 @@ if __name__ == '__main__':
         eval()
     else:
         train()
+        print('Finish')
+        os.kill(os.getpid(), 9)
