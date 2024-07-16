@@ -86,7 +86,7 @@ def plot_scatter(ax, x, y, xerr, yerr, title):
   pearson_corr, _ = pearsonr(x, y)
   spearman_corr, _ = spearmanr(x, y)
   r2_str = r'$R^2$'
-  ax.set_title(f'{title}\nAUE = {aue:.2f} kcal/mol, {r2_str} = {cor:.2f}, Pearson = {pearson_corr:.2f}, Spearman = {spearman_corr:.2f}\n1 kcal/mol = {within_1_kcal:.0f}%')
+  ax.set_title(f'{title}\nAUE = {aue:.2f} kcal/mol, {r2_str} = {cor:.2f}, Pearson = {pearson_corr:.2f}, Spearman = {spearman_corr:.2f}\n1 kcal/mol = {within_1_kcal:.0f}%, N = {len(x)}')
   ax.set_xlabel('ΔG_exp, kcal/mol ± Uncertainty')
   ax.set_ylabel('ΔG_calc, kcal/mol ± Uncertainty')
 
