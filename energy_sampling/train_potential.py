@@ -160,9 +160,9 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     print(in_dim)
     # Define the model
     if model_type == 'mace':
-        model = MACEModel(in_dim=in_dim, out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, batch_norm=False).to(device, dtype=torch.float32)
+        model = MACEModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, mlp_dim=emb_dim, equivariant_pred=False, batch_norm=False, num_atom_features=in_dim).to(device, dtype=torch.double)
     elif model_type == 'egnn':
-        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float32)
+        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float64)
     else:
         raise ValueError("Invalid model type. Choose either 'mace' or 'egnn'.")
     # print sum params
@@ -192,7 +192,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
 
                 # Forward pass
                 outputs = model(x)
-                loss = criterion(outputs.squeeze(), x.y.to(torch.float32).squeeze())
+                loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
 
                 # Backward pass and optimize
                 loss.backward()
@@ -308,7 +308,7 @@ lr = args.lr
 epochs=1000
 
 model, losses, dataloader_train = train_model(
-    'egnn', 
+    'mace', 
     in_dim=max_atom_features+1, 
     out_dim=1, 
     emb_dim=emb_dim, 
