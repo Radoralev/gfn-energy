@@ -154,7 +154,7 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, data, device, patience):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, train_data, val_data, device, patience):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
     print(in_dim)
@@ -177,13 +177,9 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, da
     best_model_state = None
     patience_counter = 0
 
-    # Split the dataloader into train and validation sets
-    train_size = int(0.9 * len(data))
-    train_dataset, val_dataset = torch.utils.data.random_split(data, [train_size, len(data) - train_size])
-    
     # Setup dataloaders
-    train_dataloader = loader.DataLoader(train_dataset, batch_size=32, shuffle=True)
-    val_dataloader = loader.DataLoader(val_dataset, batch_size=32, shuffle=False)
+    train_dataloader = loader.DataLoader(train_data, batch_size=32, shuffle=True)
+    val_dataloader = loader.DataLoader(val_data, batch_size=32, shuffle=False)
 
     for epoch in range(epochs):
         running_loss = 0.0
@@ -249,30 +245,61 @@ def eval_model(model, dataloader, device):
             running_loss += loss.item()
     return running_loss/len(dataloader)
 
-data = []
-for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers'))):
-    solvent_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
-    vacuum_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
-    if args.solvation:
-        solvent_graphs = extract_graphs(solvent_dir)
-        data.extend(solvent_graphs)
-    else:        
-        vacuum_graphs = extract_graphs(vacuum_dir)
-        data.extend(vacuum_graphs)
+train_data = []
+val_data = []
+test_data = []
+molecule_list = list(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers')))
+# split the molecule list into train,test,val with random 
+np.random.seed(42)
+np.random.shuffle(molecule_list)
+molecule_number = len(molecule_list)
+train_molecules = molecule_list[:int(0.8*molecule_number)]
+val_molecules = molecule_list[int(0.8*molecule_number):int(0.9*molecule_number)]
+test_molecules = molecule_list[int(0.9*molecule_number):]
+print(len(train_molecules), len(val_molecules), len(test_molecules))
+
+
+def extract_mols(name_list):
+    data = []
+    for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers'))):
+        if dir in name_list:
+            solvent_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
+            vacuum_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
+            if args.solvation:
+                solvent_graphs = extract_graphs(solvent_dir)
+                data.extend(solvent_graphs)
+            else:        
+                vacuum_graphs = extract_graphs(vacuum_dir)
+                data.extend(vacuum_graphs)
+    return data
+print('Extracting train data')
+train_data = extract_mols(train_molecules)
+print('Extracting val data')
+val_data = extract_mols(val_molecules)
+print('Extracting test data')
+test_data = extract_mols(test_molecules)
+print('Number of train samples:', len(train_data))
+print('Number of val samples:', len(val_data))
+print('Number of test samples:', len(test_data))
 
 # find max number of each atom feature in a molecule
 max_atom_features = np.zeros(5, dtype=np.int64)
-for sample in data:
+for sample in train_data+val_data+test_data:
     for i in range(5):
         max_atom_features[i] = max(max_atom_features[i], sample.atoms[:, i].max())
 
 print(max_atom_features.tolist())
 # calculate mean and variance of .y 
-y = min([sample.y for sample in data])
-for sample in data:
+y = min([sample.y for sample in train_data] + [sample.y for sample in val_data] + [sample.y for sample in test_data])
+for sample in train_data:
+    sample.y = sample.y - y
+for sample in val_data:
+    sample.y = sample.y - y
+for sample in test_data:
     sample.y = sample.y - y
 
-dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
+
+dataloader_test = loader.DataLoader(test_data, batch_size=32, shuffle=True)
 
 
 emb_dim = args.emb_dim
@@ -288,7 +315,8 @@ model, losses, dataloader_train = train_model(
     num_layers=num_layers, 
     lr=lr, 
     epochs=epochs, 
-    data=data[5000:], 
+    train_data=train_data,
+    val_data=val_data, 
     device='cuda', 
     patience=50,)
 
