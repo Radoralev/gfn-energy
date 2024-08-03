@@ -268,6 +268,9 @@ for sample in data:
 
 print(max_atom_features.tolist())
 # calculate mean and variance of .y 
+y = min([sample.y for sample in data])
+for sample in data:
+    sample.y = sample.y - y
 
 dataloader_test = loader.DataLoader(data[:5000], batch_size=32, shuffle=True)
 
