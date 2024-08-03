@@ -19,6 +19,7 @@ from rdkit import Chem
 from rdkit.Chem import rdDetermineBonds
 from models.egnn import EGNNModel
 from models.mace import MACEModel
+from itertools import combinations
 
 import matplotlib.pyplot as plt
 #torch set float32
@@ -101,8 +102,7 @@ def xyz_mol2graph(xyz_mol):
             edge_features_list.append(edge_feature)
 
         # data.edge_index: Graph connectivity in COO format with shape [2, num_edges]
-        edge_index = np.array(edges_list, dtype = np.int64).T
-
+        edge_index = np.array(list(combinations(list(np.arange(len(x))), r=2))).T
         # data.edge_attr: Edge feature matrix with shape [num_edges, num_edge_features]
         edge_attr = np.array(edge_features_list, dtype = np.int64)
 
@@ -308,7 +308,7 @@ lr = args.lr
 epochs=1000
 
 model, losses, dataloader_train = train_model(
-    'mace', 
+    'egnn', 
     in_dim=max_atom_features+1, 
     out_dim=1, 
     emb_dim=emb_dim, 
