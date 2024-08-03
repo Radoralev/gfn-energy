@@ -34,7 +34,8 @@ class MACEModel(torch.nn.Module):
         batch_norm: bool = True,
         residual: bool = True,
         equivariant_pred: bool = False,
-        condition_time: bool = False
+        condition_time: bool = False,
+        num_atom_features: int = 1
     ):
         """
         Parameters:
@@ -86,7 +87,8 @@ class MACEModel(torch.nn.Module):
         )
 
         # Embedding lookup for initial node features
-        self.emb_in = torch.nn.Embedding(in_dim, emb_dim)
+        self.embedding = torch.nn.Embedding(in_dim, emb_dim) 
+        self.embedding_proj = torch.nn.Linear(emb_dim+len(num_atom_features)-1, emb_dim)
 
         # Set hidden irreps if none are provided
         if hidden_irreps is None:
@@ -170,11 +172,12 @@ class MACEModel(torch.nn.Module):
         #batch = prep_input(self.smiles_graph, pos, device=self.emb_in.weight.device)
         # Node embedding
         #atom_number = batch.num_nodes
-        h = self.emb_in(batch.atoms)  # (n,) -> (n, d)
-        bs, atom_num = batch.pos.shape
-        if t:
-            h = h.view(bs, atom_num, self.emb_dim)
-            t = t.unsqueeze(1).expand(h.size(0), h.size(1), h.size(2))
+        h = self.embedding(batch.atoms[..., 0])
+        h = torch.cat([h, batch.atoms[..., 1:]], dim=-1)
+        h = self.embedding_proj(h)
+        if t is not None:
+            # match h shape
+            t = t.repeat(h.shape[0]//t.shape[0], 1)
             h = h + t
 
         # Edge features
@@ -183,7 +186,6 @@ class MACEModel(torch.nn.Module):
 
         edge_sh = self.spherical_harmonics(vectors)
         edge_feats = self.radial_embedding(lengths)
-        
         for conv, reshape, prod in zip(self.convs, self.reshapes, self.prods):
             # Message passing layer
             h_update = conv(h, batch.edge_index, edge_sh, edge_feats)
