@@ -1,0 +1,2 @@
+python train_potential.py --output weights/egnn_solvation_small_with_hs_minus_min2 --lr 1e-2 --num_layers 2 --weight_decay 1e-2 --emb_dim 64 --solvation
+python train_potential.py --output weights/egnn_vacuum_small_with_hs_minus_min2  --lr 1e-2 --num_layers 2 --weight_decay 1e-2 --emb_dim 64

@@ -154,7 +154,7 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, train_data, val_data, device, patience):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, train_data, val_data, device, patience,):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
     print(in_dim)
@@ -170,7 +170,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     # Define the optimizer, loss function, and learning rate scheduler, weight decay
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.weight_decay)
     criterion = torch.nn.MSELoss()
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=patience//2, factor=0.5, verbose=True)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1 ** (1 / 8e4))    
     all_losses = []
     best_loss = np.inf
     best_epoch = 0
@@ -194,21 +194,21 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
                 outputs = model(x)
                 loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
 
-                # Backward pass and optimize
+                # Backward pass and optimize add clip_grad_norm_
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
 
                 # Update running loss
                 running_loss += loss.item()
                 all_losses.append(loss.item())
 
-                tepoch.set_postfix(loss=(loss.item()) * 627.503)
+                tepoch.set_postfix(loss=(loss.item()*627.503))
         # Calculate average loss for the epoch
         avg_loss = running_loss / len(train_dataloader)
-        print(f"Epoch {epoch+1}, Loss: {avg_loss}")
-
+        print(f"Epoch {epoch+1}, Loss: {avg_loss*627.503}")
+        print(f"Learning rate: {scheduler.get_last_lr()[0]}")
         # Step the scheduler
-        scheduler.step(avg_loss)
 
         # Check for early stopping
         val_loss = (eval_model(model, val_dataloader, device)) * 627.503
@@ -253,9 +253,9 @@ molecule_list = list(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sa
 np.random.seed(42)
 np.random.shuffle(molecule_list)
 molecule_number = len(molecule_list)
-train_molecules = molecule_list[:int(0.8*molecule_number)]
-val_molecules = molecule_list[int(0.8*molecule_number):int(0.9*molecule_number)]
-test_molecules = molecule_list[int(0.9*molecule_number):]
+train_molecules = molecule_list[:int(0.95*molecule_number)]
+val_molecules = molecule_list[int(0.95*molecule_number):int(0.975*molecule_number)]
+test_molecules = molecule_list[int(0.975*molecule_number):]
 print(len(train_molecules), len(val_molecules), len(test_molecules))
 
 
@@ -284,19 +284,26 @@ print('Number of test samples:', len(test_data))
 
 # find max number of each atom feature in a molecule
 max_atom_features = np.zeros(5, dtype=np.int64)
+atoms = set()
 for sample in train_data+val_data+test_data:
+    for atom in sample.atoms[:, 0]:
+        atoms.add(atom.item())
     for i in range(5):
         max_atom_features[i] = max(max_atom_features[i], sample.atoms[:, i].max())
 
-print(max_atom_features.tolist())
-# calculate mean and variance of .y 
-y = min([sample.y for sample in train_data] + [sample.y for sample in val_data] + [sample.y for sample in test_data])
+# check if there any atoms in sample.atoms[:, 0] that are present in test/val data but not in train data
 for sample in train_data:
-    sample.y = sample.y - y
-for sample in val_data:
-    sample.y = sample.y - y
-for sample in test_data:
-    sample.y = sample.y - y
+    for atom in sample.atoms[:, 0]:
+        if atom.item() not in atoms:
+            print('Atom not in train data:', atom)
+            break
+
+print(max_atom_features.tolist())
+
+
+min_y = np.min([sample.y for sample in train_data+val_data+test_data])
+for sample in train_data+val_data+test_data:
+    sample.y = sample.y - min_y
 
 
 dataloader_test = loader.DataLoader(test_data, batch_size=32, shuffle=True)
@@ -318,10 +325,10 @@ model, losses, dataloader_train = train_model(
     train_data=train_data,
     val_data=val_data, 
     device='cuda', 
-    patience=50,)
-
-print('MSE on train data:', eval_model(model, dataloader_train, 'cuda') * 627.503)
-print('MSE on val data:', eval_model(model, dataloader_test, 'cuda') * 627.503)
+    patience=50,
+)
+print('MSE on train data:', eval_model(model, dataloader_train, 'cuda')*627.503)
+print('MSE on val data:', eval_model(model, dataloader_test, 'cuda')*627.503)
 
 
 
