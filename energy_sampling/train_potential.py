@@ -213,7 +213,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
         special_preds = []
         for x in special_val_dataloader:
             pred = model(x.to(device))
-            special_preds.append(pred.detach().cpu().tolist())
+            special_preds.extend(pred.detach().cpu().tolist())
         print(f"Molecule 0 mean pred: {np.mean(special_preds)}, std pred: {np.std(special_preds)}")
         # Check for early stopping
         val_loss = (eval_model(model, val_dataloader, device)) * 627.503
@@ -257,12 +257,26 @@ molecule_list = list(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sa
 # split the molecule list into train,test,val with random 
 np.random.seed(42)
 np.random.shuffle(molecule_list)
+special_val = 'molecule_0'
 molecule_number = len(molecule_list)
-train_molecules = molecule_list[:int(0.93*molecule_number)]
-special_val = train_molecules[0]
-val_molecules = molecule_list[int(0.9*molecule_number):int(0.95*molecule_number)]
-test_molecules = molecule_list[int(0.95*molecule_number):]
+from sklearn.model_selection import train_test_split
+
+train_molecules, val_molecules = train_test_split(molecule_list, test_size=0.1)
+val_molecules, test_molecules = train_test_split(val_molecules, test_size=0.5)
+
+# check if train, test and val are disjoint
+assert len(set(train_molecules).intersection(set(val_molecules))) == 0
+assert len(set(train_molecules).intersection(set(test_molecules))) == 0
+assert len(set(val_molecules).intersection(set(test_molecules))) == 0
+
+if special_val not in train_molecules:
+    train_molecules.add(special_val)
+if special_val in val_molecules:
+    val_molecules.remove(special_val)
+if special_val in test_molecules:
+    test_molecules.remove(special_val)
 print(len(train_molecules), len(val_molecules), len(test_molecules))
+
 
 
 def extract_mols(name_list):
@@ -273,10 +287,12 @@ def extract_mols(name_list):
             vacuum_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
             if args.solvation:
                 solvent_graphs = extract_graphs(solvent_dir)
-                data.extend(solvent_graphs)
-            else:        
+                if len(solvent_graphs) > 20:
+                    data.extend(solvent_graphs)
+            else:
                 vacuum_graphs = extract_graphs(vacuum_dir)
-                data.extend(vacuum_graphs)
+                if len(solvent_graphs) > 20:
+                    data.extend(vacuum_graphs)
     return data
 print('Extracting train data')
 train_data = extract_mols(train_molecules)
