@@ -154,7 +154,7 @@ def update_plot(losses):
     plt.close()  # Close the figure to prevent it from being displayed again
 
 
-def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, train_data, val_data, device, patience,):
+def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, train_data, val_data, special_val_data, device, patience,):
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
     print(in_dim)
@@ -162,7 +162,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     if model_type == 'mace':
         model = MACEModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, mlp_dim=emb_dim, equivariant_pred=False, batch_norm=False, num_atom_features=in_dim).to(device, dtype=torch.double)
     elif model_type == 'egnn':
-        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float64)
+        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=True, num_atom_features=in_dim).to(device, dtype=torch.float64)
     else:
         raise ValueError("Invalid model type. Choose either 'mace' or 'egnn'.")
     # print sum params
@@ -170,7 +170,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     # Define the optimizer, loss function, and learning rate scheduler, weight decay
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.weight_decay)
     criterion = torch.nn.MSELoss()
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1 ** (1 / 8e4))    
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1 ** (1 / 9e4))    
     all_losses = []
     best_loss = np.inf
     best_epoch = 0
@@ -180,7 +180,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     # Setup dataloaders
     train_dataloader = loader.DataLoader(train_data, batch_size=32, shuffle=True)
     val_dataloader = loader.DataLoader(val_data, batch_size=32, shuffle=False)
-
+    special_val_dataloader = loader.DataLoader(special_val_data, batch_size=32, shuffle=False)
     for epoch in range(epochs):
         running_loss = 0.0
         with tqdm(train_dataloader, unit="batch") as tepoch:
@@ -204,12 +204,17 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
                 all_losses.append(loss.item())
 
                 tepoch.set_postfix(loss=(loss.item()*627.503))
+
         # Calculate average loss for the epoch
         avg_loss = running_loss / len(train_dataloader)
         print(f"Epoch {epoch+1}, Loss: {avg_loss*627.503}")
         print(f"Learning rate: {scheduler.get_last_lr()[0]}")
         # Step the scheduler
-
+        special_preds = []
+        for x in special_val_dataloader:
+            pred = model(x.to(device))
+            special_preds.append(pred.detach().cpu().tolist())
+        print(f"Molecule 0 mean pred: {np.mean(special_preds)}, std pred: {np.std(special_preds)}")
         # Check for early stopping
         val_loss = (eval_model(model, val_dataloader, device)) * 627.503
         print(f"Validation Loss: {val_loss}")
@@ -253,9 +258,10 @@ molecule_list = list(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sa
 np.random.seed(42)
 np.random.shuffle(molecule_list)
 molecule_number = len(molecule_list)
-train_molecules = molecule_list[:int(0.95*molecule_number)]
-val_molecules = molecule_list[int(0.95*molecule_number):int(0.975*molecule_number)]
-test_molecules = molecule_list[int(0.975*molecule_number):]
+train_molecules = molecule_list[:int(0.93*molecule_number)]
+special_val = train_molecules[0]
+val_molecules = molecule_list[int(0.9*molecule_number):int(0.95*molecule_number)]
+test_molecules = molecule_list[int(0.95*molecule_number):]
 print(len(train_molecules), len(val_molecules), len(test_molecules))
 
 
@@ -276,11 +282,14 @@ print('Extracting train data')
 train_data = extract_mols(train_molecules)
 print('Extracting val data')
 val_data = extract_mols(val_molecules)
+special_val_data = extract_mols([special_val])
 print('Extracting test data')
 test_data = extract_mols(test_molecules)
 print('Number of train samples:', len(train_data))
 print('Number of val samples:', len(val_data))
 print('Number of test samples:', len(test_data))
+# special val data target mean and std
+print('Special val data target mean and std:', np.mean([sample.y.item() for sample in special_val_data]), np.std([sample.y.item() for sample in special_val_data]))
 
 # find max number of each atom feature in a molecule
 max_atom_features = np.zeros(5, dtype=np.int64)
@@ -301,9 +310,6 @@ for sample in train_data:
 print(max_atom_features.tolist())
 
 
-min_y = np.min([sample.y for sample in train_data+val_data+test_data])
-for sample in train_data+val_data+test_data:
-    sample.y = sample.y - min_y
 
 
 dataloader_test = loader.DataLoader(test_data, batch_size=32, shuffle=True)
@@ -324,8 +330,9 @@ model, losses, dataloader_train = train_model(
     epochs=epochs, 
     train_data=train_data,
     val_data=val_data, 
+    special_val_data=special_val_data,
     device='cuda', 
-    patience=50,
+    patience=150,
 )
 print('MSE on train data:', eval_model(model, dataloader_train, 'cuda')*627.503)
 print('MSE on val data:', eval_model(model, dataloader_test, 'cuda')*627.503)
