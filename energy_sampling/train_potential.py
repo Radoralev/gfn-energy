@@ -291,7 +291,7 @@ def extract_mols(name_list):
                     data.extend(solvent_graphs)
             else:
                 vacuum_graphs = extract_graphs(vacuum_dir)
-                if len(solvent_graphs) > 20:
+                if len(vacuum_graphs) > 20:
                     data.extend(vacuum_graphs)
     return data
 print('Extracting train data')
