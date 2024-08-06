@@ -204,18 +204,18 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
                 running_loss += loss.item()
                 all_losses.append(loss.item())
 
-                tepoch.set_postfix(loss=(loss.item()*627.503**2))
+                tepoch.set_postfix(loss=(loss.item()))
 
         # Calculate average loss for the epoch
         avg_loss = running_loss / len(train_dataloader)
-        print(f"Epoch {epoch+1}, Loss: {avg_loss*627.503**2}")
+        print(f"Epoch {epoch+1}, Loss: {avg_loss}")
         print(f"Learning rate: {scheduler.get_last_lr()[0]}")
         # Step the scheduler
         special_preds = []
         for x in special_val_dataloader:
             pred = model(x.to(device))
             special_preds.extend(pred.detach().cpu().tolist())
-        print(f"Molecule 0 mean pred: {np.mean(rescale(np.array(special_preds)))*627.503} kcal/mol, std pred: {np.std(rescale(np.array(special_preds))*627.503)} kcal/mol")
+        print(f"Molecule 0 mean pred: {np.mean(rescale(np.array(special_preds)))} kcal/mol, std pred: {np.std(rescale(np.array(special_preds)))} kcal/mol")
         # Check for early stopping
         val_loss_mse, val_loss_mae = (eval_model(model, val_dataloader, device))
         print(f"Validation MAE: {val_loss_mae}")
@@ -266,46 +266,46 @@ def extract_mols(name_list):
 
 data = extract_mols(molecule_list)
 
-np.random.shuffle(molecule_list)
+# np.random.shuffle(molecule_list)
 special_val = 'molecule_0'
-molecule_number = len(molecule_list)
+# molecule_number = len(molecule_list)
 from sklearn.model_selection import train_test_split
 
-train_molecules, val_molecules = train_test_split(molecule_list, test_size=0.1)
-val_molecules, test_molecules = train_test_split(val_molecules, test_size=0.5)
+# train_molecules, val_molecules = train_test_split(molecule_list, test_size=0.1)
+# val_molecules, test_molecules = train_test_split(val_molecules, test_size=0.5)
 
-# check if train, test and val are disjoint
-assert len(set(train_molecules).intersection(set(val_molecules))) == 0
-assert len(set(train_molecules).intersection(set(test_molecules))) == 0
-assert len(set(val_molecules).intersection(set(test_molecules))) == 0
+# # check if train, test and val are disjoint
+# assert len(set(train_molecules).intersection(set(val_molecules))) == 0
+# assert len(set(train_molecules).intersection(set(test_molecules))) == 0
+# assert len(set(val_molecules).intersection(set(test_molecules))) == 0
 
-if special_val not in train_molecules:
-    train_molecules.add(special_val)
-if special_val in val_molecules:
-    val_molecules.remove(special_val)
-if special_val in test_molecules:
-    test_molecules.remove(special_val)
-print(len(train_molecules), len(val_molecules), len(test_molecules))
-
-
+# if special_val not in train_molecules:
+#     train_molecules.add(special_val)
+# if special_val in val_molecules:
+#     val_molecules.remove(special_val)
+# if special_val in test_molecules:
+#     test_molecules.remove(special_val)
+# print(len(train_molecules), len(val_molecules), len(test_molecules))
 
 
 
-print('Extracting train data')
-train_data = extract_mols(train_molecules)
-print('Extracting val data')
-val_data = extract_mols(val_molecules)
+
+
+# print('Extracting train data')
+# train_data = extract_mols(train_molecules)
+# print('Extracting val data')
+# val_data = extract_mols(val_molecules)
 special_val_data = extract_mols([special_val])
-print('Extracting test data')
-test_data = extract_mols(test_molecules)
-print('Number of train samples:', len(train_data))
-print('Number of val samples:', len(val_data))
-print('Number of test samples:', len(test_data))
-# special val data target mean and std
-print('Special val data target mean and std:', np.mean([sample.y.item()*627.503 for sample in special_val_data]), np.std([sample.y.item()*627.503 for sample in special_val_data]))
+# print('Extracting test data')
+# test_data = extract_mols(test_molecules)
+# print('Number of train samples:', len(train_data))
+# print('Number of val samples:', len(val_data))
+# print('Number of test samples:', len(test_data))
+# # special val data target mean and std
+print('Special val data target mean and std:', np.mean([sample.y.item() for sample in special_val_data]), np.std([sample.y.item() for sample in special_val_data]))
 
 
-data = train_data+val_data+test_data
+# data = train_data+val_data+test_data
 np.random.shuffle(data)
 train_data, val_data = train_test_split(data, test_size=0.1)
 val_data, test_data = train_test_split(val_data, test_size=0.5)
@@ -348,7 +348,7 @@ def eval_model(model, dataloader, device):
         for x in dataloader:
             x = x.to(device)
             outputs = model(x) 
-            outputs = rescale(outputs) * 627.503
+            outputs = rescale(outputs) 
             loss = criterion1(outputs.squeeze(), x.y.to(torch.float32).squeeze())
             loss2 = criterion2(outputs.squeeze(), x.y.to(torch.float32).squeeze())
             running_loss_mse += loss.item()
