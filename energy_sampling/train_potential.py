@@ -160,7 +160,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     print(in_dim)
     # Define the model
     if model_type == 'mace':
-        model = MACEModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, mlp_dim=emb_dim, equivariant_pred=False, batch_norm=False, num_atom_features=in_dim).to(device, dtype=torch.double)
+        model = MACEModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, mlp_dim=emb_dim, equivariant_pred=True, batch_norm=False, num_atom_features=in_dim).to(device, dtype=torch.double)
     elif model_type == 'egnn':
         model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=True, num_atom_features=in_dim).to(device, dtype=torch.float64)
     else:
@@ -170,7 +170,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     # Define the optimizer, loss function, and learning rate scheduler, weight decay
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.weight_decay)
     criterion = torch.nn.MSELoss()
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1 ** (1 / 9e4))    
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1 ** (1 / 9e5))    
     all_losses = []
     best_loss = np.inf
     best_epoch = 0
@@ -214,7 +214,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
         for x in special_val_dataloader:
             pred = model(x.to(device))
             special_preds.extend(pred.detach().cpu().tolist())
-        print(f"Molecule 0 mean pred: {np.mean(special_preds)*627.503} kcal/mol, std pred: {np.std(np.array(special_preds)*627.503)} kcal/mol")
+        print(f"Molecule 0 mean pred: {np.mean(rescale(special_preds))*627.503} kcal/mol, std pred: {np.std(np.array(rescale(special_preds))*627.503)} kcal/mol")
         # Check for early stopping
         val_loss_mse, val_loss_mae = (eval_model(model, val_dataloader, device))
         print(f"Validation MAE: {val_loss_mae}")
@@ -239,21 +239,6 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     return model, all_losses, train_dataloader
 
 
-def eval_model(model, dataloader, device):
-    model.eval()
-    criterion1 = torch.nn.MSELoss()
-    criterion2 = torch.nn.L1Loss()
-    running_loss_mse = 0.0
-    running_loss_mae = 0.0
-    with torch.no_grad():
-        for x in dataloader:
-            x = x.to(device)
-            outputs = model(x)
-            loss = criterion1(outputs.squeeze()*627.503, x.y.to(torch.float32).squeeze()*627.503)
-            loss2 = criterion2(outputs.squeeze()*627.503, x.y.to(torch.float32).squeeze()*627.503)
-            running_loss_mse += loss.item()
-            running_loss_mae += loss2.item()
-    return running_loss_mse/len(dataloader), running_loss_mae/len(dataloader)
 
 train_data = []
 val_data = []
@@ -284,6 +269,7 @@ print(len(train_molecules), len(val_molecules), len(test_molecules))
 
 
 
+
 def extract_mols(name_list):
     data = []
     for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers'))):
@@ -299,6 +285,7 @@ def extract_mols(name_list):
                 if len(vacuum_graphs) > 20:
                     data.extend(vacuum_graphs)
     return data
+
 print('Extracting train data')
 train_data = extract_mols(train_molecules)
 print('Extracting val data')
@@ -331,6 +318,34 @@ for sample in train_data:
 print(max_atom_features.tolist())
 
 
+# normalize targets between 0 and 1 
+targets = [sample.y.item() for sample in train_data+val_data+test_data]
+min_target = min(targets)
+max_target = max(targets)
+for sample in train_data+val_data+test_data:
+    sample.y = (sample.y - min_target) / (max_target - min_target)
+
+
+def eval_model(model, dataloader, device):
+    model.eval()
+    criterion1 = torch.nn.MSELoss()
+    criterion2 = torch.nn.L1Loss()
+    running_loss_mse = 0.0
+    running_loss_mae = 0.0
+    with torch.no_grad():
+        for x in dataloader:
+            x = x.to(device)
+            outputs = model(x)
+            outputs = rescale(outputs)
+            loss = criterion1(outputs.squeeze(), x.y.to(torch.float32).squeeze())
+            loss2 = criterion2(outputs.squeeze(), x.y.to(torch.float32).squeeze())
+            running_loss_mse += loss.item()
+            running_loss_mae += loss2.item()
+    return running_loss_mse/len(dataloader), running_loss_mae/len(dataloader)
+
+def rescale(outputs):
+    outputs = outputs.squeeze() * (max_target - min_target) + min_target
+    return outputs
 
 
 dataloader_test = loader.DataLoader(test_data, batch_size=32, shuffle=True)
