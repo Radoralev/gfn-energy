@@ -163,7 +163,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     if model_type == 'mace':
         model = MACEModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, mlp_dim=emb_dim, equivariant_pred=True, batch_norm=False, num_atom_features=in_dim).to(device, dtype=torch.double)
     elif model_type == 'egnn':
-        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=True, num_atom_features=in_dim).to(device, dtype=torch.float64)
+        model = EGNNModel(in_dim=in_dim[0], out_dim=out_dim, emb_dim=emb_dim, num_layers=num_layers, equivariant_pred=False, num_atom_features=in_dim).to(device, dtype=torch.float64)
     else:
         raise ValueError("Invalid model type. Choose either 'mace' or 'egnn'.")
     # print sum params
@@ -264,51 +264,51 @@ def extract_mols(name_list):
                     data.extend(vacuum_graphs)
     return data
 
-data = extract_mols(molecule_list)
+# data = extract_mols(molecule_list)
 
-# np.random.shuffle(molecule_list)
+np.random.shuffle(molecule_list)
 special_val = 'molecule_0'
-# molecule_number = len(molecule_list)
+molecule_number = len(molecule_list)
 from sklearn.model_selection import train_test_split
 
-# train_molecules, val_molecules = train_test_split(molecule_list, test_size=0.1)
-# val_molecules, test_molecules = train_test_split(val_molecules, test_size=0.5)
+train_molecules, val_molecules = train_test_split(molecule_list, test_size=0.1)
+val_molecules, test_molecules = train_test_split(val_molecules, test_size=0.5)
 
-# # check if train, test and val are disjoint
-# assert len(set(train_molecules).intersection(set(val_molecules))) == 0
-# assert len(set(train_molecules).intersection(set(test_molecules))) == 0
-# assert len(set(val_molecules).intersection(set(test_molecules))) == 0
+# check if train, test and val are disjoint
+assert len(set(train_molecules).intersection(set(val_molecules))) == 0
+assert len(set(train_molecules).intersection(set(test_molecules))) == 0
+assert len(set(val_molecules).intersection(set(test_molecules))) == 0
 
-# if special_val not in train_molecules:
-#     train_molecules.add(special_val)
-# if special_val in val_molecules:
-#     val_molecules.remove(special_val)
-# if special_val in test_molecules:
-#     test_molecules.remove(special_val)
-# print(len(train_molecules), len(val_molecules), len(test_molecules))
-
-
+if special_val not in train_molecules:
+    train_molecules.add(special_val)
+if special_val in val_molecules:
+    val_molecules.remove(special_val)
+if special_val in test_molecules:
+    test_molecules.remove(special_val)
+print(len(train_molecules), len(val_molecules), len(test_molecules))
 
 
 
-# print('Extracting train data')
-# train_data = extract_mols(train_molecules)
-# print('Extracting val data')
-# val_data = extract_mols(val_molecules)
+
+
+print('Extracting train data')
+train_data = extract_mols(train_molecules)
+print('Extracting val data')
+val_data = extract_mols(val_molecules)
 special_val_data = extract_mols([special_val])
-# print('Extracting test data')
-# test_data = extract_mols(test_molecules)
-# print('Number of train samples:', len(train_data))
-# print('Number of val samples:', len(val_data))
-# print('Number of test samples:', len(test_data))
-# # special val data target mean and std
+print('Extracting test data')
+test_data = extract_mols(test_molecules)
+print('Number of train samples:', len(train_data))
+print('Number of val samples:', len(val_data))
+print('Number of test samples:', len(test_data))
+# special val data target mean and std
 print('Special val data target mean and std:', np.mean([sample.y.item() for sample in special_val_data]), np.std([sample.y.item() for sample in special_val_data]))
 
 
-# data = train_data+val_data+test_data
-np.random.shuffle(data)
-train_data, val_data = train_test_split(data, test_size=0.1)
-val_data, test_data = train_test_split(val_data, test_size=0.5)
+# # data = train_data+val_data+test_data
+# np.random.shuffle(data)
+# train_data, val_data = train_test_split(data, test_size=0.1)
+# val_data, test_data = train_test_split(val_data, test_size=0.5)
 
 # find max number of each atom feature in a molecule
 max_atom_features = np.zeros(5, dtype=np.int64)
