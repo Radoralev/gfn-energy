@@ -5,27 +5,34 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tb_both_ways_learned_var_expl_ls_tscale1_25k_attention_epochs_small_lr1e5_withHs.csv'
+output_file = 'fed_results/tb_bw_ls_beta5_t1_e=2.5k_p=1k_attention_lr1e3.csv'
+
+import os
+
+# Set the LD_PRELOAD environment variable
+os.environ['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libgomp.so.1'
 
 # Function to run the command and capture the output
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
-        'python', 'train.py', '--t_scale', '1', '--T', '10', '--epochs', '1000',
-        '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
-       '--learned_variance', '--log_var_range', '1', '--output_dir',  output_dir,
-        '--patience', '25000', '--model', 'attention',
-        '--conditional_flow_model', #'--langevin', '--ld_step', '0.1', '--ld_schedule',
+        'python', 'train.py', '--t_scale', '2', '--T', '10', '--epochs', '2500',
+        '--batch_size', '16', '--energy', 'neural', '--local_model', local_model,
+        '--learned_variance', '--log_var_range', '1', '--output_dir',  output_dir,
+        '--patience', '1000', '--model', 'egnn', #'--torchani-model', 'ANI-1ccx',
+        '--conditional_flow_model', #'--ld_step', '0.003', '--ld_schedule',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--pis_architectures', '--mode_fwd', 'tb', '--mode_bwd', 'tb',
+        '--equivariant_architectures', '--mode_fwd', 'tb',#'--mode_bwd', 'tb',
         '--lr_policy', '1e-5', '--lr_back', '1e-5', '--lr_flow', '1e-4', 
-        #'--exploratory', '--exploration_wd', '--exploration_factor', '0.1', '--local_search',
-        #'--buffer_size', '60000', '--prioritized', 'rank', '--rank_weight', '0.01',
-        #'--target_acceptance_rate', '0.574', 
-        '--hidden_dim', '128', '--joint_layers', '2', '--s_emb_dim', '128',
-        '--t_emb_dim', '128', '--harmonics_dim', '128'
+        '--exploratory', '--exploration_wd', '--exploration_factor', '1.', '--local_search',
+        '--buffer_size', '600000', '--prioritized', 'rank', '--rank_weight', '0.01',
+        '--target_acceptance_rate', '0.574', '--beta', '5',
+        '--hidden_dim', '64', '--joint_layers', '2', '--s_emb_dim', '64',
+        '--t_emb_dim', '64', '--harmonics_dim', '64'
     ]
-    if load_from_most_recent:
-        command.append('--load_from_most_recent')
+    # if load_from_most_recent:
+    #     command.append('--load_from_most_recent')
+    # if 'solvation' in local_model:
+    #     command.append('--solvate')
     print(command)
     subprocess.run(command)
 
@@ -88,11 +95,13 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         if smiles in existing_results:
             continue
 
-        local_model_vacuum = 'weights/egnn_vacuum_small_with_hs'
-        local_model_solvation = 'weights/egnn_solvation_small_with_hs'
+        local_model_vacuum = 'weights/egnn_vacuum_small_with_hs_32'
+        local_model_solvation = 'weights/egnn_solvation_small_with_hs_32'
 
         run_command(smiles, local_model_vacuum, output_dir)
+        print('Vacuum done')
         run_command(smiles, local_model_solvation, output_dir, load_from_most_recent=True)
+        print('Solvation done')
 
         # Read the output files
         logZ_vacuum, logZlb_vacuum, logZ_std_vacuum, logZlb_std_vacuum, logZ_learned_vacuum, logZ_learned_std_vacuum = read_output_file(smiles, local_model_vacuum, output_dir)

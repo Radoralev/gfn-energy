@@ -56,18 +56,18 @@ def create_simulation_solvent(smiles,
     forcefield = ForceField()
     if solvate:
         print('Adding solvent.')
-        forcefield = ForceField('amber10.xml', 'amber14/tip3pfb.xml')
+        forcefield = ForceField('amber10.xml', 'implicit/gbn2.xml')
     forcefield.registerTemplateGenerator(gaff.generator)
     modeller = Modeller(ligand_mol.to_topology().to_openmm(),
                         ligand_mol.to_topology().get_positions().to_openmm())
     print('System has %d atoms before solvation' % modeller.topology.getNumAtoms())
 
-    if solvate:
-        modeller.addSolvent(forcefield, model='tip3p', padding= 1.2 * unit.angstroms,
-                            #positiveIon='Na+', negativeIon='Cl-',
-                            ionicStrength=0 * unit.molar, neutralize=False) #boxSize=Vec3(5,5,5) * unit.nanometers)
+    # if solvate:
+    #     modeller.addSolvent(forcefield, model='tip3p', padding= 1.2 * unit.angstroms,
+    #                         #positiveIon='Na+', negativeIon='Cl-',
+    #                         ionicStrength=0 * unit.molar, neutralize=False) #boxSize=Vec3(5,5,5) * unit.nanometers)
 
-        print('System has %d atoms after solvation' % modeller.topology.getNumAtoms())
+    #     print('System has %d atoms after solvation' % modeller.topology.getNumAtoms())
     modeller.topology.setPeriodicBoxVectors(np.eye(3)*2.4)
 
     # Create the system
@@ -99,20 +99,36 @@ class OpenMMEnergy(BaseSet):
         self.smiles = smiles
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         system, integrator, topology, self.ligand = create_simulation_solvent(smiles, 0.002, 1, temp, 'gaff-2.11', solvate=solvate)
-        
+        self.min_val = 5
+        self.max_val = None
+        self.first_percentile = None
+        self.last_percentile = None
         n_atoms = topology.getNumAtoms()
         self.atom_types = [atom.element.atomic_number for atom in topology.atoms()]
         print(self.atom_types)
         openmm_bridge = bg.OpenMMBridge(system, integrator, n_workers=1)
         self.data_ndim = 3 * n_atoms
         self.target = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=openmm_bridge).to(device)
+        grad_clipping = bg.utils.ClipGradient(clip=3, norm_dim=3)
+        self.core_energy = bg.GradientClippedEnergy(self.target, grad_clipping).to(device)
+       # self.target = bg.LinLogCutEnergy(self.target, high_energy=self.min_val*0.75+self.max_val*0.25, max_energy=self.max_val)
+
         print(f'System has {n_atoms} atoms')
         
     def energy(self, xyz):
-        energies = self.target.energy(xyz)
-        print('Batch mean energy:', energies.mean())
-        return torch.clamp(energies, 0, 1000)
+        energies = self.target.energy(xyz).squeeze() 
+        if self.min_val:
+            return torch.nn.functional.softmax(energies)
+            #energies = self.target.energy(xyz).squeeze() - self.min_val 
+        else:
+            return torch.clamp(energies, 0, None)
     
+    def update_linlog(self):
+        if self.min_val and self.max_val:
+            self.target = bg.LinLogCutEnergy(self.core_energy, high_energy=(self.min_val*0.75+self.max_val*0.25)-self.min_val, max_energy=self.max_val)
+        else:
+            self.target = self.core_energy
+
     def sample(self, batch_size):
         return self.ligand.generate_conformers(n_conformers=batch_size)
 

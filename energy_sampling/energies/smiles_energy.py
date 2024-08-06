@@ -26,11 +26,11 @@ class MoleculeFromSMILES_XTB(BaseSet):
         self.data_ndim = 3 * len(self.atomic_numbers)
         # Initialize XTB Energy
         self.solvent = 'water' if solvate else ''
-        self.target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent=self.solvent, method='GFN2-xTB', verbosity=VERBOSITY_MUTED))        # Get positions
+        self.target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=temp, solvent=self.solvent, method='GFN2-xTB'))        # Get positions
         self.positions = self.rdk_mol.GetConformer().GetPositions()
     
     def energy(self, xyz):
-        energies = torch.clamp(self.target.energy(torch.tensor(xyz.reshape(-1, len(self.atomic_numbers), 3))), 0, 1000)
+        energies = self.target.energy(torch.tensor(xyz.reshape(-1, len(self.atomic_numbers), 3)))
         return energies
     
     def sample(self, batch_size):
@@ -44,7 +44,7 @@ class MoleculeFromSMILES_XTB(BaseSet):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # generate random data
         time_now = time.time()
-        target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=self.temp, solvent=self.solvent, method='GFN2-xTB', verbosity=0))
+        target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers, temperature=self.temp, solvent=self.solvent, method='GFN-FF', verbosity=0))
         for i in range(25000):
             for i in range(300):
                 x = torch.randn(1, int(self.data_ndim/3), 3).to(device)

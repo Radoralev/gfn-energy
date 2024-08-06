@@ -5,11 +5,11 @@ from torch import nn
 import math
 
 from .mace import MACEModel
-from .egnn import EGNNModel
 from .attention import AtomAttention
 from .utils import smiles2graph, prep_input
 from torch_geometric.data import Batch
 from torch_geometric import loader 
+from models.layers.egnn_layer import EGNNLayer
 
 class TimeConder(nn.Module):
     def __init__(self, channel, out_dim, num_layers):
@@ -131,6 +131,75 @@ class StateEncoding(nn.Module):
     def forward(self, s):
         return self.x_model(s)
 
+class EGNNModel(torch.nn.Module):
+    """
+    E-GNN model from "E(n) Equivariant Graph Neural Networks".
+    """
+    def __init__(
+        self,
+        num_layers: int = 5,
+        emb_dim: int = 128,
+        in_dim: int = 1,
+        out_dim: int = 1,
+        activation: str = "relu",
+        norm: str = "layer",
+        aggr: str = "sum",
+        pool: str = "sum",
+        residual: bool = True,
+        equivariant_pred: bool = False,
+        num_atom_features: int = 1
+    ):
+        """
+        Initializes an instance of the EGNNModel class with the provided parameters.
+
+        Parameters:
+        - num_layers (int): Number of layers in the model (default: 5)
+        - emb_dim (int): Dimension of the node embeddings (default: 128)
+        - in_dim (int): Input dimension of the model (default: 1)
+        - out_dim (int): Output dimension of the model (default: 1)
+        - activation (str): Activation function to be used (default: "relu")
+        - norm (str): Normalization method to be used (default: "layer")
+        - aggr (str): Aggregation method to be used (default: "sum")
+        - pool (str): Global pooling method to be used (default: "sum")
+        - residual (bool): Whether to use residual connections (default: True)
+        - equivariant_pred (bool): Whether it is an equivariant prediction task (default: False)
+        """
+        super().__init__()
+        self.equivariant_pred = equivariant_pred
+        self.residual = residual
+        # Embedding lookup for initial node features
+        self.num_atom_features = num_atom_features
+        self.embedding = torch.nn.Embedding(num_atom_features+1, emb_dim) 
+        self.in_dim = in_dim
+        self.emb_dim = emb_dim
+        self.out_dim = out_dim
+        # Stack of GNN layers
+        self.convs = torch.nn.ModuleList()
+        for _ in range(num_layers):
+            self.convs.append(EGNNLayer(emb_dim, activation, norm, aggr))
+
+
+    
+    def forward(self, batch, t=None):
+        h = self.embedding(batch.atoms[..., 0])
+        if t is not None:
+            # match h shape
+            t = t.repeat(h.shape[0]//t.shape[0], 1)
+            h = h + t
+        #TODO batch size is hardcoded here 
+        #h = h.view(-1, batch.atoms.shape[0]//32, self.emb_dim)
+        # print(batch.pos.shape/, h.shape)
+        pos = batch.pos.to(dtype=torch.float32)#.reshape(-1, 3)
+        for conv in self.convs:
+            # Message passing layer
+            h_update, pos_update = conv(h, pos, batch.edge_index)
+
+            # Update node features (n, d) -> (n, d)
+            h = h + h_update if self.residual else h_update 
+
+            # Update node coordinates (no residual) (n, 3) -> (n, 3)
+            pos = pos_update
+        return pos.view(-1, self.out_dim)
 
 class EquivariantPolicy(nn.Module):
     def __init__(self, model: str = 'egnn', in_dim: int = 32, t_dim: int = 32, hidden_dim: int = 64, out_dim: int = None, num_layers: int = 2, smiles: str = None, zero_init: bool = False, model_args: dict = None):
@@ -139,20 +208,23 @@ class EquivariantPolicy(nn.Module):
         self.graph = smiles2graph(smiles)
         self.in_dim = in_dim
         if model == 'mace':
-            self.model = MACEModel(in_dim=in_dim, out_dim=out_dim, mlp_dim=hidden_dim, emb_dim=t_dim, equivariant_pred=True, num_layers=num_layers).to(self.device)
+            self.model = MACEModel(in_dim=in_dim, out_dim=out_dim, mlp_dim=hidden_dim, emb_dim=t_dim, equivariant_pred=True, num_layers=num_layers,).to(self.device)
             if zero_init:
                 self.model.pred.weight.data.fill_(0.0)
                 self.model.pred.bias.data.fill_(0.0)
         elif model == 'egnn':
-            self.model = EGNNModel(in_dim=model_args['in_dim'][0], emb_dim=model_args['emb_dim'], out_dim=out_dim, num_layers=model_args['num_layers'], num_atom_features=model_args['in_dim'], equivariant_pred=True)
-            if zero_init:
-                self.model.pred.weight.data.fill_(0.0)
-                self.model.pred.bias.data.fill_(0.0)
+            self.model = EGNNModel(in_dim=in_dim, emb_dim=hidden_dim, out_dim=out_dim, num_layers=num_layers, num_atom_features=max(self.graph['node_feat'][:, 0]), equivariant_pred=True)
+        # data_list = prep_input(self.graph, pos=torch.ones(64, self.in_dim//3, 3) ,device=self.device)
+        # self.batch_train = Batch.from_data_list(data_list)
+        # data_list = prep_input(self.graph, pos=torch.ones(512, self.in_dim//3, 3) ,device=self.device)
+        # self.batch_val = Batch.from_data_list(data_list)
+        # data_list = prep_input(self.graph, pos=torch.ones(2048, self.in_dim//3, 3) ,device=self.device)
+        # self.batch_final_val = Batch.from_data_list(data_list)
 
     def forward(self, s, t):
-        data_list = prep_input(self.graph, s.reshape(-1, self.in_dim//3, 3), device=self.device)
-        dl = loader.DataLoader(data_list, batch_size=s.shape[0])
-        batch = next(iter(dl))
+        data_list = prep_input(self.graph, pos=s.reshape(-1, self.in_dim//3, 3), device=self.device)
+        batch = Batch.from_data_list(data_list)
+      #  batch.pos = s.reshape(-1, 3)
         return self.model(batch, t)
 
 

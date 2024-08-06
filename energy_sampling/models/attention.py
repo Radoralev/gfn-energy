@@ -29,9 +29,9 @@ class AtomAttention(nn.Module):
         super(AtomAttention, self).__init__()
         self.atom_num = kernel_size
         self.atom_type_proj = nn.Embedding(100, embeddings_dim)
-        self.feature_convolution = nn.Conv1d(embeddings_dim*2+t_dim, hidden_dim, kernel_size, stride=1,
+        self.feature_convolution = nn.Conv1d(embeddings_dim*2+t_dim, hidden_dim, 1, stride=1,
                                              padding=kernel_size // 2)
-        self.attention_convolution = nn.Conv1d(embeddings_dim*2+t_dim, hidden_dim, kernel_size, stride=1,
+        self.attention_convolution = nn.Conv1d(embeddings_dim*2+t_dim, hidden_dim, 1, stride=1,
                                                padding=kernel_size // 2)
         self.circular_pad = nn.CircularPad1d(padding = kernel_size // 2)
         self.softmax = nn.Softmax(dim=-1)

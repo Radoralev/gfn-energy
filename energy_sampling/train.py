@@ -19,6 +19,7 @@ from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimiz
     get_gfn_backward_loss, get_exploration_std, get_name
 
 
+
 parser = argparse.ArgumentParser(description='GFN Linear Regression')
 parser.add_argument('--lr_policy', type=float, default=1e-3)
 parser.add_argument('--lr_flow', type=float, default=1e-2)
@@ -112,6 +113,7 @@ parser.add_argument('--local_model', type=str, default=None, help="Path to local
 parser.add_argument('--equivariant_architectures', action='store_true', default=False)
 parser.add_argument('--output_dir', type=str, default='')
 parser.add_argument('--load_from_most_recent', action='store_true', default=False)
+parser.add_argument('--plot', action='store_true', default=False)
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -120,7 +122,7 @@ if 'SLURM_PROCID' in os.environ:
 
 eval_data_size = 512
 final_eval_data_size = 1024 * 2
-plot_data_size = 2000
+plot_data_size = 1024
 final_plot_data_size = 2000
 
 if args.pis_architectures:
@@ -163,7 +165,7 @@ def get_energy():
             elif args.local_model.split('/')[-1].startswith('mace'):
                 model, model_args = load_model(model='mace', filename=args.local_model)
         energy_alanine = Alanine(device=device, phi='full', temp=1000, energy=None)
-        energy_model = NeuralEnergy(model=model, smiles=energy_alanine.smiles, batch_size=model_args['batch_size'])
+        energy_model = NeuralEnergy(model=model, smiles=energy_alanine.smiles, batch_size_train=args.batch_size)
         energy = Alanine(device=device, phi='full', temp=1000, energy=energy_model)
         args.smiles = energy.smiles
     elif args.energy == 'xtb':
@@ -180,6 +182,7 @@ def get_energy():
         elif args.torchani_model == 'ANI-1ccx':
             import torchani
             model = torchani.models.ANI1ccx(periodic_table_index=True)
+            energy = TorchANIEnergy(model=model, smiles=args.smiles, batch_size=args.batch_size, solvate=args.solvate)
         elif args.local_model:
             if args.local_model.split('/')[-1].startswith('egnn'):
                 model, model_args = load_model(model='egnn', filename=args.local_model)
@@ -216,14 +219,15 @@ def load_model(model, filename):
     with open(filename + '.json', 'r') as f:
         model_args = json.load(f)
         if model == 'egnn':
-            model = EGNNModel(in_dim=model_args['in_dim'][0], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], num_atom_features=model_args['in_dim'], equivariant_pred=False)
+            model = EGNNModel(in_dim=model_args['in_dim'][0], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], num_atom_features=model_args['in_dim'], equivariant_pred=True)
         elif model == 'mace':
-            model = MACEModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], equivariant_pred=False)
+            model = MACEModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], equivariant_pred=True)
     model.load_state_dict(torch.load(filename + '.pt'))
     return model, model_args
 
 
 def plot_step(energy, gfn_model, name):
+    print(args.energy)
     if args.energy == 'many_well':
         batch_size = plot_data_size
         samples = gfn_model.sample(batch_size, energy.log_reward)
@@ -246,15 +250,36 @@ def plot_step(energy, gfn_model, name):
                 "visualization/kdex23": wandb.Image(fig_to_image(fig_kde_x23)),
                 "visualization/samplesx13": wandb.Image(fig_to_image(fig_samples_x13)),
                 "visualization/samplesx23": wandb.Image(fig_to_image(fig_samples_x23))}
-    elif args.energy.startswith('alanine') or (args.energy.startswith('xtb') and args.smiles == 'CC(C)C(=O)NC(C)C(=O)NC'):
+    elif args.energy.startswith('alanine') or args.smiles == 'CC(C)C(=O)NC(C)C(=O)NC':
         samples = gfn_model.sample(plot_data_size, energy.log_reward)
         samples_gt = energy.sample(plot_data_size)
         fig, ax = energy.plot(samples)
         fig_gt, ax_gt = energy.plot(samples_gt)
         return {'visualization/rama_pred': wandb.Image(fig_to_image(fig)), 
                 'visualization/rama_gt': wandb.Image(fig_to_image(fig_gt))}
-    elif energy.data_ndim != 2:
-        return {}
+    elif args.energy == 'neural':
+        print('plotting')
+        samples = gfn_model.sample(2, energy.log_reward)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        samples = samples.reshape(-1, energy.data_ndim//3, 3)
+        node_features = energy.graph.get('node_feat', None)
+        edge_index_artificial = []
+        for i, p1 in enumerate(samples[0]):
+            for j, p2 in enumerate(samples[0]):
+                if i == j:
+                    continue
+                if torch.linalg.vector_norm(p1 - p2, ord=2) < 1.75:
+                    edge_index_artificial.append([i, j])
+        edge_index_artificial = np.array(edge_index_artificial).T
+
+        # Generate a color map based on node features
+        colors = node_features[:, 0]
+
+        ax.scatter(samples[0, :, 0].cpu().numpy(), samples[0, :, 1].cpu().numpy(), samples[0, :, 2].cpu().numpy(), c=colors, s=100)
+        for edge in edge_index_artificial:
+            ax.plot(samples[0, edge, 0].cpu().numpy(), samples[0, edge, 1].cpu().numpy(), samples[0, edge, 2].cpu().numpy(), color='black')
+        return {'visualization/3d': wandb.Image(fig_to_image(fig))}
     else:
         batch_size = plot_data_size
         gfn_model.eval()
@@ -280,20 +305,20 @@ def plot_step(energy, gfn_model, name):
                 "visualization/kde_overlay": wandb.Image(fig_to_image(fig_kde_overlay)),
                 "visualization/kde": wandb.Image(fig_to_image(fig_kde))}
 
-
 def eval_step(eval_data, energy, gfn_model, final_eval=False):
     gfn_model.eval()
     metrics = dict()
     log_reward_func = energy.log_reward
     if final_eval:
         calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func)
-        if args.energy == 'neural':
-            convertMetricsToKcal(metrics)
     else:
         init_state = torch.zeros(eval_data_size, energy.data_ndim).to(device)
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[
             'eval/log_Z_learned'] = log_partition_function(
             init_state, gfn_model, log_reward_func)
+        metrics['eval/log_Z'] = addKbT(metrics['eval/log_Z'])
+        metrics['eval/log_Z_lb'] = addKbT(metrics['eval/log_Z_lb'])
+        metrics['eval/log_Z_learned'] = addKbT(metrics['eval/log_Z_learned'])
     if eval_data is None:
         log_elbo = None
         sample_based_metrics = None
@@ -306,7 +331,7 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
             metrics['eval/mean_log_likelihood'] = 0. if args.mode_fwd == 'pis' else mean_log_likelihood(eval_data,
                                                                                                         gfn_model,
                                                                                                         energy.log_reward)
-        metrics.update(get_sample_metrics(samples, eval_data, final_eval))
+        # metrics.update(get_sample_metrics(samples, eval_data, final_eval))
     gfn_model.train()
     return metrics
 
@@ -317,6 +342,9 @@ def calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func):
     for _ in range(2):
         init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
         samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
+        log_Z = addKbT(log_Z)
+        log_Z_lb = addKbT(log_Z_lb)
+        log_Z_learned = addKbT(log_Z_learned)
         logZs.append(log_Z.item())
         logZlbs.append(log_Z_lb.item())
         logZlearned.append(log_Z_learned.item())
@@ -327,17 +355,18 @@ def calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func):
     metrics['final_eval/mean_log_Z_learned'] = torch.mean(torch.tensor(logZlearned))
     metrics['final_eval/std_log_Z_learned'] = torch.std(torch.tensor(logZlearned))
 
-def convertMetricsToKcal(metrics):
-    k = 3.1668 * 1e-6
+def addKbT(logz):
+    k = 0.001987
     T = 298.15
-    hartree_to_kcal = 627.503
-    factor = k * T * hartree_to_kcal
-    metrics['final_eval/mean_log_Z'] = metrics['final_eval/mean_log_Z'] * factor
-    metrics['final_eval/std_log_Z'] = metrics['final_eval/std_log_Z'] * factor
-    metrics['final_eval/mean_log_Z_lb'] = metrics['final_eval/mean_log_Z_lb'] * factor
-    metrics['final_eval/std_log_Z_lb'] = metrics['final_eval/std_log_Z_lb'] * factor
-    metrics['final_eval/mean_log_Z_learned'] = metrics['final_eval/mean_log_Z_learned'] * factor
-    metrics['final_eval/std_log_Z_learned'] = metrics['final_eval/std_log_Z_learned'] * factor
+    #hartree_to_kcal = 627.503
+    factor = k * T# * hartree_to_kcal
+    return logz * factor
+    # metrics['final_eval/mean_log_Z'] = metrics['final_eval/mean_log_Z'] * factor
+    # metrics['final_eval/std_log_Z'] = metrics['final_eval/std_log_Z'] * factor
+    # metrics['final_eval/mean_log_Z_lb'] = metrics['final_eval/mean_log_Z_lb'] * factor
+    # metrics['final_eval/std_log_Z_lb'] = metrics['final_eval/std_log_Z_lb'] * factor
+    # metrics['final_eval/mean_log_Z_learned'] = metrics['final_eval/mean_log_Z_learned'] * factor
+    # metrics['final_eval/std_log_Z_learned'] = metrics['final_eval/std_log_Z_learned'] * factor
 
 
 def train_step(energy, gfn_model, gfn_optimizer, it, exploratory, buffer, buffer_ls, exploration_factor, exploration_wd):
@@ -391,7 +420,6 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
             samples, rewards = buffer_ls.sample()
         else:
             samples, rewards = buffer.sample()
-
     loss = get_gfn_backward_loss(args.mode_bwd, samples, gfn_model, energy.log_reward,
                                  exploration_std=exploration_std)
     return loss
@@ -421,10 +449,6 @@ def train():
                     pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers, model_args=model_args,
                     joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, equivariant_architectures=args.equivariant_architectures).to(device)
     
-    if args.model == 'egnn' and args.equivariant_architectures:
-        copy_specific_layers(model1=energy.model, model2=gfn_model.joint_model.model)
-        if args.learn_pb:
-            copy_specific_layers(model1=energy.model, model2=gfn_model.back_model.model)
 
 
     if args.continue_training:
@@ -457,28 +481,32 @@ def train():
     buffer_ls = ReplayBuffer(args.buffer_size, device, energy.log_reward,args.batch_size, data_ndim=energy.data_ndim, beta=args.beta,
                           rank_weight=args.rank_weight, prioritized=args.prioritized)
     gfn_model.train()
-    best_loss = float('inf')
+    best_loss = float('-inf')
     early_stop_counter = 0
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(gfn_optimizer, patience=args.patience//2)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(gfn_optimizer, gamma=0.1**(1/9e5))
 
     for i in trange(args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd)
-        if i % 3 == 0:
+        if i % 100 == 0:
+            energy.min_val = None
             metrics.update(eval_step(eval_data, energy, gfn_model, final_eval=False))
             #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
             #    del metrics['eval/log_Z_learned']
-            images = plot_step(energy, gfn_model, name)
-            metrics.update(images)
+            if i % 100 == 0 and args.plot:
+                images = plot_step(energy, gfn_model, name)
+                metrics.update(images)
+            else:
+                metrics.update({'visualization/3d': None})
             plt.close('all')
             #metrics = check_nan_in_metrics(metrics)
-            metrics['lr'] = gfn_optimizer.param_groups[0]['lr']
+            metrics['lr'] = scheduler.get_last_lr()[0]
             wandb.log(metrics, step=i)
-
+            #energy.min_val = 5
         
         # Early stopping
-        if metrics['train/loss'] < best_loss and i > 500:
-            best_loss = metrics['train/loss']
+        if metrics['eval/log_Z_lb'] > best_loss and i > 500:
+            best_loss = metrics['eval/log_Z_lb'] 
             # savew weights
             if early_stop_counter > 0:
                 torch.save(gfn_model.state_dict(), f'{name}model.pt')
@@ -488,7 +516,17 @@ def train():
             if early_stop_counter >= args.patience:
                 print('Early stopping triggered.')
                 break
-        
+        # if (i+1) % 200 == 0:
+        #     samples = gfn_model.sample(4096, energy.log_reward)
+        #     energy.min_val = None
+        #     energy.max_val = None
+        #     energy.update_linlog()
+        #     bounds_energies = -energy.log_reward(samples)
+        #     energy.min_val = torch.quantile(bounds_energies, 0.01)
+        #     energy.max_val = energy.min_val+30
+        #     energy.update_linlog()
+        #     print(f"Min energy: {energy.min_val}")
+        #     print(f"Max energy: {energy.max_val}")
         # Learning rate scheduler
         scheduler.step(metrics['train/loss'])
 

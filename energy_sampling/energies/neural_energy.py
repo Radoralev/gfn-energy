@@ -16,6 +16,8 @@ class NeuralEnergy(BaseSet):
         self.batch_size_final_val = batch_size_final_val
         self.batch_size_train = batch_size_train
         self.batch_size_val = batch_size_val
+        self.min_val = None
+        self.max_val = None
 
         data_list = prep_input(self.graph, pos=torch.ones(batch_size_train, self.data_ndim//3, 3) ,device=self.device)
         self.batch_train = Batch.from_data_list(data_list)
@@ -33,7 +35,7 @@ class NeuralEnergy(BaseSet):
             batch = self.batch_final_val
         
         batch.pos = xyz.reshape(-1, 3)
-        energies = self.model(batch).squeeze()
+        energies = torch.clamp(-self.model(batch).squeeze(), 0, None)
         return energies
     
     def sample(self, batch_size):
