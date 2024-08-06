@@ -203,23 +203,24 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
                 running_loss += loss.item()
                 all_losses.append(loss.item())
 
-                tepoch.set_postfix(loss=(loss.item()*627.503))
+                tepoch.set_postfix(loss=(loss.item()*627.503**2))
 
         # Calculate average loss for the epoch
         avg_loss = running_loss / len(train_dataloader)
-        print(f"Epoch {epoch+1}, Loss: {avg_loss*627.503}")
+        print(f"Epoch {epoch+1}, Loss: {avg_loss*627.503**2}")
         print(f"Learning rate: {scheduler.get_last_lr()[0]}")
         # Step the scheduler
         special_preds = []
         for x in special_val_dataloader:
             pred = model(x.to(device))
             special_preds.extend(pred.detach().cpu().tolist())
-        print(f"Molecule 0 mean pred: {np.mean(special_preds)}, std pred: {np.std(special_preds)}")
+        print(f"Molecule 0 mean pred: {np.mean(special_preds)*627.503} kcal/mol, std pred: {np.std(np.array(special_preds)*627.503)} kcal/mol")
         # Check for early stopping
-        val_loss = (eval_model(model, val_dataloader, device)) * 627.503
-        print(f"Validation Loss: {val_loss}")
-        if val_loss < best_loss:
-            best_loss = val_loss
+        val_loss_mse, val_loss_mae = (eval_model(model, val_dataloader, device))
+        print(f"Validation MAE: {val_loss_mae}")
+        print(f"Validation MSE: {val_loss_mse}")
+        if val_loss_mae < best_loss:
+            best_loss = val_loss_mae
             best_epoch = epoch
             best_model_state = model.state_dict()
             patience_counter = 0
@@ -240,15 +241,19 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
 
 def eval_model(model, dataloader, device):
     model.eval()
-    criterion = torch.nn.MSELoss()
-    running_loss = 0.0
+    criterion1 = torch.nn.MSELoss()
+    criterion2 = torch.nn.L1Loss()
+    running_loss_mse = 0.0
+    running_loss_mae = 0.0
     with torch.no_grad():
         for x in dataloader:
             x = x.to(device)
             outputs = model(x)
-            loss = criterion(outputs.squeeze(), x.y.to(torch.float32).squeeze())
-            running_loss += loss.item()
-    return running_loss/len(dataloader)
+            loss = criterion1(outputs.squeeze()*627.503, x.y.to(torch.float32).squeeze()*627.503)
+            loss2 = criterion2(outputs.squeeze()*627.503, x.y.to(torch.float32).squeeze()*627.503)
+            running_loss_mse += loss.item()
+            running_loss_mae += loss2.item()
+    return running_loss_mse/len(dataloader), running_loss_mae/len(dataloader)
 
 train_data = []
 val_data = []
@@ -293,6 +298,8 @@ def extract_mols(name_list):
                 vacuum_graphs = extract_graphs(vacuum_dir)
                 if len(vacuum_graphs) > 20:
                     data.extend(vacuum_graphs)
+        if len(data) >= 32:
+            break
     return data
 print('Extracting train data')
 train_data = extract_mols(train_molecules)
@@ -305,7 +312,7 @@ print('Number of train samples:', len(train_data))
 print('Number of val samples:', len(val_data))
 print('Number of test samples:', len(test_data))
 # special val data target mean and std
-print('Special val data target mean and std:', np.mean([sample.y.item() for sample in special_val_data]), np.std([sample.y.item() for sample in special_val_data]))
+print('Special val data target mean and std:', np.mean([sample.y.item()*627.503 for sample in special_val_data]), np.std([sample.y.item()*627.503 for sample in special_val_data]))
 
 # find max number of each atom feature in a molecule
 max_atom_features = np.zeros(5, dtype=np.int64)
@@ -350,9 +357,17 @@ model, losses, dataloader_train = train_model(
     device='cuda', 
     patience=150,
 )
-print('MSE on train data:', eval_model(model, dataloader_train, 'cuda')*627.503)
-print('MSE on val data:', eval_model(model, dataloader_test, 'cuda')*627.503)
+train_mse, train_mae = eval_model(model, dataloader_train, 'cuda')
+print('MSE on train data:', train_mse)
+print('MAE on train data:', train_mae)
 
+val_mse, val_mae = eval_model(model, loader.DataLoader(val_data, batch_size=32, shuffle=True), 'cuda')
+print('MSE on val data:', val_mse)
+print('MAE on val data:', val_mae)
+
+test_mse, test_mae = eval_model(model, dataloader_test, 'cuda')
+print('MSE on test data:', test_mse)
+print('MAE on test data:', test_mae)
 
 
 # save model

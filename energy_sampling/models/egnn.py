@@ -82,17 +82,16 @@ class EGNNModel(torch.nn.Module):
         for conv in self.convs:
             # Message passing layer
             h_update, pos_update = conv(h, pos, batch.edge_index)
-
             # Update node features (n, d) -> (n, d)
             h = h + h_update if self.residual else h_update 
-
             # Update node coordinates (no residual) (n, 3) -> (n, 3)
             pos = pos_update
-    
+
         if not self.equivariant_pred:
             # Select only scalars for invariant prediction
             out = self.pool(h, batch.batch)  # (n, d) -> (batch_size, d)
         else:
-            out = self.pool(torch.cat([h, pos], dim=-1), batch.batch)
-            
+            out = torch.cat([h, pos], dim=-1)
+            out = self.pred(out)
+            return self.pool(out, batch.batch)
         return self.pred(out)  # (batch_size, out_dim)
