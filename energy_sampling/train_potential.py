@@ -32,6 +32,7 @@ parser.add_argument('--solvation', action='store_true', help='Flag to indicate s
 parser.add_argument('--output', type=str, default='output.txt', help='Output file string')
 parser.add_argument('--weight_decay', type=float, default=0.0, help='Weight decay')
 parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
+parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
 args = parser.parse_args()
 
 
@@ -178,9 +179,9 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     patience_counter = 0
 
     # Setup dataloaders
-    train_dataloader = loader.DataLoader(train_data, batch_size=32, shuffle=True)
-    val_dataloader = loader.DataLoader(val_data, batch_size=32, shuffle=False)
-    special_val_dataloader = loader.DataLoader(special_val_data, batch_size=32, shuffle=False)
+    train_dataloader = loader.DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = loader.DataLoader(val_data, batch_size=args.batch_size, shuffle=False)
+    special_val_dataloader = loader.DataLoader(special_val_data, batch_size=args.batch_size, shuffle=False)
     for epoch in range(epochs):
         running_loss = 0.0
         with tqdm(train_dataloader, unit="batch") as tepoch:
@@ -284,8 +285,8 @@ def extract_mols(name_list):
                 vacuum_graphs = extract_graphs(vacuum_dir)
                 if len(vacuum_graphs) > 20:
                     data.extend(vacuum_graphs)
-        if len(data) >= 32:
-            break
+        # if len(data) >= 128:
+        #     break
     return data
 
 print('Extracting train data')
@@ -351,7 +352,7 @@ def rescale(outputs):
     return outputs
 
 
-dataloader_test = loader.DataLoader(test_data, batch_size=32, shuffle=True)
+dataloader_test = loader.DataLoader(test_data, batch_size=args.batch_size, shuffle=True)
 
 
 emb_dim = args.emb_dim
@@ -377,7 +378,7 @@ train_mse, train_mae = eval_model(model, dataloader_train, 'cuda')
 print('MSE on train data:', train_mse)
 print('MAE on train data:', train_mae)
 
-val_mse, val_mae = eval_model(model, loader.DataLoader(val_data, batch_size=32, shuffle=True), 'cuda')
+val_mse, val_mae = eval_model(model, loader.DataLoader(val_data, batch_size=args.batch_size, shuffle=True), 'cuda')
 print('MSE on val data:', val_mse)
 print('MAE on val data:', val_mae)
 
