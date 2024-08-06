@@ -298,8 +298,6 @@ def extract_mols(name_list):
                 vacuum_graphs = extract_graphs(vacuum_dir)
                 if len(vacuum_graphs) > 20:
                     data.extend(vacuum_graphs)
-        if len(data) >= 32:
-            break
     return data
 print('Extracting train data')
 train_data = extract_mols(train_molecules)
