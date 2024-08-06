@@ -214,7 +214,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
         for x in special_val_dataloader:
             pred = model(x.to(device))
             special_preds.extend(pred.detach().cpu().tolist())
-        print(f"Molecule 0 mean pred: {np.mean(rescale(special_preds))*627.503} kcal/mol, std pred: {np.std(np.array(rescale(special_preds))*627.503)} kcal/mol")
+        print(f"Molecule 0 mean pred: {np.mean(rescale(np.array(special_preds)))*627.503} kcal/mol, std pred: {np.std(rescale(np.array(special_preds))*627.503)} kcal/mol")
         # Check for early stopping
         val_loss_mse, val_loss_mae = (eval_model(model, val_dataloader, device))
         print(f"Validation MAE: {val_loss_mae}")
@@ -284,6 +284,8 @@ def extract_mols(name_list):
                 vacuum_graphs = extract_graphs(vacuum_dir)
                 if len(vacuum_graphs) > 20:
                     data.extend(vacuum_graphs)
+        if len(data) >= 32:
+            break
     return data
 
 print('Extracting train data')
@@ -345,7 +347,7 @@ def eval_model(model, dataloader, device):
     return running_loss_mse/len(dataloader), running_loss_mae/len(dataloader)
 
 def rescale(outputs):
-    outputs = outputs.squeeze() * (max_target - min_target) + min_target
+    outputs = outputs * (max_target - min_target) + min_target
     return outputs
 
 
