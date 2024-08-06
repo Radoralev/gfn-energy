@@ -325,7 +325,8 @@ max_target = max(targets)
 for sample in train_data+val_data+test_data:
     sample.y = (sample.y - min_target) / (max_target - min_target)
 
-
+print('Min target:', min_target)
+print('Max target:', max_target)
 def eval_model(model, dataloader, device):
     model.eval()
     criterion1 = torch.nn.MSELoss()
