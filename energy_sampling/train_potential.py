@@ -396,6 +396,8 @@ model_params = {
     'num_layers': num_layers,
     'epochs': epochs,
     'solvation': args.solvation,
+    'min_target': min_target,
+    'max_target': max_target,
 }
 with open(args.output+'.json', 'w') as f:
     json.dump(model_params, f)
