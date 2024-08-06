@@ -59,7 +59,7 @@ class GFN(nn.Module):
                 in_dim=dim, 
                 t_dim=t_dim, 
                 hidden_dim=hidden_dim, 
-                out_dim=2 * dim, 
+                out_dim=dim, 
                 num_layers=joint_layers, 
                 smiles=smiles, 
                 zero_init=zero_init,
@@ -138,6 +138,8 @@ class GFN(nn.Module):
         print('Number of parameters: ', self.num_parameters())
 
     def split_params(self, tensor):
+        if self.equivariant_architectures and self.model =='egnn':
+            return tensor[..., :self.dim], torch.ones_like(tensor[..., :self.dim]) + np.log(self.pf_std_per_traj) * 2.
         mean, logvar = gaussian_params(tensor)
         if not self.learned_variance:
             logvar = torch.zeros_like(logvar)
@@ -183,7 +185,6 @@ class GFN(nn.Module):
 
     def get_trajectory_fwd(self, s, exploration_std, log_r, pis=False):
         bsz = s.shape[0]
-
         logpf = torch.zeros((bsz, self.trajectory_length), device=self.device)
         logpb = torch.zeros((bsz, self.trajectory_length), device=self.device)
         logf = torch.zeros((bsz, self.trajectory_length + 1), device=self.device)
@@ -216,12 +217,12 @@ class GFN(nn.Module):
                         pflogvars_sample = torch.logaddexp(pflogvars, add_log_var).detach()
 
             # Equation (2) in the paper
+            var_term = np.sqrt(self.dt) * (
+            pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)
             if pis:
-                s_ = s + self.dt * pf_mean + np.sqrt(self.dt) * (
-                        pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)
+                s_ = s + self.dt * pf_mean + var_term
             else:
-                s_ = s + self.dt * pf_mean.detach() + np.sqrt(self.dt) * (
-                        pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)
+                s_ = s + self.dt * pf_mean.detach() + var_term
 
             noise = ((s_ - s) - self.dt * pf_mean) / (np.sqrt(self.dt) * (pflogvars / 2).exp())
             logpf[:, i] = -0.5 * (noise ** 2 + logtwopi + np.log(self.dt) + pflogvars).sum(1)
@@ -240,10 +241,8 @@ class GFN(nn.Module):
                 back_var = (self.pf_std_per_traj ** 2) * self.dt * i / (i + 1) * back_var_correction
                 noise_backward = (s - back_mean) / back_var.sqrt()
                 logpb[:, i] = -0.5 * (noise_backward ** 2 + logtwopi + back_var.log()).sum(1)
-
             s = s_
             states[:, i + 1] = s
-
         return states, logpf, logpb, logf
 
     def get_trajectory_bwd(self, s, exploration_std, log_r):
@@ -288,10 +287,9 @@ class GFN(nn.Module):
             noise = ((s - s_) - self.dt * pf_mean) / (np.sqrt(self.dt) * (pflogvars / 2).exp())
             logpf[:, self.trajectory_length - i - 1] = -0.5 * (noise ** 2 + logtwopi + np.log(self.dt) + pflogvars).sum(
                 1)
-
+            
             s = s_
             states[:, self.trajectory_length - i - 1] = s
-
         return states, logpf, logpb, logf
 
     def sample(self, batch_size, log_r):

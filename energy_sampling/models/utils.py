@@ -72,10 +72,27 @@ def smiles2graph(smiles_string):
 
 def prep_input(graph, pos=None, device=None):
     datalist = []
-    atoms = torch.from_numpy(graph['node_feat'])
-    edge_index = torch.from_numpy(graph['edge_index'])
-    edge_attr = torch.from_numpy(graph['edge_feat'])
-    for xyz in pos:
-        data = Data(atoms=atoms, edge_index=edge_index, edge_attr=edge_attr, pos=xyz).to(device)
+    atoms = torch.from_numpy(graph['node_feat']).to(device)
+    edge_attr = torch.from_numpy(graph['edge_feat']).to(device)
+    
+    # # Stack all positions into a single tensor
+    pos_tensor = pos
+    
+    # # Compute pairwise distances in a batched manner
+    # dist_matrix = torch.cdist(pos_tensor, pos_tensor, p=2)
+    
+    # # Apply threshold to get edge indices
+    # edge_indices = (dist_matrix < 1.75).nonzero(as_tuple=False)
+    
+    # # Remove self-loops
+    # edge_indices = edge_indices[edge_indices[:, 1] != edge_indices[:, 2]]
+
+    # fully connected graph
+    edge_indices = torch.combinations(torch.arange(atoms.size(0)).to(device), with_replacement=False).t().contiguous()
+    # Create Data objects
+    for i, xyz in enumerate(pos_tensor):
+        #edge_index = edge_indices[edge_indices[:, 0] == i][:, 1:].t().contiguous()
+        data = Data(atoms=atoms, edge_index=edge_indices, edge_attr=edge_attr, pos=xyz).to(device)
         datalist.append(data)
+    
     return datalist

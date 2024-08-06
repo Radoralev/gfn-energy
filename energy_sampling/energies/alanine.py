@@ -95,6 +95,7 @@ class Alanine(BaseSet):
         self.device = device
         self.temp = temp        
         self.phi = phi
+        self.min_val = None
         self.bgmol_model = get_bgmol_model(system_name, temperature=temp)
         self.data = load_data(temp, self.bgmol_model, device, phi)
         self.smiles = 'C[C@@H](C(=O)NC)NC(=O)C'
@@ -103,7 +104,8 @@ class Alanine(BaseSet):
             self.data_ndim = self.energy_model.data_ndim
 
     def energy(self, x):    
-        return self.energy_model.energy(x)
+        energies = self.energy_model.energy(x).squeeze()
+        return energies
 
     def sample(self, batch_size):
         indices = np.random.choice(len(self.data), size=batch_size, replace=False)

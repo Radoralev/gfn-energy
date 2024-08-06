@@ -91,7 +91,5 @@ class EGNNModel(torch.nn.Module):
             # Select only scalars for invariant prediction
             out = self.pool(h, batch.batch)  # (n, d) -> (batch_size, d)
         else:
-            out = torch.cat([h, pos], dim=-1)
-            out = self.pred(out)
-            return self.pool(out, batch.batch)
+            out = self.pool(torch.cat([h, pos], dim=-1), batch.batch)
         return self.pred(out)  # (batch_size, out_dim)

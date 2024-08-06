@@ -8,6 +8,10 @@ import warnings
 import torch
 import numpy as np
 from .base import _BridgeEnergy, _Bridge
+import os
+print(os.environ.get('LD_LIBRARY_PATH'))
+
+from tblite.interface import Calculator
 
 
 class XTBBridge(_Bridge):
@@ -83,15 +87,16 @@ class XTBBridge(_Bridge):
             evaluate_force=True,
             evaluate_energy=True,
     ):
-        from tblite.interface import Calculator
         #from tblite.exceptions import TBLiteRuntimeError
         positions = _nm2bohr(positions)
         energy, force = None, None
         try:
             calc = Calculator(self.method, self.numbers, positions)
             calc.add("alpb-solvation", "ethanol")
-            calc.set_verbosity(self.verbosity)
-            calc.set_electronic_temperature(self.temperature)
+            #calc.set('max-iter', 50)
+            calc.set('verbosity', 0)
+#            calc.set_verbosity(self.verbosity)
+            # calc.set_electronic_temperature(self.temperature)
             res = calc.singlepoint()
             if evaluate_energy:
                 energy = _hartree2kbt(res.get_energy(), self.temperature)
