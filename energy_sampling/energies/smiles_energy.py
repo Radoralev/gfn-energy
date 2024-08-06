@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from .xtb_energy import XTBEnergy, XTBBridge
+# from .xtb_energy import XTBEnergy, XTBBridge
 from .base_set import BaseSet
 from .alanine import load_data, plot_rama_traj
 #from xtb.libxtb import VERBOSITY_MUTED, VERBOSITY_MINIMAL
