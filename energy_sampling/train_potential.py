@@ -323,8 +323,8 @@ print(max_atom_features.tolist())
 
 # normalize targets between 0 and 1 
 targets = [sample.y.item() for sample in train_data+val_data+test_data]
-mean_target = np.mean(targets)
-std_target = np.std(targets)
+mean_target = 0#np.mean(targets)
+std_target = 1#np.std(targets)
 for sample in train_data+val_data+test_data:
     sample.y = (sample.y - mean_target)/std_target
 
@@ -339,8 +339,8 @@ def eval_model(model, dataloader, device):
     with torch.no_grad():
         for x in dataloader:
             x = x.to(device)
-            outputs = model(x)
-            outputs = rescale(outputs)
+            outputs = model(x) 
+            outputs = rescale(outputs) * 627.503
             loss = criterion1(outputs.squeeze(), x.y.to(torch.float32).squeeze())
             loss2 = criterion2(outputs.squeeze(), x.y.to(torch.float32).squeeze())
             running_loss_mse += loss.item()
