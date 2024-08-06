@@ -322,13 +322,13 @@ print(max_atom_features.tolist())
 
 # normalize targets between 0 and 1 
 targets = [sample.y.item() for sample in train_data+val_data+test_data]
-min_target = min(targets)
-max_target = max(targets)
+mean_target = np.mean(targets)
+std_target = np.std(targets)
 for sample in train_data+val_data+test_data:
-    sample.y = (sample.y - min_target) / (max_target - min_target)
+    sample.y = (sample.y - mean_target)/std_target
 
-print('Min target:', min_target)
-print('Max target:', max_target)
+print('Mean target:', mean_target)
+print('Std target:', std_target)
 def eval_model(model, dataloader, device):
     model.eval()
     criterion1 = torch.nn.MSELoss()
@@ -347,7 +347,7 @@ def eval_model(model, dataloader, device):
     return running_loss_mse/len(dataloader), running_loss_mae/len(dataloader)
 
 def rescale(outputs):
-    outputs = outputs * (max_target - min_target) + min_target
+    outputs = outputs*std_target + mean_target
     return outputs
 
 
@@ -398,8 +398,8 @@ model_params = {
     'num_layers': num_layers,
     'epochs': epochs,
     'solvation': args.solvation,
-    'min_target': min_target,
-    'max_target': max_target,
+    'mean_target': mean_target,
+    'std_target': std_target,
 }
 with open(args.output+'.json', 'w') as f:
     json.dump(model_params, f)
