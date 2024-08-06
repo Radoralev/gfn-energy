@@ -247,6 +247,25 @@ test_data = []
 molecule_list = list(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers')))
 # split the molecule list into train,test,val with random 
 np.random.seed(42)
+
+def extract_mols(name_list):
+    data = []
+    for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers'))):
+        if dir in name_list:
+            solvent_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
+            vacuum_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
+            if args.solvation:
+                solvent_graphs = extract_graphs(solvent_dir)
+                if len(solvent_graphs) > 20:
+                    data.extend(solvent_graphs)
+            else:
+                vacuum_graphs = extract_graphs(vacuum_dir)
+                if len(vacuum_graphs) > 20:
+                    data.extend(vacuum_graphs)
+    return data
+
+data = extract_mols(molecule_list)
+
 np.random.shuffle(molecule_list)
 special_val = 'molecule_0'
 molecule_number = len(molecule_list)
@@ -271,23 +290,6 @@ print(len(train_molecules), len(val_molecules), len(test_molecules))
 
 
 
-def extract_mols(name_list):
-    data = []
-    for i, dir in enumerate(os.listdir(os.path.join(os.getcwd(), '..', 'conformation_sampling', 'conformers'))):
-        if dir in name_list:
-            solvent_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'solvation', 'crest_conformers.xyz')
-            vacuum_dir = os.path.join(os.getcwd(), '..','conformation_sampling', 'conformers', dir, 'vacuum', 'crest_conformers.xyz')
-            if args.solvation:
-                solvent_graphs = extract_graphs(solvent_dir)
-                if len(solvent_graphs) > 20:
-                    data.extend(solvent_graphs)
-            else:
-                vacuum_graphs = extract_graphs(vacuum_dir)
-                if len(vacuum_graphs) > 20:
-                    data.extend(vacuum_graphs)
-        # if len(data) >= 128:
-        #     break
-    return data
 
 print('Extracting train data')
 train_data = extract_mols(train_molecules)
@@ -301,6 +303,12 @@ print('Number of val samples:', len(val_data))
 print('Number of test samples:', len(test_data))
 # special val data target mean and std
 print('Special val data target mean and std:', np.mean([sample.y.item()*627.503 for sample in special_val_data]), np.std([sample.y.item()*627.503 for sample in special_val_data]))
+
+
+data = train_data+val_data+test_data
+np.random.shuffle(data)
+train_data, val_data = train_test_split(data, test_size=0.1)
+val_data, test_data = train_test_split(val_data, test_size=0.5)
 
 # find max number of each atom feature in a molecule
 max_atom_features = np.zeros(5, dtype=np.int64)
