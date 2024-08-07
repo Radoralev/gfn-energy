@@ -170,7 +170,7 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
     print('Parameter number:', sum(p.numel() for p in model.parameters()))
     # Define the optimizer, loss function, and learning rate scheduler, weight decay
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.weight_decay)
-    criterion = torch.nn.MSELoss()
+    criterion = torch.nn.MSELoss(reduction='none')
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1 ** (1 / 9e5))    
     all_losses = []
     best_loss = np.inf
@@ -189,11 +189,12 @@ def train_model(model_type, in_dim, out_dim, emb_dim, num_layers, lr, epochs, tr
                 tepoch.set_description(f"Epoch {epoch+1}")
                 x = x.to(device)
                 # Zero the parameter gradients
+                num_atoms = (x.atoms[:, 0] >= 0).sum(dim=-1, dtype=torch.float64) 
                 optimizer.zero_grad()
 
                 # Forward pass
                 outputs = model(x)
-                loss = criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())
+                loss = (criterion(outputs.squeeze(), x.y.to(torch.float64).squeeze())/num_atoms.sqrt()).mean()
 
                 # Backward pass and optimize add clip_grad_norm_
                 loss.backward()
