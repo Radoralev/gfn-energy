@@ -316,9 +316,9 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[
             'eval/log_Z_learned'] = log_partition_function(
             init_state, gfn_model, log_reward_func)
-        metrics['eval/log_Z'] = addKbT(metrics['eval/log_Z'])
-        metrics['eval/log_Z_lb'] = addKbT(metrics['eval/log_Z_lb'])
-        metrics['eval/log_Z_learned'] = addKbT(metrics['eval/log_Z_learned'])
+        metrics['eval/log_Z'] = add_kBT(metrics['eval/log_Z'])
+        metrics['eval/log_Z_lb'] = add_kBT(metrics['eval/log_Z_lb'])
+        metrics['eval/log_Z_learned'] = add_kBT(metrics['eval/log_Z_learned'])
     if eval_data is None:
         log_elbo = None
         sample_based_metrics = None
@@ -342,9 +342,9 @@ def calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func):
     for _ in range(2):
         init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
         samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
-        log_Z = addKbT(log_Z)
-        log_Z_lb = addKbT(log_Z_lb)
-        log_Z_learned = addKbT(log_Z_learned)
+        log_Z = add_kBT(log_Z)
+        log_Z_lb = add_kBT(log_Z_lb)
+        log_Z_learned = add_kBT(log_Z_learned)
         logZs.append(log_Z.item())
         logZlbs.append(log_Z_lb.item())
         logZlearned.append(log_Z_learned.item())
@@ -355,12 +355,12 @@ def calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func):
     metrics['final_eval/mean_log_Z_learned'] = torch.mean(torch.tensor(logZlearned))
     metrics['final_eval/std_log_Z_learned'] = torch.std(torch.tensor(logZlearned))
 
-def addKbT(logz):
-    k = 0.001987
+def add_kBT(logz):
+    kB = unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree/unit.kelvin)
     T = 298.15
-    #hartree_to_kcal = 627.503
-    factor = k * T# * hartree_to_kcal
-    return logz * factor
+    hartree_to_kcal = 627.503
+    factor = kB * T * hartree_to_kcal
+    return -logz * factor
     # metrics['final_eval/mean_log_Z'] = metrics['final_eval/mean_log_Z'] * factor
     # metrics['final_eval/std_log_Z'] = metrics['final_eval/std_log_Z'] * factor
     # metrics['final_eval/mean_log_Z_lb'] = metrics['final_eval/mean_log_Z_lb'] * factor
