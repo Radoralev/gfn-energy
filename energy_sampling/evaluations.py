@@ -4,10 +4,10 @@ from sample_metrics import compute_distribution_distances
 
 
 @torch.no_grad()
-def log_partition_function(initial_state, gfn, log_reward_fn):
+def log_partition_function(initial_state, gfn, log_reward_fn, unit_conversion=627.509/(0.001987*298.15)): # 627.509 kcal/mol to hartree
     states, log_pfs, log_pbs, log_fs = gfn.get_trajectory_fwd(initial_state, None, log_reward_fn)
    # print(states[:, -1])
-    log_r = log_reward_fn(states[:, -1])
+    log_r = log_reward_fn(states[:, -1]) * unit_conversion
     log_weight = log_r + log_pbs.sum(-1) - log_pfs.sum(-1)
 
     log_Z = logmeanexp(log_weight)

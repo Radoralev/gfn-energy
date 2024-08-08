@@ -35,7 +35,7 @@ class NeuralEnergy(BaseSet):
             batch = self.batch_final_val
         
         batch.pos = xyz.reshape(-1, 3)
-        energies = torch.clamp(-self.model(batch).squeeze(), 0, None)
+        energies = self.model(batch).squeeze()
         return energies
     
     def sample(self, batch_size):
