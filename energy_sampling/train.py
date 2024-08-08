@@ -505,8 +505,8 @@ def train():
             #energy.min_val = 5
         
         # Early stopping
-        if metrics['train/loss'] < best_loss and i > 500:
-            best_loss = metrics['train/loss'] 
+        if metrics['eval/log_Z_lb'] < best_loss and i > 500:
+            best_loss = metrics['eval/log_Z_lb'] 
             # savew weights
             if early_stop_counter > 0:
                 torch.save(gfn_model.state_dict(), f'{name}model.pt')
