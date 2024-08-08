@@ -219,7 +219,7 @@ def load_model(model, filename):
     with open(filename + '.json', 'r') as f:
         model_args = json.load(f)
         if model == 'egnn':
-            model = EGNNModel(in_dim=model_args['in_dim'][0], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], num_atom_features=model_args['in_dim'], equivariant_pred=True)
+            model = EGNNModel(in_dim=model_args['in_dim'][0], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], num_atom_features=model_args['in_dim'], equivariant_pred=False)
         elif model == 'mace':
             model = MACEModel(in_dim=model_args['in_dim'], emb_dim=model_args['emb_dim'], out_dim=model_args['out_dim'], num_layers=model_args['num_layers'], equivariant_pred=True)
     model.load_state_dict(torch.load(filename + '.pt'))
@@ -481,7 +481,7 @@ def train():
     buffer_ls = ReplayBuffer(args.buffer_size, device, energy.log_reward,args.batch_size, data_ndim=energy.data_ndim, beta=args.beta,
                           rank_weight=args.rank_weight, prioritized=args.prioritized)
     gfn_model.train()
-    best_loss = float('-inf')
+    best_loss = float('inf')
     early_stop_counter = 0
     scheduler = torch.optim.lr_scheduler.ExponentialLR(gfn_optimizer, gamma=0.1**(1/9e5))
 
@@ -505,8 +505,8 @@ def train():
             #energy.min_val = 5
         
         # Early stopping
-        if metrics['eval/log_Z_lb'] > best_loss and i > 500:
-            best_loss = metrics['eval/log_Z_lb'] 
+        if metrics['train/loss'] < best_loss and i > 500:
+            best_loss = metrics['train/loss'] 
             # savew weights
             if early_stop_counter > 0:
                 torch.save(gfn_model.state_dict(), f'{name}model.pt')
