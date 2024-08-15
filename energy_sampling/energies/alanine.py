@@ -111,7 +111,9 @@ class Alanine(BaseSet):
         indices = np.random.choice(len(self.data), size=batch_size, replace=False)
         return self.data[indices] 
 
-    def plot(self, x, w=None):
+    def plot(self, x, w=None, sampled=False):
+        if not sampled:
+            x = self.energy_model.torsions_to_conformations(x)
         return plot_rama_traj(x, w, get_phi=True, model=self.bgmol_model)
     
     def time_test(self):

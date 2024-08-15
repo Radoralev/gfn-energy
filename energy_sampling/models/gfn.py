@@ -9,6 +9,7 @@ from utils import gaussian_params
 from .mace import MACEModel
 logtwopi = math.log(2 * math.pi)
 
+from torch.distributions import Normal, VonMises, MixtureSameFamily 
 
 class GFN(nn.Module):
     def __init__(self, dim: int, s_emb_dim: int, hidden_dim: int,
@@ -17,8 +18,8 @@ class GFN(nn.Module):
                  trajectory_length: int = 100, partial_energy: bool = False,
                  clipping: bool = False, lgv_clip: float = 1e2, gfn_clip: float = 1e4, pb_scale_range: float = 1.,
                  langevin_scaling_per_dimension: bool = True, conditional_flow_model: bool = False,
-                 learn_pb: bool = False, model='mlp', smiles=None,
-                 pis_architectures: bool = False, lgv_layers: int = 3, joint_layers: int = 2, model_args: dict = None,
+                 learn_pb: bool = False, model='mlp', smiles: str = '',
+                 pis_architectures: bool = False, lgv_layers: int = 3, joint_layers: int = 2, model_args: dict = {},
                  zero_init: bool = False, device=torch.device('cuda'), equivariant_architectures: bool = False):
         super(GFN, self).__init__()
         self.dim = dim
@@ -165,7 +166,7 @@ class GFN(nn.Module):
             s = self.s_model(s)
         s_new = self.joint_model(s, t)
 
-        flow = self.flow_model(s, t).squeeze(-1) if self.conditional_flow_model or self.partial_energy else self.flow_model
+        flow = self.flow_model(s, t).squeeze(-1) if self.conditional_flow_model or self.partial_energy else self.flow_model # type: ignore
 
         if self.langevin:
             if self.pis_architectures or self.equivariant_architectures:
@@ -183,7 +184,7 @@ class GFN(nn.Module):
     def num_parameters(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
-    def get_trajectory_fwd(self, s, exploration_std, log_r, pis=False):
+    def get_trajectory_fwd(self, s, exploration_std, log_r):
         bsz = s.shape[0]
         logpf = torch.zeros((bsz, self.trajectory_length), device=self.device)
         logpb = torch.zeros((bsz, self.trajectory_length), device=self.device)
@@ -195,35 +196,27 @@ class GFN(nn.Module):
             pf_mean, pflogvars = self.split_params(pfs)
 
             logf[:, i] = flow
-            if self.partial_energy:
-                ref_log_var = np.log(self.t_scale * max(1, i) * self.dt)
-                log_p_ref = -0.5 * (logtwopi + ref_log_var + np.exp(-ref_log_var) * (s ** 2)).sum(1)
-                logf[:, i] += (1 - i * self.dt) * log_p_ref + i * self.dt * log_r(s)
 
             if exploration_std is None:
-                if pis:
-                    pflogvars_sample = pflogvars
-                else:
-                    pflogvars_sample = pflogvars.detach()
+                pflogvars_sample = pflogvars.detach()
             else:
                 expl = exploration_std(i)
                 if expl <= 0.0:
                     pflogvars_sample = pflogvars.detach()
                 else:
                     add_log_var = torch.full_like(pflogvars, np.log(exploration_std(i) / np.sqrt(self.dt)) * 2)
-                    if pis:
-                        pflogvars_sample = torch.logaddexp(pflogvars, add_log_var)
-                    else:
-                        pflogvars_sample = torch.logaddexp(pflogvars, add_log_var).detach()
+                    pflogvars_sample = torch.logaddexp(pflogvars, add_log_var).detach()
 
             # Equation (2) in the paper
-            var_term = np.sqrt(self.dt) * (
-            pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)
-            if pis:
-                s_ = s + self.dt * pf_mean + var_term
-            else:
-                s_ = s + self.dt * pf_mean.detach() + var_term
+            var_term = np.sqrt(self.dt) * (pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)
+            s_ = s + self.dt * pf_mean.detach() + var_term
 
+            # x_(t+dt) = x_t + u(xt)dt + sqrt(dt)*g(xt)*N(0,1)
+            # x_(t+dt)-x_t = u(xt)dt + sqrt(dt)*g(xt)*N(0,1)
+            # x_(t+dt)-x_t - u(xt)dt = sqrt(dt)*g(xt)*N(0,1)
+            # (x_t - x_(t+dt) + u(xt)dt) / (sqrt(dt)*g(xt)) = N(0,1)
+            # logpf = -0.5*(N(0,1)^2 + log(2pi) + log(pflogvars)).
+            # pf = N(0,1) * sqrt(pflogvars) + pf_mean
             noise = ((s_ - s) - self.dt * pf_mean) / (np.sqrt(self.dt) * (pflogvars / 2).exp())
             logpf[:, i] = -0.5 * (noise ** 2 + logtwopi + np.log(self.dt) + pflogvars).sum(1)
 

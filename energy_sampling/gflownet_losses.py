@@ -11,13 +11,11 @@ def fwd_tb(initial_state, gfn, log_reward_fn, exploration_std=None, return_exp =
     # log_fs is the log of the forward probability 
     # log_r is the log of the reward function
     loss = 0.5 * ((log_pfs.sum(-1) + log_fs[:, 0] - log_pbs.sum(-1) - log_r) ** 2)
-   # print(loss)
     if return_exp:
         return loss.mean(), states, log_pfs, log_pbs, log_r
     else:
         
         return loss.mean()
-
 
 def bwd_tb(initial_state, gfn, log_reward_fn, exploration_std=None):
     states, log_pfs, log_pbs, log_fs = gfn.get_trajectory_bwd(initial_state, exploration_std, log_reward_fn)

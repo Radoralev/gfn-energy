@@ -50,7 +50,7 @@ def create_simulation_solvent(smiles,
     ligand_mol.generate_conformers(n_conformers=1)
     gaff = GAFFTemplateGenerator(molecules=ligand_mol)
     lig_top = ligand_mol.to_topology()
-    print(lig_top.get_positions())
+    print(lig_top.get_positions().reshape(-1, 3).std())    
     modeller = Modeller(lig_top.to_openmm(), lig_top.get_positions().to_openmm())
 
     forcefield = ForceField()
@@ -116,13 +116,10 @@ class OpenMMEnergy(BaseSet):
         print(f'System has {n_atoms} atoms')
         
     def energy(self, xyz):
-        energies = self.target.energy(xyz).squeeze() 
-        if self.min_val:
-            return torch.nn.functional.softmax(energies)
-            #energies = self.target.energy(xyz).squeeze() - self.min_val 
-        else:
-            return torch.clamp(energies, 0, None)
-    
+        print(xyz.reshape(-1, self.data_ndim//3, 3).std(dim=1))
+        energies = self.target.energy(xyz - xyz.mean()).squeeze() 
+        return energies / 2625.5
+
     def update_linlog(self):
         if self.min_val and self.max_val:
             self.target = bg.LinLogCutEnergy(self.core_energy, high_energy=(self.min_val*0.75+self.max_val*0.25)-self.min_val, max_energy=self.max_val)
