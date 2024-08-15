@@ -9,12 +9,14 @@ from openmmforcefields.generators import GAFFTemplateGenerator
 from .base_set import BaseSet
 import numpy as np
 
+from .utils import embed_mol_and_get_conformer, RDKitConformer, torsions_to_conformations
+
+
 def get_atom_types_from_smiles(smiles, solvate=True):
     ligand_mol = Molecule.from_smiles(smiles)
     ligand_mol.generate_conformers(n_conformers=1)
     gaff = GAFFTemplateGenerator(molecules=ligand_mol)
     lig_top = ligand_mol.to_topology()
-    print(lig_top.get_positions())
     modeller = Modeller(lig_top.to_openmm(), lig_top.get_positions().to_openmm())
 
     forcefield = ForceField()
@@ -35,7 +37,7 @@ def get_atom_types_from_smiles(smiles, solvate=True):
     modeller.topology.setPeriodicBoxVectors(np.eye(3)*2.4)
     topology = modeller.topology 
     atom_types = torch.tensor([atom.element.atomic_number for atom in topology.atoms()])
-    return atom_types, modeller.getPositions()
+    return atom_types#, modeller.getPositions()
     
 
 class TorchANIEnergy(BaseSet):
@@ -43,19 +45,23 @@ class TorchANIEnergy(BaseSet):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(self.device)
         self.model.eval()
-        self.atomic_numbers, init_pos = get_atom_types_from_smiles(smiles, solvate)
-        self.atomic_numbers = self.atomic_numbers.to(self.device)
-        self.data_ndim = 3 * len(self.atomic_numbers)
+        self.rd_conf = RDKitConformer(smiles)
+        self.atomic_numbers = torch.tensor(self.rd_conf.get_atomic_numbers()).to(self.device)
+        self.tas = self.rd_conf.freely_rotatable_tas
+        if smiles == 'C[C@@H](C(=O)NC)NC(=O)C':
+            self.tas = ((0, 1, 2, 3), (0, 1, 6, 7))
+        self.data_ndim = len(self.tas)
+        self.atom_nr = len(self.atomic_numbers)
         self.batch_size = batch_size
-        init_pos = torch.tensor(init_pos.value_in_unit(unit.angstrom)).to(self.device, dtype=torch.float32)
-        print(init_pos.shape)
-        print(self.atomic_numbers.shape)
-        print('Atomic numbers:', self.atomic_numbers)
-        print('Energy of initial conformation:', self.energy(init_pos.repeat(self.batch_size, 1, 1).to(self.device)))
+
+        print('Number of atoms:', self.atom_nr, ', Number of torsion angles:', self.data_ndim)
+        print('Torsion angles:', self.tas)
+
         
     def energy(self, xyz):
         an_bs = self.atomic_numbers.unsqueeze(0).repeat(xyz.size(0), 1).to(self.device)
-        energies = torch.clamp(self.model((an_bs, xyz.reshape(-1, int(self.data_ndim/3), 3))).energies, 0, None)
+        confs = torsions_to_conformations(xyz, self.tas, self.rd_conf, self.device)
+        energies = self.model((an_bs, confs.reshape(-1, self.atom_nr, 3))).energies
         return energies
     
     def sample(self, batch_size):

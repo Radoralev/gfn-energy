@@ -8,6 +8,14 @@ import warnings
 
 import torch
 import numpy as np
+import os
+
+from wurlitzer import pipes
+from joblib import Parallel, delayed
+
+print(os.environ.get('LD_LIBRARY_PATH'))
+
+from tblite.interface import Calculator
 
 def is_list_or_tuple(x):
     return isinstance(x, list) or isinstance(x, tuple)
@@ -54,6 +62,26 @@ def _parse_dim(dim):
             f"\n\t- a list with len > 1 containing non-empty lists containing integers"
         )
 
+def _chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+
+def get_energy(numbers, positions, solvent):
+    with pipes():
+        try:
+            calc = Calculator("GFN2-xTB", numbers, positions * 1.8897259886,)
+            calc.set('accuracy', 50)
+            if solvent:
+                calc.add("alpb-solvation", solvent)
+            res = calc.singlepoint()
+            energy = res.get("energy")
+            force = res.get("gradient")
+        except RuntimeError:
+            energy = 0.0
+            force = 0.0
+    return energy, force
 
 class Energy(torch.nn.Module):
     """
@@ -268,21 +296,23 @@ class _Bridge:
         energy_shape = [*energy_shape, 1]
         position_batch = assert_numpy(positions.reshape(-1, self.n_atoms, 3), arr_type=self._FLOATING_TYPE)
 
-        energy_batch = np.zeros(energy_shape, dtype=position_batch.dtype)
-        force_batch = np.zeros_like(position_batch)
+        n_jobs = len(os.sched_getaffinity(0))
+        energies = np.zeros(len(position_batch))
+        forces = np.zeros_like(position_batch)
+        i = 0
+        x = Parallel(n_jobs=n_jobs)(delayed(get_energy)(self.numbers, s, self.solvent) for s in position_batch)
+        for j, s in enumerate(position_batch):
+            energy, force = x[j]
+            energies[i] = energy
+            forces[i] = force
+            i+=1
 
-        for i, pos in enumerate(position_batch):
-            energy_batch[i], force_batch[i] = self._evaluate_single(
-                pos,
-                *args,
-                evaluate_energy=evaluate_energy,
-                evaluate_force=evaluate_force,
-                **kwargs
-            )
-
+        energy_batch = np.array(energies)#.reshape(-1)
+        force_batch = np.array(forces)#.reshape(-1, self.n_atoms, 3)
         energies = torch.tensor(energy_batch.reshape(*energy_shape)).to(positions)
-        forces = torch.tensor(force_batch.reshape(*shape)).to(positions)
+        forces = -torch.tensor(force_batch.reshape(*shape)).to(positions)
 
+        forces = _nm2bohr(forces)
         # store
         self.last_energies = energies
         self.last_forces = forces
@@ -335,3 +365,8 @@ class _BridgeEnergy(Energy):
         else:
             self._last_batch = hash(str(batch))
             return self._bridge.evaluate(batch)[1]
+        
+_BOHR_RADIUS = 0.0529177210903  # nm
+
+def _nm2bohr(x):
+    return x / _BOHR_RADIUS

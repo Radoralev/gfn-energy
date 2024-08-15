@@ -8,7 +8,7 @@ kB = unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree/unit.kelvin)
 @torch.no_grad()
 def log_partition_function(initial_state, gfn, log_reward_fn, beta=1/(kB*298.15)): # 627.509 kcal/mol to hartree
     states, log_pfs, log_pbs, log_fs = gfn.get_trajectory_fwd(initial_state, None, log_reward_fn)
-   # print(states[:, -1])
+
     log_r = log_reward_fn(states[:, -1]) * beta 
     log_weight = log_r + log_pbs.sum(-1) - log_pfs.sum(-1)
 

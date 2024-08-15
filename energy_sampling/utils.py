@@ -4,6 +4,18 @@ import math
 import PIL 
 from datetime import datetime
 from gflownet_losses import *
+from ogb.utils.features import (allowable_features, atom_to_feature_vector,
+ bond_to_feature_vector, atom_feature_vector_to_dict, bond_feature_vector_to_dict) 
+from torch_geometric.data import Data
+
+import rdkit.Chem as Chem
+from rdkit.Geometry.rdGeometry import Point3D
+from rdkit.Chem import QED, Crippen, rdMolDescriptors, rdmolops
+import matplotlib.pyplot as plt
+
+import py3Dmol
+from rdkit.Chem import AllChem
+
 
 
 def set_seed(seed):
@@ -50,7 +62,7 @@ def gaussian_params(tensor):
 def fig_to_image(fig):
     fig.canvas.draw()
 
-    return PIL.Image.frombytes(
+    return PIL.Image.frombytes( # type: ignore
         "RGB", fig.canvas.get_width_height(), fig.canvas.tostring_rgb()
     )
 
@@ -103,10 +115,10 @@ def get_exploration_std(iter, exploratory, exploration_factor=0.1, exploration_w
     if exploratory is False:
         return None
     if exploration_wd:
-        exploration_std = exploration_factor * max(0, 1. - iter / 5000.)
+        exploration_std = exploration_factor * max(0, 1. - iter / 10000.)
     else:
         exploration_std = exploration_factor
-    expl = lambda x: exploration_std
+    expl = lambda : exploration_std
     return expl
 
 
