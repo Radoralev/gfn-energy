@@ -133,7 +133,7 @@ def get_rotatable_ta_list(mol):
         return result
 
     torsion_angles = remove_duplicate_tas(collect_4tuples(nonring))
-    torsion_angles = [ta for ta in torsion_angles if not is_hydrogen_ta(mol, ta)]
+    #torsion_angles = [ta for ta in torsion_angles if not is_hydrogen_ta(mol, ta)]
     return torsion_angles
 
 class RDKitConformer:
