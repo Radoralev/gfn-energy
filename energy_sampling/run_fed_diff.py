@@ -15,8 +15,8 @@ os.environ['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libgomp.so.1'
 # Function to run the command and capture the output
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
-        'python', 'train.py', '--t_scale', '0.25', '--T', '5', '--epochs', '1000',
-        '--batch_size', '4', '--energy', 'xtb', '--local_model', local_model,
+        'python', 'train.py', '--t_scale', '0.25', '--T', '5', '--epochs', '10000',
+        '--batch_size', '6', '--energy', 'xtb', '--local_model', local_model,
         '--output_dir',  output_dir, #'--langevin',
         '--patience', '25000', '--model', 'mlp', #,
         '--conditional_flow_model',#'--ld_step', '0.01','--ld_schedule',
