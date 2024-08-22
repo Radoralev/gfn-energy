@@ -115,7 +115,7 @@ def get_exploration_std(iter, exploratory, exploration_factor=0.1, exploration_w
     if exploratory is False:
         return None
     if exploration_wd:
-        exploration_std = exploration_factor * max(0, 1. - iter / 10000.)
+        exploration_std = exploration_factor * max(0, 1. - iter / 3000.)
     else:
         exploration_std = exploration_factor
     expl = lambda x: exploration_std

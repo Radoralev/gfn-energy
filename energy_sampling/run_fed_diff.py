@@ -5,7 +5,7 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tb_fwd_t1_e=25k_p=25k_mlp_lr1e3.csv'
+output_file = 'fed_results/tbT5_bws_t0.25_expl_e=25k_p=25k_mlp_lr1e3_xtbcli_gfn2xtb_tas.csv'
 
 import os
 
@@ -15,19 +15,19 @@ os.environ['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libgomp.so.1'
 # Function to run the command and capture the output
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
-        'python', 'train.py', '--t_scale', '4.', '--T', '10', '--epochs', '10000',
-        '--batch_size', '32', '--energy', 'neural', '--local_model', local_model,
+        'python', 'train.py', '--t_scale', '0.25', '--T', '5', '--epochs', '1000',
+        '--batch_size', '4', '--energy', 'xtb', '--local_model', local_model,
         '--output_dir',  output_dir, #'--langevin',
         '--patience', '25000', '--model', 'mlp', #,
         '--conditional_flow_model',#'--ld_step', '0.01','--ld_schedule',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb','--mode_bwd', 'tb', #'--max_iter_ls', '100', '--burn_in', '50',
-        '--lr_policy', '1e-3', '--lr_back', '1e-3', '--lr_flow', '1e-3', 
-        # '--exploratory', '--exploration_wd', '--exploration_factor', '2.', #'--local_search',
+        '--lr_policy', '1e-4', '--lr_back', '1e-4', '--lr_flow', '1e-3', 
+        # '--exploratory', '--exploration_wd', '--exploration_factor', '2.',# '--local_search',
         # '--buffer_size', '600000', '--prioritized', 'rank', '--rank_weight', '0.01',
         # '--target_acceptance_rate', '0.574', '--beta', '5',
-        '--hidden_dim', '256', '--joint_layers', '2', '--s_emb_dim', '256',
-        '--t_emb_dim', '256', '--harmonics_dim', '256'#, '--plot',
+        '--hidden_dim', '512', '--joint_layers', '5', '--s_emb_dim', '512',
+        '--t_emb_dim', '512', '--harmonics_dim', '512'#, '--plot',
     ]
     # if load_from_most_recent:
     #     command.append('--load_from_most_recent')
@@ -100,10 +100,10 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         if smiles in existing_results:
             continue
         
-        species = ['Br', 'P', 'I'] 
-        if any(s in species for s in smiles.strip()):
-            print('Skipping', smiles)
-            continue
+        # species = ['Br', 'P', 'I'] 
+        # if any(s in species for s in smiles.strip()):
+        #     print('Skipping', smiles)
+        #     continue
 
         local_model_vacuum = 'weights/egnn_vacuum_small_with_hs_final'
         local_model_solvation = 'weights/egnn_solvation_small_with_hs_final'
@@ -117,6 +117,11 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         logZ_vacuum, logZlb_vacuum, logZ_std_vacuum, logZlb_std_vacuum, logZ_learned_vacuum, logZ_learned_std_vacuum = read_output_file(smiles, local_model_vacuum, output_dir)
         logZ_solvation, logZlb_solvation, logZ_std_solvation, logZlb_std_solvation, logZ_learned_solvation, logZ_learned_std_solvation = read_output_file(smiles, local_model_solvation, output_dir)
 
+        try:
+            float(logZ_vacuum)
+        except ValueError:
+            print('Error in parsing logZs, can\'t convert to float')
+            continue
         # Calculate fed_Z and fed_Z_lb
         fed_Z = float(logZ_solvation) - float(logZ_vacuum)
         fed_Z_lb = float(logZlb_solvation) - float(logZlb_vacuum) 

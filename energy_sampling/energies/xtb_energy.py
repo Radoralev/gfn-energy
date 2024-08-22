@@ -80,56 +80,6 @@ class XTBBridge(_Bridge):
     def n_atoms(self):
         return len(self.numbers)
 
-
-    def _evaluate_single(
-            self,
-            positions: torch.Tensor,
-            evaluate_force=True,
-            evaluate_energy=True,
-    ):
-        #from tblite.exceptions import TBLiteRuntimeError
-        positions = _nm2bohr(positions)
-        energy, force = None, None
-        try:
-            calc = Calculator(self.method, self.numbers, positions)
-            calc.add("alpb-solvation", "ethanol")
-            #calc.set('max-iter', 50)
-            calc.set('verbosity', 0)
-#            calc.set_verbosity(self.verbosity)
-            # calc.set_electronic_temperature(self.temperature)
-            res = calc.singlepoint()
-            if evaluate_energy:
-                energy = _hartree2kbt(res.get_energy(), self.temperature)
-            if evaluate_force:
-                force = _hartree_per_bohr2kbt_per_nm(
-                    -res.get_gradient(),
-                    self.temperature
-                )
-            assert not np.isnan(energy)
-            assert not np.isnan(force).any()
-        except RuntimeError as e:
-            if self.err_handling == "error":
-                raise e
-            elif self.err_handling == "warning":
-                warnings.warn(
-                    f"Caught exception in xtb. "
-                    f"Returning infinite energy and zero force. "
-                    f"Original exception: {e}"
-                )
-                force = np.zeros_like(positions)
-                energy = np.infty
-            elif self.err_handling == "ignore":
-                force = np.zeros_like(positions)
-                energy = np.infty
-        except AssertionError:
-            force[np.isnan(force)] = 0.
-            energy = np.infty
-            if self.err_handling in ["error", "warning"]:
-                warnings.warn("Found nan in xtb force or energy. Returning infinite energy and zero force.")
-
-        return energy, force
-
-
 class XTBEnergy(_BridgeEnergy):
     """Semi-empirical energy computation with XTB.
 

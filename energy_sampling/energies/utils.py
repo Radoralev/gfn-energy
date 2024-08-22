@@ -5,12 +5,25 @@ from rdkit.Geometry.rdGeometry import Point3D
 import numpy as np
 import torch
 
-def torsions_to_conformations(xyz, tas, rd_conf, device):
+def conformations_to_torsions(xyz, tas, rd_conf):
+    # energies = self.model((an_bs, xyz.reshape(-1, self.data_ndim//3, 3))).energies
+    torsions = []
+    for conf in xyz:
+        rd_conf.set_atom_positions(conf)
+        tas = torch.tensor(rd_conf.get_freely_rotatable_tas_values())
+        torsions.append(tas)
+    torsions = torch.stack(torsions)
+    return torsions
+
+def torsions_to_conformations(xyz, tas, bonds, rd_conf, device):
     # energies = self.model((an_bs, xyz.reshape(-1, self.data_ndim//3, 3))).energies
     confs = []
-    for rotation_set in xyz:
+    for transformation_set in xyz:
+        rotation_set = transformation_set[:len(tas)]
+        bond_lengths = transformation_set[len(tas):]
         for i, torsion in enumerate(tas):
             rd_conf.set_torsion_angle(torsion, rotation_set[i])
+        #rd_conf.set_bond_lengths(bond_lengths, bonds)
         xyz = torch.tensor(rd_conf.get_atom_positions()).to(device, dtype=torch.float32)
         confs.append(xyz)
     confs = torch.stack(confs)
@@ -21,7 +34,7 @@ def get_torsion_angles_atoms_list(mol):
 
 def get_torsion_angles_values(conf, torsion_angles_atoms_list):
     return [
-        np.float32(rdMolTransforms.GetDihedralRad(conf, *ta))
+        torch.tensor(rdMolTransforms.GetDihedralRad(conf, *ta))
         for ta in torsion_angles_atoms_list
     ]
 
@@ -120,11 +133,10 @@ def get_rotatable_ta_list(mol):
     -------
     list of tuples: A list of unique torsion angle tuples corresponding to rotatable bonds in the molecule.
     """
-    #torsion_pattern = "[*]~[!$(*#*)&!D1]-&!@[!$(*#*)&!D1]~[*]"
-    #substructures = Chem.MolFromSmarts(torsion_pattern)
-    #torsion_angles = remove_duplicate_tas(list(mol.GetSubstructMatches(substructures)))
+    torsion_pattern = "[*]~[!$(*#*)&!D1]-&!@[!$(*#*)&!D1]~[*]"
+    substructures = Chem.MolFromSmarts(torsion_pattern)
+    torsion_angles = remove_duplicate_tas(list(mol.GetSubstructMatches(substructures)))
     nonring, ring = TorsionFingerprints.CalculateTorsionLists(mol, )
-
     def collect_4tuples(output):
         result = []
         for item in output:
@@ -132,9 +144,21 @@ def get_rotatable_ta_list(mol):
             result.extend(tuples_list)
         return result
 
-    torsion_angles = remove_duplicate_tas(collect_4tuples(nonring))
+    ring_tas = collect_4tuples(ring)
+    nonring_tas = collect_4tuples(nonring)
+    # collect bonds from the ring torsion angles (atom1, atom2, atom3, atom4) -> [(atom1, atom2), (atom2, atom3), (atom3, atom4)]
+    ring_bonds = [(ta[0], ta[1]) for ta in ring_tas] + [(ta[1], ta[2]) for ta in ring_tas] + [(ta[2], ta[3]) for ta in ring_tas]
+    nonring_bonds = [(ta[1], ta[2]) for ta in nonring_tas] + [(ta[2], ta[3]) for ta in nonring_tas] + [(ta[0], ta[1]) for ta in nonring_tas]
+
+    # add also inverse bonds
+    ring_bonds.extend([(b[1], b[0]) for b in ring_bonds])
+    nonring_bonds.extend([(b[1], b[0]) for b in nonring_bonds])
+
+    torsion_angles.extend(nonring_tas)
+    torsion_angles = remove_duplicate_tas(torsion_angles)
     #torsion_angles = [ta for ta in torsion_angles if not is_hydrogen_ta(mol, ta)]
-    return torsion_angles
+    print('Torsion Angles:', torsion_angles)
+    return torsion_angles, ring_bonds, nonring_bonds
 
 class RDKitConformer:
     def __init__(self, smiles):
@@ -146,7 +170,14 @@ class RDKitConformer:
         self.rdk_conf = self.embed_mol_and_get_conformer(self.rdk_mol, extra_opt=True)
 
         self.set_atom_positions(self.rdk_conf.GetPositions())
-        self.freely_rotatable_tas = get_rotatable_ta_list(self.rdk_mol)
+        self.freely_rotatable_tas, self.ring_bonds, self.nonring_bonds = get_rotatable_ta_list(self.rdk_mol)
+
+        self.hydrogen_indices = [self.rdk_mol.GetAtomWithIdx(i).GetAtomicNum() == 1 for i in range(self.rdk_mol.GetNumAtoms())]
+
+        print(self.ring_bonds+self.nonring_bonds)
+        self.bonds = self.get_mol_bonds(self.rdk_mol)
+        self.bond_lengths = self.get_bond_lengths(self.rdk_mol)
+        print('Number of bonds:', len(self.bonds))
 
     def __deepcopy__(self, memo):
         atom_positions = self.get_atom_positions()
@@ -163,6 +194,42 @@ class RDKitConformer:
         mol = Chem.MolFromSmiles(smiles)
         mol = Chem.AddHs(mol)
         return mol
+    
+    def get_mol_bonds(self, mol):
+        bonds = []
+        for bond in mol.GetBonds():
+            begin_idx = bond.GetBeginAtomIdx()
+            end_idx = bond.GetEndAtomIdx()
+            if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
+                continue
+            elif (begin_idx, end_idx) in self.ring_bonds:
+                continue
+            elif (begin_idx, end_idx) in self.nonring_bonds:
+                continue
+            bonds.append((begin_idx, end_idx))
+        return bonds
+    
+    def get_bond_lengths(self, mol):
+        bond_lengths = []
+        bonds = mol.GetBonds()
+        for bond in bonds:
+            begin_idx = bond.GetBeginAtomIdx()
+            end_idx = bond.GetEndAtomIdx()
+            if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
+                continue
+            elif (begin_idx, end_idx) in self.ring_bonds:
+                continue
+            elif (begin_idx, end_idx) in self.nonring_bonds:
+                continue
+            l = rdMolTransforms.GetBondLength(self.rdk_conf, begin_idx, end_idx)
+            bond_lengths.append(l)
+        return bond
+    
+    def set_bond_lengths(self, bond_lengths, bonds):
+        bond_lengths = bond_lengths.cpu().numpy()
+        for i, (bond, length) in enumerate(zip(bonds, bond_lengths)):
+            rdMolTransforms.SetBondLength(self.rdk_conf, *bond, float(length))
+
 
     def embed_mol_and_get_conformer(self, mol, extra_opt=False):
         """Embed RDkit mol with a conformer and return the RDKit conformer object
@@ -180,7 +247,8 @@ class RDKitConformer:
         :param atom_positions: 2d numpy array of shape [num atoms, 3] with new atom positions
         """
         for idx, pos in enumerate(atom_positions):
-            self.rdk_conf.SetAtomPosition(idx, Point3D(*pos))
+            x,y,z = pos
+            self.rdk_conf.SetAtomPosition(idx, Point3D(x.item(),y.item(),z.item()))
 
     def get_atom_positions(self):
         """

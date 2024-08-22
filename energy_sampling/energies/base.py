@@ -77,11 +77,11 @@ def get_energy(numbers, positions, solvent):
                 calc.add("alpb-solvation", solvent)
             res = calc.singlepoint()
             energy = res.get("energy")
-            force = res.get("gradient")
+       #     force = res.get("gradient")
         except RuntimeError:
             energy = 0.0
-            force = 0.0
-    return energy, force
+      #      force = 0.0
+    return energy#, force
 
 class Energy(torch.nn.Module):
     """
@@ -164,20 +164,7 @@ class Energy(torch.nn.Module):
         raise NotImplementedError()
 
     def energy(self, *xs, temperature=1.0, **kwargs):
-        assert len(xs) == len(
-            self._event_shapes
-        ), f"Expected {len(self._event_shapes)} arguments but only received {len(xs)}"
-        batch_shape = xs[0].shape[: -len(self._event_shapes[0])]
-        for i, (x, s) in enumerate(zip(xs, self._event_shapes)):
-            assert x.shape[: -len(s)] == batch_shape, (
-                f"Inconsistent batch shapes."
-                f"Input at index {i} has batch shape {x.shape[:-len(s)]}"
-                f"however input at index 0 has batch shape {batch_shape}."
-            )
-            assert (
-                x.shape[-len(s) :] == s
-            ), f"Input at index {i} as wrong shape {x.shape[-len(s):]} instead of {s}"
-        return self._energy(*xs, **kwargs) / temperature
+        return self._energy(*xs, **kwargs) #/ temperature
 
     def force(
         self,
@@ -259,7 +246,7 @@ class Energy(torch.nn.Module):
 class _BridgeEnergyWrapper(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, bridge):
-        energy, force, *_ = bridge.evaluate(input)
+        energy, force = bridge.evaluate(input)
         ctx.save_for_backward(-force)
         return energy
 
@@ -294,23 +281,21 @@ class _Bridge:
         energy_shape = shape[:-2] if shape[-2:] == (self.n_atoms, 3) else shape[:-1]
         # the stupid last dim
         energy_shape = [*energy_shape, 1]
-        position_batch = assert_numpy(positions.reshape(-1, self.n_atoms, 3), arr_type=self._FLOATING_TYPE)
-
-        n_jobs = len(os.sched_getaffinity(0))
+        position_batch = positions.detach().cpu().numpy()#assert_numpy(positions.reshape(-1, self.n_atoms, 3), arr_type=self._FLOATING_TYPE)
         energies = np.zeros(len(position_batch))
         forces = np.zeros_like(position_batch)
         i = 0
-        x = Parallel(n_jobs=n_jobs)(delayed(get_energy)(self.numbers, s, self.solvent) for s in position_batch)
-        for j, s in enumerate(position_batch):
-            energy, force = x[j]
+        x = Parallel(n_jobs=-1)(delayed(get_energy)(self.numbers, s, self.solvent) for s in position_batch)
+        for j, s in enumerate(x):
+            energy = x[j]
             energies[i] = energy
-            forces[i] = force
+        #    forces[i] = force
             i+=1
 
         energy_batch = np.array(energies)#.reshape(-1)
         force_batch = np.array(forces)#.reshape(-1, self.n_atoms, 3)
-        energies = torch.tensor(energy_batch.reshape(*energy_shape)).to(positions)
-        forces = -torch.tensor(force_batch.reshape(*shape)).to(positions)
+        energies = torch.tensor(energy_batch).to(positions)
+        #forces = -torch.tensor(force_batch.reshape(*shape)).to(positions)
 
         forces = _nm2bohr(forces)
         # store
@@ -352,19 +337,11 @@ class _BridgeEnergy(Energy):
 
     def _energy(self, batch, no_grads=False):
         # check if we have already computed this energy (hash of string representation should be sufficient)
-        if hash(str(batch)) == self._last_batch:
-            return self._bridge.last_energies
-        else:
-            self._last_batch = hash(str(batch))
-            return _evaluate_bridge_energy(batch, self._bridge)
+        return _evaluate_bridge_energy(batch, self._bridge)
 
     def force(self, batch, temperature=None):
         # check if we have already computed this energy
-        if hash(str(batch)) == self.last_batch:
-            return self.bridge.last_forces
-        else:
-            self._last_batch = hash(str(batch))
-            return self._bridge.evaluate(batch)[1]
+        return self._bridge.evaluate(batch)[1]
         
 _BOHR_RADIUS = 0.0529177210903  # nm
 
