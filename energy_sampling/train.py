@@ -430,7 +430,7 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
         if args.local_search:
             if it % args.ls_cycle < 2:
                 samples, rewards = buffer.sample()
-                local_search_samples, log_r = langevin_dynamics(samples, energy.log_reward, device, args)
+                local_search_samples, log_r = langevin_dynamics(samples, energy, device, args)
                 buffer_ls.add(local_search_samples, log_r)
         
             samples, rewards = buffer_ls.sample()
@@ -447,8 +447,13 @@ def train():
         os.makedirs(name)
     print(args.energy)
     energy, model_args = get_energy()
+    metrics = dict()
+
     #energy.time_test()
     #return
+    if energy.data_ndim == 0:
+        write_outs(metrics)
+        return
     eval_data = energy.sample(eval_data_size)
 
     config = args.__dict__
@@ -463,7 +468,8 @@ def train():
                     t_scale=args.t_scale, langevin_scaling_per_dimension=args.langevin_scaling_per_dimension,
                     conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
                     pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers, model_args=model_args,
-                    joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, equivariant_architectures=args.equivariant_architectures).to(device)
+                    joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, 
+                    equivariant_architectures=args.equivariant_architectures).to(device)
     
 
 
@@ -490,7 +496,6 @@ def train():
                                       args.conditional_flow_model, args.use_weight_decay, args.weight_decay)
 
     print(gfn_model)
-    metrics = dict()
 
     buffer = ReplayBuffer(args.buffer_size, device, energy.log_reward,args.batch_size, data_ndim=energy.data_ndim, beta=args.beta,
                           rank_weight=args.rank_weight, prioritized=args.prioritized)
@@ -555,6 +560,9 @@ def train():
     eval_results = final_eval(energy, gfn_model)#.to(device)
     metrics.update(eval_results)
 
+    write_outs(metrics)
+
+def write_outs(metrics):
     keyword = ''
     if 'vacuum' in args.local_model:
         keyword = 'vacuum'
@@ -569,12 +577,12 @@ def train():
         f.write(str(args))
     # write the results to a file
     with open(f'temp/{args.output_dir}/{args.smiles}_{keyword}.txt', 'w') as f:
-        f.write(f"log_Z_lb: {metrics['final_eval/mean_log_Z_lb']}\n")
-        f.write(f"log_Z_lb_std: {metrics['final_eval/std_log_Z_lb']}\n")
-        f.write(f"log_Z: {metrics['final_eval/mean_log_Z']}\n")
-        f.write(f"log_Z_std: {metrics['final_eval/std_log_Z']}\n")
-        f.write(f"log_Z_learned: {metrics['final_eval/mean_log_Z_learned']}\n")
-        f.write(f"log_Z_learned_std: {metrics['final_eval/std_log_Z_learned']}\n")
+        f.write(f"log_Z_lb: {metrics.get('final_eval/mean_log_Z_lb', '-')}\n")
+        f.write(f"log_Z_lb_std: {metrics.get('final_eval/std_log_Z_lb', '-')}\n")
+        f.write(f"log_Z: {metrics.get('final_eval/mean_log_Z', '-')}\n")
+        f.write(f"log_Z_std: {metrics.get('final_eval/std_log_Z', '-')}\n")
+        f.write(f"log_Z_learned: {metrics.get('final_eval/mean_log_Z_learned', '-')}\n")
+        f.write(f"log_Z_learned_std: {metrics.get('final_eval/std_log_Z_learned', '-')}\n")
 
 def final_eval(energy, gfn_model):
     final_eval_data = energy.sample(final_eval_data_size)

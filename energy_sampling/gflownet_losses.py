@@ -10,7 +10,7 @@ def fwd_tb(initial_state, gfn, log_reward_fn, exploration_std=None, return_exp =
     # log_pfs is the log of the partition function 
     # log_fs is the log of the forward probability 
     # log_r is the log of the reward function
-    loss = 0.5 * ((log_pfs.sum(-1) + log_fs[:, 0] - log_pbs.sum(-1) - log_r) ** 2)
+    loss = 0.5 * ((log_pfs.sum(-1) + log_fs[:, 0] - log_pbs.sum(-1) - log_r) ** 2) #- log_r
     if return_exp:
         return loss.mean(), states, log_pfs, log_pbs, log_r
     else:

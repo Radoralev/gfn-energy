@@ -35,7 +35,14 @@ data[['fed_Z_lb_mean', 'fed_Z_lb_uncertainty']] = data['fed_Z_lb'].apply(lambda 
 data[['fed_Z_learned_mean', 'fed_Z_learned_uncertainty']] = data['fed_Z_learned'].apply(lambda x: pd.Series(parse_value_with_uncertainty(x)))
 
 # Exclude rows with extremely large fedZ or fedZlb values
-data = data[(data['fed_Z_mean'].abs() < 100) & (data['fed_Z_lb_mean'].abs() < 100)]
+# data = data[(data['fed_Z_mean'].abs() < 100) & (data['fed_Z_lb_mean'].abs() < 100)]
+
+# excludes rows with extremeleylarge fed_Z_uncertainty
+data = data[data['fed_Z_uncertainty'].abs() < 5]
+
+# Sort the data based on the absolute difference between experimental and calculated values
+data['abs_diff'] = np.abs(data['experimental_val_mean'] - data['fed_Z_mean'])
+data = data.sort_values('abs_diff')
 
 # Extract the necessary columns
 experimental_val = data['experimental_val_mean']
@@ -47,9 +54,6 @@ fed_Z_lb_uncertainty = data['fed_Z_lb_uncertainty']
 fed_Z_learned = data['fed_Z_learned_mean']
 fed_Z_learned_uncertainty = data['fed_Z_learned_uncertainty']
 
-# Sort the data based on the absolute difference between experimental and calculated values
-data['abs_diff'] = np.abs(experimental_val - fed_Z)
-data = data.sort_values('abs_diff')
 
 # Calculate the number of points to include based on the top 95%
 num_points = int(len(data) * 1)
@@ -79,14 +83,14 @@ def plot_scatter(ax, x, y, xerr, yerr, title):
   
   # Statistics
   aue = mean_absolute_error(x, y)
-  cor = r2_score(x, y)
+  cor = r2_score(y, y_pred)
   within_1_kcal = np.sum(np.abs(x - y) < 1) / len(x) * 100
   
   # Pearson and Spearman correlations
   pearson_corr, _ = pearsonr(x, y)
   spearman_corr, _ = spearmanr(x, y)
   r2_str = r'$R^2$'
-  ax.set_title(f'{title}\nAUE = {aue:.2f} kcal/mol, {r2_str} = {cor:.2f}, Pearson = {pearson_corr:.2f}, Spearman = {spearman_corr:.2f}\n1 kcal/mol = {within_1_kcal:.0f}%, N = {len(x)}')
+  ax.set_title(f'{title}\nMAE = {aue:.2f} kcal/mol, {r2_str} = {cor:.2f}, Pearson = {pearson_corr:.2f}, Spearman = {spearman_corr:.2f}\n1 kcal/mol = {within_1_kcal:.0f}%, N = {len(x)}')
   ax.set_xlabel('ΔG_exp, kcal/mol ± Uncertainty')
   ax.set_ylabel('ΔG_calc, kcal/mol ± Uncertainty')
 

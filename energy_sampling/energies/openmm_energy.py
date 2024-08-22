@@ -1,15 +1,16 @@
 import torch
 import bgflow as bg
 from openff.toolkit import Molecule
-from openmmforcefields.generators import SystemGenerator
 from .base_set import BaseSet
 import openmm
 from openmm import app, unit, LangevinIntegrator, Vec3, Platform
-from openmm.app import PDBFile, Simulation, Modeller, PDBReporter, StateDataReporter, DCDReporter, ForceField
+from openmm.app import  Modeller, ForceField
 from openmmforcefields.generators import GAFFTemplateGenerator
 from tqdm import tqdm
 import os 
 import numpy as np
+from .utils import RDKitConformer
+from .utils import torsions_to_conformations
 
 def get_platform(use_gpu=False):
     os_platform = os.getenv('PLATFORM')
@@ -99,26 +100,29 @@ class OpenMMEnergy(BaseSet):
         self.smiles = smiles
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         system, integrator, topology, self.ligand = create_simulation_solvent(smiles, 0.002, 1, temp, 'gaff-2.11', solvate=solvate)
-        self.min_val = 5
-        self.max_val = None
-        self.first_percentile = None
-        self.last_percentile = None
-        n_atoms = topology.getNumAtoms()
-        self.atom_types = [atom.element.atomic_number for atom in topology.atoms()]
-        print(self.atom_types)
+        # Initialize RDKit molecule
+        self.smiles = smiles
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.rd_conf = RDKitConformer(smiles)
+        self.atomic_numbers = torch.tensor(self.rd_conf.get_atomic_numbers()).to(self.device)
+        self.tas = self.rd_conf.freely_rotatable_tas
+        self.bonds = self.rd_conf.bonds
+        if smiles == 'C[C@@H](C(=O)NC)NC(=O)C':
+            self.tas = ((0, 1, 2, 3), (0, 1, 6, 7))
+        self.data_ndim = len(self.tas)
+        self.atom_nr = len(self.atomic_numbers)
+
         openmm_bridge = bg.OpenMMBridge(system, integrator, n_workers=1)
-        self.data_ndim = 3 * n_atoms
-        self.target = bg.OpenMMEnergy(dimension=self.data_ndim, bridge=openmm_bridge).to(device)
+        self.target = bg.OpenMMEnergy(dimension=self.atom_nr, bridge=openmm_bridge).to(device)
         grad_clipping = bg.utils.ClipGradient(clip=3, norm_dim=3)
         self.core_energy = bg.GradientClippedEnergy(self.target, grad_clipping).to(device)
        # self.target = bg.LinLogCutEnergy(self.target, high_energy=self.min_val*0.75+self.max_val*0.25, max_energy=self.max_val)
 
-        print(f'System has {n_atoms} atoms')
         
     def energy(self, xyz):
-        print(xyz.reshape(-1, self.data_ndim//3, 3).std(dim=1))
-        energies = self.target.energy(xyz - xyz.mean()).squeeze() 
-        return energies / 2625.5
+        confs = torsions_to_conformations(xyz, self.tas, self.bonds, self.rd_conf, self.device)
+        energies = torch.clamp(self.target.energy(confs.reshape(-1, self.atom_nr*3)).squeeze() / 2625.5, None, 100)
+        return energies
 
     def update_linlog(self):
         if self.min_val and self.max_val:
