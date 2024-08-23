@@ -90,7 +90,7 @@ def run_gfn_xtb(
     # else:
     #     cmd = f"xtb --gfn2 {xyz_file}"
     if solvent:
-        cmd += f"--alpb water"
+        cmd += f"--alpb water "
 
     # run XTB
     with open(file_name + ".out", "w") as fd:
@@ -164,8 +164,8 @@ def get_energy(numbers, positions, method="gfnff", solvent=False):
     file_name = "input.xyz"
 
     _write_xyz_file(numbers, positions, str(Path(directory.name) / "input.xyz"))
-   # with pipes():
-    energy = run_gfn_xtb(directory.name, file_name, gfn_version=method, solvent=solvent)
+    with pipes():
+        energy = run_gfn_xtb(directory.name, file_name, gfn_version=method, solvent=solvent)
     directory.cleanup()
 
     if np.isnan(energy):
