@@ -509,7 +509,7 @@ def train():
     for i in trange(args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd, args)
-        if (i) % 50 == 0:
+        if (i) % 2000 == 0:
             energy.min_val = None
             metrics.update(eval_step(eval_data, energy, gfn_model, final_eval=False))
             #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
