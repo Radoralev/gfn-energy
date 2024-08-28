@@ -34,6 +34,7 @@ METHODS = {"gfn2": "gfn 2", "gfnff": "gfnff"}
 
 def _get_energy(file):
     normal_termination = False
+    energy = np.nan
     with open(file) as f:
         for l in f:
             if "TOTAL ENERGY" in l:
@@ -43,11 +44,9 @@ def _get_energy(file):
                     return np.nan
             if "normal termination of xtb" in l:
                 normal_termination = True
-    if normal_termination:
-        return energy
-    else:
+    if not normal_termination:
         return np.nan
-
+    return energy
 
 def run_gfn_xtb(
     filepath,
@@ -85,10 +84,7 @@ def run_gfn_xtb(
     cmd = "xtb --{} {} {} {}".format(
         str(gfn_version), xyz_file, opt, str(gfn_xtb_config or "")
     )
-    # if solvent:
-    #     cmd = f"xtb --gfn2 --gbsa h2o {xyz_file}"
-    # else:
-    #     cmd = f"xtb --gfn2 {xyz_file}"
+
     if solvent:
         cmd += f"--alpb water "
 
