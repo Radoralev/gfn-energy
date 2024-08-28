@@ -44,6 +44,7 @@ def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
 # Function to read the output file and extract the required value
 def read_output_file(smiles, local_model, output_dir):
     keyword = ''
+    smiles = smiles.replace('/', '\/')
     if 'vacuum' in local_model:
         keyword = 'vacuum'
     elif 'solvation' in local_model:
