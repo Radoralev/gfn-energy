@@ -569,14 +569,16 @@ def write_outs(metrics):
     elif 'solvation' in args.local_model:
         keyword = 'solvation' 
 
+    smiles = args.smiles.replace('/', '\/')
+
     # if temp/args.output_dir doesn't exist create it
     if not os.path.exists(f'temp/{args.output_dir}'):
         os.makedirs(f'temp/{args.output_dir}')
     # write a string version of the arguments to a file
-    with open(f'temp/{args.output_dir}/{args.smiles}_{keyword}_command.txt', 'w') as f:
+    with open(f'temp/{args.output_dir}/{smiles}_{keyword}_command.txt', 'w') as f:
         f.write(str(args))
     # write the results to a file
-    with open(f'temp/{args.output_dir}/{args.smiles}_{keyword}.txt', 'w') as f:
+    with open(f'temp/{args.output_dir}/{smiles}_{keyword}.txt', 'w') as f:
         f.write(f"log_Z_lb: {metrics.get('final_eval/mean_log_Z_lb', '-')}\n")
         f.write(f"log_Z_lb_std: {metrics.get('final_eval/std_log_Z_lb', '-')}\n")
         f.write(f"log_Z: {metrics.get('final_eval/mean_log_Z', '-')}\n")
