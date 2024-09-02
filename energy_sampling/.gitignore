@@ -1,0 +1,10 @@
+*.pt
+*.json
+*.csv
+*.png
+*.ipynb_checkpoints/
+*__pycache__/
+*.pyc
+*.yml
+*.zip
+*.yaml
