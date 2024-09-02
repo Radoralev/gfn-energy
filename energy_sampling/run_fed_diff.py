@@ -5,7 +5,7 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tbT5_bws_t0.25_expl_e=25k_p=25k_mlp_lr1e3_xtbcli_gfn2xtb_tas.csv'
+output_file = 'fed_results/tbT5_bws_t0.25_expl_e=25k_p=25k_mlp_lr1e3_xtbcli_gfn2xtb_bas.csv'
 
 import os
 
@@ -15,8 +15,8 @@ os.environ['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libgomp.so.1'
 # Function to run the command and capture the output
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
-        'python', 'train.py', '--t_scale', '0.25', '--T', '5', '--epochs', '10000',
-        '--batch_size', '6', '--energy', 'xtb', '--local_model', local_model,
+        'python', 'train.py', '--t_scale', '0.25', '--T', '2', '--epochs', '10000',
+        '--batch_size', '4', '--energy', 'xtb', '--local_model', local_model,
         '--output_dir',  output_dir, #'--langevin',
         '--patience', '25000', '--model', 'mlp', #,
         '--conditional_flow_model',#'--ld_step', '0.01','--ld_schedule',
@@ -26,8 +26,8 @@ def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
         # '--exploratory', '--exploration_wd', '--exploration_factor', '2.',# '--local_search',
         # '--buffer_size', '600000', '--prioritized', 'rank', '--rank_weight', '0.01',
         # '--target_acceptance_rate', '0.574', '--beta', '5',
-        '--hidden_dim', '512', '--joint_layers', '5', '--s_emb_dim', '512',
-        '--t_emb_dim', '512', '--harmonics_dim', '512'#, '--plot',
+        '--hidden_dim', '128', '--joint_layers', '5', '--s_emb_dim', '128',
+        '--t_emb_dim', '128', '--harmonics_dim', '128'#, '--plot',
     ]
     # if load_from_most_recent:
     #     command.append('--load_from_most_recent')
@@ -44,7 +44,7 @@ def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
 # Function to read the output file and extract the required value
 def read_output_file(smiles, local_model, output_dir):
     keyword = ''
-    smiles = smiles.replace('/', '\/')
+    smiles = smiles.replace('/', '_')
     if 'vacuum' in local_model:
         keyword = 'vacuum'
     elif 'solvation' in local_model:

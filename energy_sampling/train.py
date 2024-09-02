@@ -469,7 +469,7 @@ def train():
                     conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
                     pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers, model_args=model_args,
                     joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, 
-                    equivariant_architectures=args.equivariant_architectures).to(device)
+                    equivariant_architectures=args.equivariant_architectures, energy=energy).to(device)
     
 
 

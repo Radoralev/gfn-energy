@@ -15,15 +15,28 @@ def conformations_to_torsions(xyz, tas, rd_conf):
     torsions = torch.stack(torsions)
     return torsions
 
-def torsions_to_conformations(xyz, tas, bonds, rd_conf, device):
+def bas_bls_to_conformations(xyz, bonds, bas, rd_conf, device):
+    confs = []
+    for transformation_set in xyz:
+        rotation_set = transformation_set[:len(bas)]
+        bond_lengths = transformation_set[len(bas):]
+        for i, bond_angle in enumerate(bas):
+            rd_conf.set_bond_angle(bond_angle, rotation_set[i])
+        rd_conf.set_bond_lengths(bond_lengths, bonds)
+        xyz = torch.tensor(rd_conf.get_atom_positions()).to(device, dtype=torch.float32)
+        confs.append(xyz)
+    confs = torch.stack(confs)
+    return confs
+
+def torsions_to_conformations(xyz, tas, rd_conf, device):
     # energies = self.model((an_bs, xyz.reshape(-1, self.data_ndim//3, 3))).energies
     confs = []
     for transformation_set in xyz:
         rotation_set = transformation_set[:len(tas)]
-        bond_lengths = transformation_set[len(tas):]
+        # bond_lengths = transformation_set[len(tas):]
         for i, torsion in enumerate(tas):
             rd_conf.set_torsion_angle(torsion, rotation_set[i])
-        #rd_conf.set_bond_lengths(bond_lengths, bonds)
+        # rd_conf.set_bond_lengths(bond_lengths, bonds)
         xyz = torch.tensor(rd_conf.get_atom_positions()).to(device, dtype=torch.float32)
         confs.append(xyz)
     confs = torch.stack(confs)
@@ -160,6 +173,22 @@ def get_rotatable_ta_list(mol):
     print('Torsion Angles:', torsion_angles)
     return torsion_angles, ring_bonds, nonring_bonds
 
+def find_bond_angles(bonds):
+    # add all reverse bonds to bonds
+    bonds = list(bonds)
+    for bond in list(bonds):
+        bonds.append((bond[1], bond[0]))
+    triples = set()
+    for bond1 in bonds:
+        i, j = bond1
+        for bond2 in bonds:
+            k, l = bond2
+            if k == j and l != i:
+                triples.add((i, j, bond2[1]))
+            elif l == j and k != i:
+                triples.add((i, j, bond2[0]))
+    return list(triples)
+
 class RDKitConformer:
     def __init__(self, smiles):
         """
@@ -177,7 +206,9 @@ class RDKitConformer:
         print(self.ring_bonds+self.nonring_bonds)
         self.bonds = self.get_mol_bonds(self.rdk_mol)
         self.bond_lengths = self.get_bond_lengths(self.rdk_mol)
+        self.bond_angles = find_bond_angles(self.bonds)
         print('Number of bonds:', len(self.bonds))
+        print(self.bond_angles)
 
     def __deepcopy__(self, memo):
         atom_positions = self.get_atom_positions()
@@ -222,13 +253,15 @@ class RDKitConformer:
             elif (begin_idx, end_idx) in self.nonring_bonds:
                 continue
             l = rdMolTransforms.GetBondLength(self.rdk_conf, begin_idx, end_idx)
-            bond_lengths.append(l)
-        return bond
+            bond_lengths.append(float(l))
+        return bond_lengths
     
     def set_bond_lengths(self, bond_lengths, bonds):
         bond_lengths = bond_lengths.cpu().numpy()
+        bond_lengths = bond_lengths + self.bond_lengths
         for i, (bond, length) in enumerate(zip(bonds, bond_lengths)):
             rdMolTransforms.SetBondLength(self.rdk_conf, *bond, float(length))
+        self.bond_lengths = bond_lengths
 
 
     def embed_mol_and_get_conformer(self, mol, extra_opt=False):
@@ -264,6 +297,13 @@ class RDKitConformer:
 
     def get_n_atoms(self):
         return self.rdk_mol.GetNumAtoms()
+
+    def set_bond_angle(self, bond_angle, value):
+        rdMolTransforms.SetAngleRad(self.rdk_conf, 
+                                    iAtomId=bond_angle[0], 
+                                    jAtomId=bond_angle[1], 
+                                    kAtomId=bond_angle[2], 
+                                    value=float(value))
 
     def set_torsion_angle(self, torsion_angle, value):
         rdMolTransforms.SetDihedralRad(self.rdk_conf, *torsion_angle, float(value))

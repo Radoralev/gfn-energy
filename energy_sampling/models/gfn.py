@@ -20,7 +20,7 @@ class GFN(nn.Module):
                  langevin_scaling_per_dimension: bool = True, conditional_flow_model: bool = False,
                  learn_pb: bool = False, model='mlp', smiles: str = '',
                  pis_architectures: bool = False, lgv_layers: int = 3, joint_layers: int = 2, model_args: dict = {},
-                 zero_init: bool = False, device=torch.device('cuda'), equivariant_architectures: bool = False):
+                 zero_init: bool = False, device=torch.device('cuda'), equivariant_architectures: bool = False, energy = None):
         super(GFN, self).__init__()
         self.dim = dim
         self.harmonics_dim = harmonics_dim
@@ -34,6 +34,7 @@ class GFN(nn.Module):
         self.learned_variance = learned_variance
         self.partial_energy = partial_energy
         self.t_scale = t_scale
+        self.energy = energy
 
         self.clipping = clipping
         self.lgv_clip = lgv_clip
@@ -47,7 +48,7 @@ class GFN(nn.Module):
         self.lgv_layers = lgv_layers
         self.joint_layers = joint_layers
 
-        self.pf_std_per_traj = np.sqrt(self.t_scale)
+        self.pf_std_per_traj = self.energy.pf_std_per_dim#np.sqrt(self.t_scale)
         self.dt = 1. / trajectory_length
         self.log_var_range = log_var_range
         self.device = device
@@ -146,7 +147,7 @@ class GFN(nn.Module):
             logvar = torch.zeros_like(logvar)
         else:
             logvar = torch.tanh(logvar) * self.log_var_range
-        return mean, logvar + np.log(self.pf_std_per_traj) * 2.
+        return mean, logvar + torch.log(self.pf_std_per_traj) * 2.
 
     def predict_next_state(self, s, t, log_r):
         if self.langevin:

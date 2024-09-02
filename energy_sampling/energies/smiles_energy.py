@@ -10,7 +10,7 @@ from .alanine import load_data, plot_rama_traj
 #from xtb.ase.calculator import XTB
 #from xtb.interface import Environment
 from .utils import RDKitConformer
-from .utils import torsions_to_conformations
+from .utils import torsions_to_conformations, bas_bls_to_conformations
 from joblib import Parallel, delayed
 from .xtbcli import get_energy
 
@@ -23,17 +23,21 @@ class MoleculeFromSMILES_XTB(BaseSet):
         self.atomic_numbers = torch.tensor(self.rd_conf.get_atomic_numbers()).to(self.device)
         self.tas = self.rd_conf.freely_rotatable_tas
         self.bonds = self.rd_conf.bonds
+        self.bas = self.rd_conf.bond_angles 
         if smiles == 'C[C@@H](C(=O)NC)NC(=O)C':
             self.tas = ((0, 1, 2, 3), (0, 1, 6, 7))
-        self.data_ndim = len(self.tas)
+        self.data_ndim = len(self.bas) + len(self.bonds)
         self.atom_nr = len(self.atomic_numbers)
         # Initialize XTB Energy
         self.solvate = solvate
         self.solvent = 'water' if solvate else ''
+        self.pf_std_per_dim = torch.ones(self.data_ndim).to(self.device)
+        self.pf_std_per_dim[:len(self.bas)] = 0.1
+        self.pf_std_per_dim[len(self.bas):] = 0.01
         # self.target = XTBEnergy(XTBBridge(numbers=self.atomic_numbers.cpu().numpy(), temperature=1, solvent=self.solvent, method='GFN2-xTB'))#.to('cuda')        # Get positions
     
     def energy(self, xyz):
-        confs = torsions_to_conformations(xyz, self.tas, self.bonds, self.rd_conf, self.device)
+        confs = bas_bls_to_conformations(xyz, self.bonds, self.bas, self.rd_conf, self.device)
         #energies = self.target.energy(confs.reshape(-1, self.atom_nr, 3)).squeeze()
 
         energies = []
