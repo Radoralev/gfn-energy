@@ -231,12 +231,12 @@ class RDKitConformer:
         for bond in mol.GetBonds():
             begin_idx = bond.GetBeginAtomIdx()
             end_idx = bond.GetEndAtomIdx()
-            if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
-                continue
-            elif (begin_idx, end_idx) in self.ring_bonds:
-                continue
-            elif (begin_idx, end_idx) in self.nonring_bonds:
-                continue
+            # if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
+            #     continue
+            # elif (begin_idx, end_idx) in self.ring_bonds:
+            #     continue
+            # elif (begin_idx, end_idx) in self.nonring_bonds:
+            #     continue
             bonds.append((begin_idx, end_idx))
         return bonds
     
