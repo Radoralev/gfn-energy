@@ -48,7 +48,7 @@ class GFN(nn.Module):
         self.lgv_layers = lgv_layers
         self.joint_layers = joint_layers
 
-        self.pf_std_per_traj = self.energy.pf_std_per_dim#np.sqrt(self.t_scale)
+        self.pf_std_per_traj = np.sqrt(self.t_scale)
         self.dt = 1. / trajectory_length
         self.log_var_range = log_var_range
         self.device = device
@@ -147,7 +147,7 @@ class GFN(nn.Module):
             logvar = torch.zeros_like(logvar)
         else:
             logvar = torch.tanh(logvar) * self.log_var_range
-        return mean, logvar + torch.log(self.pf_std_per_traj) * 2.
+        return mean, logvar + np.log(self.pf_std_per_traj) * 2.
 
     def predict_next_state(self, s, t, log_r):
         if self.langevin:
@@ -191,9 +191,11 @@ class GFN(nn.Module):
         logpb = torch.zeros((bsz, self.trajectory_length), device=self.device)
         logf = torch.zeros((bsz, self.trajectory_length + 1), device=self.device)
         states = torch.zeros((bsz, self.trajectory_length + 1, self.dim), device=self.device)
-
+        # start from init state
         for i in range(self.trajectory_length):
+            # predict next state using neural nets (policies and flow model)
             pfs, flow = self.predict_next_state(s, i * self.dt, log_r)
+            # it's variational inference so we need to sample from the distribution
             pf_mean, pflogvars = self.split_params(pfs)
 
             logf[:, i] = flow
@@ -210,6 +212,9 @@ class GFN(nn.Module):
 
             # Equation (2) in the paper
             var_term = np.sqrt(self.dt) * (pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)
+            # s_ is thr predicted next state
+            # important to note: that the predicted parameters of the distribution are detached
+            # before sampling the state
             s_ = s + self.dt * pf_mean.detach() + var_term
 
             # x_(t+dt) = x_t + u(xt)dt + sqrt(dt)*g(xt)*N(0,1)

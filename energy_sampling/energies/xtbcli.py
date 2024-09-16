@@ -6,8 +6,6 @@ import warnings
 
 import numpy as np
 
-from .utils import RDKitConformer
-from .utils import torsions_to_conformations
 
 
 # This is a hotfix for tblite (used for the conformer generation) not
@@ -169,3 +167,67 @@ def get_energy(numbers, positions, method="gfnff", solvent=False):
 
     return energy
 
+
+def optimize_conformation(numbers, positions, method="gfnff", solvent=True):
+    directory = TemporaryDirectory()
+    file_name = "input.xyz"
+
+    # Write the input xyz file
+    _write_xyz_file(numbers, positions, str(Path(directory.name) / file_name))
+
+    # Run xtb with optimization and solvent
+    with pipes():
+        energy = run_gfn_xtb(
+            directory.name, file_name, gfn_version=method, opt=True, solvent=solvent
+        )
+
+    # Read optimized geometry from xtbopt.xyz
+    optimized_xyz_file = Path(directory.name) / "xtbopt.xyz"
+    if optimized_xyz_file.exists():
+        elements_opt, positions_opt = _read_xyz_file(str(optimized_xyz_file))
+    else:
+        # Optimization failed, return original positions.
+        elements_opt = numbers
+        positions_opt = positions
+        warnings.warn("Optimization failed, returning original positions.")
+
+    # Clean up temporary directory
+    directory.cleanup()
+
+    return elements_opt, positions_opt, energy
+
+def _read_xyz_file(file_path: str):
+    # Map element symbols to atomic numbers
+    element_symbol_to_atomic_number = {
+        'H': 1, 'He': 2,
+        'Li': 3, 'Be': 4, 'B': 5, 'C':6, 'N':7, 'O':8, 'F':9, 'Ne':10,
+        'Na':11, 'Mg':12, 'Al':13, 'Si':14, 'P':15, 'S':16, 'Cl':17, 'Ar':18,
+        'K':19, 'Ca':20, 'Sc':21, 'Ti':22, 'V':23, 'Cr':24, 'Mn':25, 'Fe':26, 'Co':27, 'Ni':28, 'Cu':29, 'Zn':30,
+        'Ga':31, 'Ge':32, 'As':33, 'Se':34, 'Br':35, 'Kr':36,
+        'Rb':37, 'Sr':38, 'Y':39, 'Zr':40, 'Nb':41, 'Mo':42, 'Tc':43, 'Ru':44, 'Rh':45, 'Pd':46, 'Ag':47, 'Cd':48,
+        'In':49, 'Sn':50, 'Sb':51, 'Te':52, 'I':53, 'Xe':54,
+        # Add more elements as needed
+    }
+
+    with open(file_path, "r") as f:
+        lines = f.readlines()
+
+    num_atoms = int(lines[0])
+    # Skip the second line (comment)
+    elements = []
+    positions = []
+    for line in lines[2:2+num_atoms]:
+        tokens = line.strip().split()
+        if len(tokens) != 4:
+            continue
+        element_symbol = tokens[0]
+        x, y, z = map(float, tokens[1:4])
+        atomic_number = element_symbol_to_atomic_number.get(element_symbol)
+        if atomic_number is None:
+            raise ValueError(f"Unknown element symbol: {element_symbol}")
+        elements.append(atomic_number)
+        positions.append([x, y, z])
+
+    positions = np.array(positions)
+    elements = np.array(elements)
+    return elements, positions

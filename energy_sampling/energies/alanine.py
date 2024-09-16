@@ -15,7 +15,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from bgflow import XTBEnergy, XTBBridge
 import time
-import torchani
+# import torchani
 from energies.neural_energy import NeuralEnergy
 
 def plot_rama_traj(trajectory, w=None, get_phi=False, i=-1, model=None):

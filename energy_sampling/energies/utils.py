@@ -5,6 +5,8 @@ from rdkit.Geometry.rdGeometry import Point3D
 import numpy as np
 import torch
 
+from .xtbcli import optimize_conformation
+
 def conformations_to_torsions(xyz, tas, rd_conf):
     # energies = self.model((an_bs, xyz.reshape(-1, self.data_ndim//3, 3))).energies
     torsions = []
@@ -42,6 +44,7 @@ def torsions_to_conformations(xyz, tas, rd_conf, device):
     confs = torch.stack(confs)
     return confs
 
+    
 def get_torsion_angles_atoms_list(mol):
     return [x[0][0] for x in TorsionFingerprints.CalculateTorsionLists(mol)[0]]
 
@@ -170,7 +173,6 @@ def get_rotatable_ta_list(mol):
     torsion_angles.extend(nonring_tas)
     torsion_angles = remove_duplicate_tas(torsion_angles)
     #torsion_angles = [ta for ta in torsion_angles if not is_hydrogen_ta(mol, ta)]
-    print('Torsion Angles:', torsion_angles)
     return torsion_angles, ring_bonds, nonring_bonds
 
 def find_bond_angles(bonds):
@@ -190,25 +192,24 @@ def find_bond_angles(bonds):
     return list(triples)
 
 class RDKitConformer:
-    def __init__(self, smiles):
+    def __init__(self, smiles, solvation):
         """
         :param atom_positions: numpy.ndarray of shape [num_atoms, 3] of dtype float64
         """
         self.smiles = smiles
+        self.solvation = solvation
         self.rdk_mol = self.get_mol_from_smiles(smiles)
-        self.rdk_conf = self.embed_mol_and_get_conformer(self.rdk_mol, extra_opt=True)
+        self.rdk_conf = embed_mol_and_get_conformer(self.rdk_mol, extra_opt=True)
 
-        self.set_atom_positions(self.rdk_conf.GetPositions())
+        num, pos, _ =  optimize_conformation(self.get_atomic_numbers(), self.rdk_conf.GetPositions(), method="gfn2", solvent=solvation)
+        self.set_atom_positions(pos)
         self.freely_rotatable_tas, self.ring_bonds, self.nonring_bonds = get_rotatable_ta_list(self.rdk_mol)
 
         self.hydrogen_indices = [self.rdk_mol.GetAtomWithIdx(i).GetAtomicNum() == 1 for i in range(self.rdk_mol.GetNumAtoms())]
 
-        print(self.ring_bonds+self.nonring_bonds)
         self.bonds = self.get_mol_bonds(self.rdk_mol)
         self.bond_lengths = self.get_bond_lengths(self.rdk_mol)
         self.bond_angles = find_bond_angles(self.bonds)
-        print('Number of bonds:', len(self.bonds))
-        print(self.bond_angles)
 
     def __deepcopy__(self, memo):
         atom_positions = self.get_atom_positions()
@@ -233,8 +234,8 @@ class RDKitConformer:
             end_idx = bond.GetEndAtomIdx()
             # if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
             #     continue
-            # elif (begin_idx, end_idx) in self.ring_bonds:
-            #     continue
+            if (begin_idx, end_idx) in self.ring_bonds:
+                continue
             # elif (begin_idx, end_idx) in self.nonring_bonds:
             #     continue
             bonds.append((begin_idx, end_idx))
@@ -246,12 +247,12 @@ class RDKitConformer:
         for bond in bonds:
             begin_idx = bond.GetBeginAtomIdx()
             end_idx = bond.GetEndAtomIdx()
-            if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
+            # if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
+            #     continue
+            if (begin_idx, end_idx) in self.ring_bonds:
                 continue
-            elif (begin_idx, end_idx) in self.ring_bonds:
-                continue
-            elif (begin_idx, end_idx) in self.nonring_bonds:
-                continue
+            # elif (begin_idx, end_idx) in self.nonring_bonds:
+            #     continue
             l = rdMolTransforms.GetBondLength(self.rdk_conf, begin_idx, end_idx)
             bond_lengths.append(float(l))
         return bond_lengths
@@ -263,17 +264,6 @@ class RDKitConformer:
             rdMolTransforms.SetBondLength(self.rdk_conf, *bond, float(length))
         self.bond_lengths = bond_lengths
 
-
-    def embed_mol_and_get_conformer(self, mol, extra_opt=False):
-        """Embed RDkit mol with a conformer and return the RDKit conformer object
-        (which is synchronized with the RDKit molecule object)
-        :param mol: rdkit.Chem.rdchem.Mol object defining the molecule
-        :param extre_opt: bool, if True, an additional optimisation of the conformer will be performed
-        """
-        AllChem.EmbedMolecule(mol)
-        if extra_opt:
-            AllChem.MMFFOptimizeMolecule(mol, confId=0, maxIters=10000)
-        return mol.GetConformer()
 
     def set_atom_positions(self, atom_positions):
         """Set atom positions of the self.rdk_conf to the input atom_positions values

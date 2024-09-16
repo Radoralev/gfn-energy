@@ -11,10 +11,10 @@ from energies import *
 from evaluations import *
 from gflownet_losses import *
 from langevin import langevin_dynamics
-from models import GFN, EGNNModel, MACEModel, TorchANI_Local
+from models import GFN, EGNNModel, MACEModel
 from plot_utils import *
 from openmm import unit
-import torchani
+# import torchani
 
 from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimizer, get_gfn_forward_loss, \
     get_gfn_backward_loss, get_exploration_std, get_name
@@ -120,7 +120,9 @@ set_seed(args.seed)
 if 'SLURM_PROCID' in os.environ:
     args.seed += int(os.environ["SLURM_PROCID"])
 
-eval_data_size = 512
+
+args.smiles = args.smiles.strip()
+eval_data_size = 2048
 final_eval_data_size = 1024 * 2
 plot_data_size = 1024
 final_plot_data_size = 2000
@@ -328,7 +330,7 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
     else:
         init_state = torch.zeros(eval_data_size, energy.data_ndim).to(device)
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[
-            'eval/log_Z_learned'] = log_partition_function(
+            'eval/log_Z_learned'], metrics['eval/NSS'], metrics['eval/ESS'] = log_partition_function(
             init_state, gfn_model, log_reward_func)
         metrics['eval/log_Z'] = add_kBT(metrics['eval/log_Z'])
         metrics['eval/log_Z_lb'] = add_kBT(metrics['eval/log_Z_lb'])
@@ -336,16 +338,6 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
     if eval_data is None:
         log_elbo = None
         sample_based_metrics = None
-    # else:
-    #     if final_eval:
-    #         metrics['final_eval/mean_log_likelihood'] = 0. if args.mode_fwd == 'pis' else mean_log_likelihood(eval_data,
-    #                                                                                                           gfn_model,
-    #                                                                                                           energy.log_reward)
-    #     else:
-    #         metrics['eval/mean_log_likelihood'] = 0. if args.mode_fwd == 'pis' else mean_log_likelihood(eval_data,
-    #                                                                                                     gfn_model,
-    #                                                                                                     energy.log_reward)
-        # metrics.update(get_sample_metrics(samples, eval_data, final_eval))
     gfn_model.train()
     return metrics
 
@@ -355,7 +347,7 @@ def calculate_log_Z_statistics(energy, gfn_model, metrics, log_reward_func):
     logZlearned = []
     for _ in range(2):
         init_state = torch.zeros(final_eval_data_size, energy.data_ndim).to(device)
-        samples, log_Z, log_Z_lb, log_Z_learned = log_partition_function(init_state, gfn_model, log_reward_func)
+        samples, log_Z, log_Z_lb, log_Z_learned, metrics['final_eval/NSS'], metrics['final_eval/ESS'] = log_partition_function(init_state, gfn_model, log_reward_func)
         log_Z = add_kBT(log_Z)
         log_Z_lb = add_kBT(log_Z_lb)
         log_Z_learned = add_kBT(log_Z_learned)
@@ -375,12 +367,6 @@ def add_kBT(logz):
     hartree_to_kcal = 627.503
     factor = hartree_to_kcal * kB * T 
     return -logz * factor
-    # metrics['final_eval/mean_log_Z'] = metrics['final_eval/mean_log_Z'] * factor
-    # metrics['final_eval/std_log_Z'] = metrics['final_eval/std_log_Z'] * factor
-    # metrics['final_eval/mean_log_Z_lb'] = metrics['final_eval/mean_log_Z_lb'] * factor
-    # metrics['final_eval/std_log_Z_lb'] = metrics['final_eval/std_log_Z_lb'] * factor
-    # metrics['final_eval/mean_log_Z_learned'] = metrics['final_eval/mean_log_Z_learned'] * factor
-    # metrics['final_eval/std_log_Z_learned'] = metrics['final_eval/std_log_Z_learned'] * factor
 
 
 def train_step(energy, gfn_model, gfn_optimizer, it, exploratory, buffer, buffer_ls, exploration_factor, exploration_wd, args):
@@ -442,15 +428,15 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
 
 
 def train():
-    name = get_name(args)
+    # name = get_name(args)
+    name = f'eval/{args.energy}/{args.smiles}/{args.solvate}/'
     if not os.path.exists(name):
         os.makedirs(name)
     print(args.energy)
     energy, model_args = get_energy()
     metrics = dict()
 
-    #energy.time_test()
-    #return
+
     if energy.data_ndim == 0:
         write_outs(metrics)
         return
@@ -509,7 +495,7 @@ def train():
     for i in trange(args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd, args)
-        if (i) % 2000 == 0:
+        if (i) % 250 == 0:
             energy.min_val = None
             metrics.update(eval_step(eval_data, energy, gfn_model, final_eval=False))
             #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
@@ -528,30 +514,9 @@ def train():
             wandb.log(metrics, step=i)
             #energy.min_val = 5
         
-        # Early stopping
-        if metrics['eval/log_Z_lb'] < best_loss and i > 500:
-            best_loss = metrics['eval/log_Z_lb'] 
-            # savew weights
-            if early_stop_counter > 0:
-                torch.save(gfn_model.state_dict(), f'{name}model.pt')
-            early_stop_counter = 0
-        elif i > 500:
-            early_stop_counter += 1
-            if early_stop_counter >= args.patience:
-                print('Early stopping triggered.')
-                break
-        # if (i+1) % 200 == 0:
-        #     samples = gfn_model.sample(4096, energy.log_reward)
-        #     energy.min_val = None
-        #     energy.max_val = None
-        #     energy.update_linlog()
-        #     bounds_energies = -energy.log_reward(samples)
-        #     energy.min_val = torch.quantile(bounds_energies, 0.01)
-        #     energy.max_val = energy.min_val+30
-        #     energy.update_linlog()
-        #     print(f"Min energy: {energy.min_val}")
-        #     print(f"Max energy: {energy.max_val}")
-        # Learning rate scheduler
+        if (i) % 1000 == 0:
+            torch.save(gfn_model.state_dict(), f'{name}model_{i}.pt')
+
         scheduler.step()
 
     # load best model if file exists

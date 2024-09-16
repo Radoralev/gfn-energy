@@ -5,7 +5,7 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/tbT5_bws_t0.25_expl_e=25k_p=25k_mlp_lr1e3_xtbcli_gfn2xtb_bas.csv'
+output_file = 'fed_results/512x5_0.25var_fwd_xtb_bs6_T5_beta_weighted.csv'
 
 import os
 
@@ -15,19 +15,20 @@ os.environ['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libgomp.so.1'
 # Function to run the command and capture the output
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
-        'python', 'train.py', '--t_scale', '0.25', '--T', '2', '--epochs', '10000',
-        '--batch_size', '4', '--energy', 'xtb', '--local_model', local_model,
+        'python', 'train.py', '--t_scale', '0.05', '--T', '1', '--epochs', '15000',
+        '--batch_size', '6', '--energy', 'xtb', '--local_model', local_model,
         '--output_dir',  output_dir, #'--langevin',
+       '--learned_variance','--log_var_range', '0.5',
         '--patience', '25000', '--model', 'mlp', #,
-        '--conditional_flow_model',#'--ld_step', '0.01','--ld_schedule',
+       # '--conditional_flow_model',#'--ld_step', '0.01','--ld_schedule',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
-        '--pis_architectures', '--mode_fwd', 'tb','--mode_bwd', 'tb', #'--max_iter_ls', '100', '--burn_in', '50',
-        '--lr_policy', '1e-4', '--lr_back', '1e-4', '--lr_flow', '1e-3', 
+        '--pis_architectures', '--mode_fwd', 'tb-avg',#'--mode_bwd', 'tb-avg', '--both_ways',#'--max_iter_ls', '100', '--burn_in', '50',
+        '--lr_policy', '1e-3', '--lr_back', '1e-3', '--lr_flow', '1e-3', 
         # '--exploratory', '--exploration_wd', '--exploration_factor', '2.',# '--local_search',
-        # '--buffer_size', '600000', '--prioritized', 'rank', '--rank_weight', '0.01',
+        # '--buffer_size', '600000', '--prioritized', 'rank', '--rank_weight', '0.05',
         # '--target_acceptance_rate', '0.574', '--beta', '5',
-        '--hidden_dim', '128', '--joint_layers', '5', '--s_emb_dim', '128',
-        '--t_emb_dim', '128', '--harmonics_dim', '128'#, '--plot',
+        '--hidden_dim', '512', '--joint_layers', '5', '--s_emb_dim', '512',
+        '--t_emb_dim', '512', '--harmonics_dim', '512'#, '--plot',
     ]
     # if load_from_most_recent:
     #     command.append('--load_from_most_recent')
@@ -93,7 +94,7 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         if row[0].startswith('#'):
             continue  # Skip header or comment lines
 
-        smiles = row[1]
+        smiles = row[1].strip()
         experimental_val = row[3]
         experimental_uncertainty = row[4]
 
@@ -109,8 +110,8 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         local_model_vacuum = 'weights/egnn_vacuum_small_with_hs_final'
         local_model_solvation = 'weights/egnn_solvation_small_with_hs_final'
 
-        run_command(smiles, local_model_vacuum, output_dir)
-        print('Vacuum done')
+        # run_command(smiles, local_model_vacuum, output_dir)
+        # print('Vacuum done')
         run_command(smiles, local_model_solvation, output_dir, load_from_most_recent=True)
         print('Solvation done')
 
