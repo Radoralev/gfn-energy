@@ -10,7 +10,7 @@ from buffer import ReplayBuffer
 from energies import *
 from evaluations import *
 from gflownet_losses import *
-from langevin import langevin_dynamics
+from langevin import langevin_dynamics, standard_monte_carlo
 from models import GFN, EGNNModel, MACEModel
 from plot_utils import *
 from openmm import unit
@@ -122,7 +122,7 @@ if 'SLURM_PROCID' in os.environ:
 
 
 args.smiles = args.smiles.strip()
-eval_data_size = 2048
+eval_data_size = 128
 final_eval_data_size = 1024 * 2
 plot_data_size = 1024
 final_plot_data_size = 2000
@@ -330,7 +330,7 @@ def eval_step(eval_data, energy, gfn_model, final_eval=False):
     else:
         init_state = torch.zeros(eval_data_size, energy.data_ndim).to(device)
         samples, metrics['eval/log_Z'], metrics['eval/log_Z_lb'], metrics[
-            'eval/log_Z_learned'], metrics['eval/NSS'], metrics['eval/ESS'] = log_partition_function(
+            'eval/log_Z_learned'], metrics['eval/ESS'], metrics['eval/ESS_ratio'] = log_partition_function(
             init_state, gfn_model, log_reward_func)
         metrics['eval/log_Z'] = add_kBT(metrics['eval/log_Z'])
         metrics['eval/log_Z_lb'] = add_kBT(metrics['eval/log_Z_lb'])
@@ -416,7 +416,7 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
         if args.local_search:
             if it % args.ls_cycle < 2:
                 samples, rewards = buffer.sample()
-                local_search_samples, log_r = langevin_dynamics(samples, energy, device, args)
+                local_search_samples, log_r = standard_monte_carlo(samples, energy, device, args)
                 buffer_ls.add(local_search_samples, log_r)
         
             samples, rewards = buffer_ls.sample()
@@ -429,7 +429,7 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
 
 def train():
     # name = get_name(args)
-    name = f'eval/{args.energy}/{args.smiles}/{args.solvate}/'
+    name = f'train/{args.energy}/{args.smiles}/{args.solvate}/'
     if not os.path.exists(name):
         os.makedirs(name)
     print(args.energy)
@@ -495,7 +495,7 @@ def train():
     for i in trange(args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd, args)
-        if (i) % 250 == 0:
+        if (i) % 2500 == 0:
             energy.min_val = None
             metrics.update(eval_step(eval_data, energy, gfn_model, final_eval=False))
             #if 'tb-avg' in args.mode_fwd or 'tb-avg' in args.mode_bwd:
@@ -514,7 +514,7 @@ def train():
             wandb.log(metrics, step=i)
             #energy.min_val = 5
         
-        if (i) % 1000 == 0:
+        if (i+1) % 15000 == 0:
             torch.save(gfn_model.state_dict(), f'{name}model_{i}.pt')
 
         scheduler.step()

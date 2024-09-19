@@ -79,7 +79,7 @@ def run_gfn_xtb(
     os.chdir(filepath)
 
     file_name = str(xyz_file.split(".")[0])
-    cmd = "xtb --{} {} {} {}".format(
+    cmd = "xtb --{} {} {} {} --iterations 1000".format(
         str(gfn_version), xyz_file, opt, str(gfn_xtb_config or "")
     )
 

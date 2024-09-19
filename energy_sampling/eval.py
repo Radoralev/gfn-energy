@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import csv
 import torch
 import matplotlib.pyplot as plt
 import wandb
@@ -15,6 +16,10 @@ from models import GFN#, EGNNModel, MACEModel, TorchANI_Local
 from plot_utils import *
 from openmm import unit
 # import torchani
+from pymbar import other_estimators
+
+
+from mcmc_eval_utils import weighted_EXP, compute_weights, fed_estimate_Z, calc_ESS
 
 from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimizer, get_gfn_forward_loss, \
     get_gfn_backward_loss, get_exploration_std, get_name
@@ -105,11 +110,11 @@ parser.add_argument('--weight_decay', type=float, default=1e-7)
 parser.add_argument('--use_weight_decay', action='store_true', default=False)
 parser.add_argument('--smiles', type=str, default='CCCCCC(=O)OC') # First mol in FreeSolv
 parser.add_argument('--temperature', type=int, default=300)
-parser.add_argument('--solvate', action='store_true', default=False, help="Solvate the molecule")
 parser.add_argument('--torchani-model', type=str, default='', help="TorchANI model to use")
 parser.add_argument('--local_model', type=str, default=None, help="Path to local model")
 parser.add_argument('--equivariant_architectures', action='store_true', default=False)
 parser.add_argument('--eval', type=int, default=0)
+parser.add_argument('--save_eval_samples', action='store_true', default=False)
 args = parser.parse_args()
 
 set_seed(args.seed)
@@ -253,109 +258,193 @@ def add_kBT(logz):
     factor = hartree_to_kcal * kB * T 
     return -logz * factor
 
+def load_gfn(args, energy):
+    gfn_model = GFN(
+        energy.data_ndim, args.s_emb_dim, args.hidden_dim, args.harmonics_dim, args.t_emb_dim,
+        trajectory_length=args.T, clipping=args.clipping, lgv_clip=args.lgv_clip, gfn_clip=args.gfn_clip,
+        langevin=args.langevin, learned_variance=args.learned_variance,
+        partial_energy=args.partial_energy, log_var_range=args.log_var_range,
+        pb_scale_range=args.pb_scale_range, model=args.model, smiles=args.smiles,
+        t_scale=args.t_scale, langevin_scaling_per_dimension=args.langevin_scaling_per_dimension,
+        conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
+        pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers, model_args=None,
+        joint_layers=args.joint_layers, zero_init=args.zero_init, device=device,
+        equivariant_architectures=args.equivariant_architectures, energy=energy
+    ).to(device)
+    return gfn_model
 
 def eval():
     # name = get_name(args)
-    name = f'eval/{args.energy}/{args.smiles}/{args.solvate}/'
+    name_s = f'eval/{args.energy}/{args.smiles}/True/'
+    name_v = f'eval/{args.energy}/{args.smiles}/False/'
     # if not args.solvate:
     #     name_load = f'results_pis_architectures/xtb/clipping_lgv_100.0_gfn_10000.0_gfn/fwd/fwd_tb/T_5/tscale_0.25/lvr_4.0/seed_12345/ CCCCCC(=O)OC/2024-08-23_02-14-49/model.pt'
     # else:
     #     name_load = f'results_pis_architectures/xtb/clipping_lgv_100.0_gfn_10000.0_gfn/fwd/fwd_tb/T_5/tscale_0.25/lvr_4.0/seed_12345/ CCCCCC(=O)OC/2024-08-23_02-34-31/model.pt'
-    name_load = name + 'model_15000.pt'
+    name_load_s = name_s + 'model_15000.pt'
+    name_load_v = name_v + 'model_15000.pt'
+
     print(args.energy)
-    energy, model_args = get_energy()
+    s_energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=True)
+    v_energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=False)
+
     metrics = dict()
-
-
-
-    eval_data = energy.sample(eval_data_size)
+    output_file = 'fed_results/eval'
 
     config = args.__dict__
     config["Experiment"] = "{args.energy}"
-    wandb.init(project="GFN Energy", config=config, name=name)
+    wandb.init(project="GFN Energy Evaluation", config=config, name='eval/' + args.energy + '/' + args.smiles)
     kB = unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree/unit.kelvin)
     T = 298.15
-    beta = 1/(kB*T)
+    beta = 1
+    hartree_to_kcal = 627.509
     states_list = []
     log_beta_weight_list = []
     log_r_list = []
     log_pfs_list = []
     log_pbs_list = []
+    num_samples = args.eval
 
-    gfn_model = GFN(energy.data_ndim, args.s_emb_dim, args.hidden_dim, args.harmonics_dim, args.t_emb_dim,
-        trajectory_length=args.T, clipping=args.clipping, lgv_clip=args.lgv_clip, gfn_clip=args.gfn_clip,
-        langevin=args.langevin, learned_variance=args.learned_variance,
-        partial_energy=args.partial_energy, log_var_range=args.log_var_range,
-        pb_scale_range=args.pb_scale_range, model = args.model, smiles=args.smiles,
-        t_scale=args.t_scale, langevin_scaling_per_dimension=args.langevin_scaling_per_dimension,
-        conditional_flow_model=args.conditional_flow_model, learn_pb=args.learn_pb,
-        pis_architectures=args.pis_architectures, lgv_layers=args.lgv_layers, model_args=model_args,
-        joint_layers=args.joint_layers, zero_init=args.zero_init, device=device, 
-        equivariant_architectures=args.equivariant_architectures, energy=energy).to(device)
+    gfn_model_s = load_gfn(args, s_energy)
+    gfn_model_v = load_gfn(args, v_energy)
 
-    gfn_model.load_state_dict(torch.load(f'{name_load}'))
+    gfn_model_s.load_state_dict(torch.load(f'{name_load_s}'))
+    gfn_model_v.load_state_dict(torch.load(f'{name_load_v}'))
 
-    for i in range(3):
-        print('Loaded model.')
+    gfn_model_v.eval()
+    gfn_model_s.eval()
 
-        gfn_model.eval()
+    v_states_list = []
+    s_states_list = []
 
-        initial_state = torch.zeros(args.eval, energy.data_ndim).to(device)
-        
-        states, log_pfs, log_pbs, log_fs = gfn_model.get_trajectory_fwd(initial_state, None, energy.log_reward)
-        print('Generated states')
-        states_list.append(states[:, -1].cpu().detach())
-        log_pfs_list.append(log_pfs.cpu().detach())
-        log_pbs_list.append(log_pbs.cpu().detach())
+    log_pfs_v_list = []
+    log_pbs_v_list = []
 
-        with torch.no_grad():
-            log_r = energy.log_reward(states[:, -1])
+    log_pfs_s_list = []
+    log_pbs_s_list = []
+
+    # Generate samples from vacuum model
+    print('Generating samples from vacuum model.')
+    for _ in range(3):  # Adjust the number of iterations as needed
+        initial_state = torch.zeros(num_samples, v_energy.data_ndim).to(device)
+        states, log_pfs, log_pbs_, _ = gfn_model_v.get_trajectory_fwd(initial_state, None, v_energy.log_reward)
+        v_states_list.append(states[:, -1].cpu().detach())
+        log_pfs_v_list.append(log_pfs.cpu().detach())
+        log_pbs_v_list.append(log_pbs_.cpu().detach())
+    v_states = torch.cat(v_states_list, dim=0)
+    log_pfs_v = torch.cat(log_pfs_v_list, dim=0)
+    log_pbs_v = torch.cat(log_pbs_v_list, dim=0)
+
+    # Generate samples from solvate model
+    print('Generating samples from solvate model.')
+    for _ in range(3):  # Adjust the number of iterations as needed
+        initial_state = torch.zeros(num_samples, s_energy.data_ndim).to(device)
+        states, log_pfs, log_pbs, _ = gfn_model_s.get_trajectory_fwd(initial_state, None, s_energy.log_reward)
+        s_states_list.append(states[:, -1].cpu().detach())
+        log_pfs_s_list.append(log_pfs.cpu().detach())
+        log_pbs_s_list.append(log_pbs.cpu().detach())
+    s_states = torch.cat(s_states_list, dim=0)
+    log_pfs_s = torch.cat(log_pfs_s_list, dim=0)
+    log_pbs_s = torch.cat(log_pbs_s_list, dim=0)
+    
+    # Compute energies for all combinations
+    total_samples = v_states.shape[0]
+    vv_energies = torch.zeros(total_samples)
+    vs_energies = torch.zeros(total_samples)
+    sv_energies = torch.zeros(total_samples)
+    ss_energies = torch.zeros(total_samples)
+
+    batch_size = 6  # Adjust batch size as needed
+    # Compute energies in batches
+    for start in range(0, total_samples, batch_size):
+        end = min(start + batch_size, total_samples)
+        v_batch = v_states[start:end].to(device)
+        s_batch = s_states[start:end].to(device)
+
+        vv_energies[start:end] = v_energy.energy(v_batch).cpu()
+        vs_energies[start:end] = v_energy.energy(s_batch).cpu()
+        sv_energies[start:end] = s_energy.energy(v_batch).cpu()
+        ss_energies[start:end] = s_energy.energy(s_batch).cpu()
+
+    # Convert energies to numpy arrays
+    vv_energies_np = vv_energies.numpy()
+    vs_energies_np = vs_energies.numpy()
+    sv_energies_np = sv_energies.numpy()
+    ss_energies_np = ss_energies.numpy()
+
+    # Compute work values
+    w_F = (sv_energies_np - vv_energies_np) * beta
+    w_R = (vs_energies_np - ss_energies_np) * beta
+
+    # Compute free energy differences using pymbar
+    print("Computing free energy differences using pymbar...")
+
+    # EXP estimator
+    deltaF_EXP_result = other_estimators.exp(w_R)
+    deltaF_EXP = deltaF_EXP_result['Delta_f'] * kB * T * hartree_to_kcal
+    deltaF_EXP_std = deltaF_EXP_result['dDelta_f'] * kB * T * hartree_to_kcal
+    print(f"EXP estimate: {deltaF_EXP:.4f} ± {deltaF_EXP_std:.4f} kcal/mol")
+
+    # BAR estimator
+    deltaF_BAR_result = other_estimators.bar(w_F, w_R)
+    deltaF_BAR = deltaF_BAR_result['Delta_f'] * kB * T * hartree_to_kcal
+    deltaF_BAR_std = deltaF_BAR_result['dDelta_f'] * kB * T * hartree_to_kcal
+    print(f"BAR estimate: {deltaF_BAR:.4f} ± {deltaF_BAR_std:.4f} kcal/mol")
 
 
-        log_beta_weight = log_r + log_pbs.sum(-1) - log_pfs.sum(-1)
-        log_beta_weight_list.append(log_beta_weight.cpu().detach())
-        log_r_list.append(log_r.cpu().detach())
+    weights_v = compute_weights(-vv_energies, log_pfs_v, beta)
+    weights_s = compute_weights(-ss_energies, log_pfs_s, beta)
 
-        with torch.no_grad():
-            log_rs = torch.cat(log_r_list, dim=0)
-            log_probs = torch.cat(log_pfs_list, dim=0).to(device).sum(dim=-1)
-            print('Probabilities sum:', torch.exp(log_probs).sum())
-            exponents = log_rs.to(device) - log_probs
-            exponents -= exponents.max()
-            weights = torch.exp(exponents) 
-            weights /= weights.sum()
-            weights = torch.where(weights > 1e-10, weights, torch.tensor(1e-10).to(device))
-            NSS = torch.exp(-torch.sum(weights*torch.log(weights)))
-            ESS_standard = 1.0 / torch.sum(weights ** 2)
-            print('Weights sum:', weights.sum())
-            print(NSS, f"ESS forward: {NSS/log_rs.shape[0]:.3f} %", f"ESS standard: {ESS_standard/log_rs.shape[0]:.3f} %")
+    ESS_v, ESS_ratio_v = calc_ESS(-vv_energies, log_pfs_v, beta)
+    ESS_s, ESS_ratio_s = calc_ESS(-ss_energies, log_pfs_s, beta)
 
-            log_probs = torch.cat(log_pbs_list, dim=0).to(device).sum(dim=-1)
-            print('Probabilities sum:', torch.exp(log_probs).sum())
-            exponents = log_rs.to(device) - log_probs
-            exponents -= exponents.max()
-            weights = torch.exp(exponents)
-            weights /= weights.sum()
-            weights = torch.where(weights > 1e-10, weights, torch.tensor(1e-10).to(device))
-            NSS = torch.exp(-torch.sum(weights*torch.log(weights)))
-            ESS_standard = 1.0 / torch.sum(weights ** 2)
-            print('Weights sum:', weights.sum())
-            print(NSS, f"ESS backward: {NSS/log_rs.shape[0]:.3f} %", f"ESS standard: {ESS_standard/log_rs.shape[0]:.3f} %")
+    print(f"ESS vacuum: {ESS_v:.4f} ({ESS_ratio_v:.4f})")
+    print(f"ESS solvate: {ESS_s:.4f} ({ESS_ratio_s:.4f})")
 
+    deltaF_weighted_EXP_F = -kB * T * np.log(np.sum(weights_v * np.exp(-w_F)) / np.sum(weights_v))
+    deltaF_weighted_EXP_R = kB * T * np.log(np.sum(weights_s * np.exp(-w_R)) / np.sum(weights_s))
+    print(f"Weighted EXP estimate (forward): {deltaF_weighted_EXP_F:.4f} kcal/mol")
+    print(f"Weighted EXP estimate (reverse): {deltaF_weighted_EXP_R:.4f} kcal/mol")
 
-    states_tensor = torch.cat(states_list, dim=0)
-    log_beta_weight_tensor = torch.cat(log_beta_weight_list, dim=0)
-    log_r_tensor = torch.cat(log_r_list, dim=0)
+    # FED_Z estimator
+    delta_f_gfn = fed_estimate_Z(vv_energies_np, ss_energies_np, beta_applied=True)
+    print(f"FED_Z estimate: {delta_f_gfn:.4f} kcal/mol")
 
-    np.save(f'{name}states.npy', states_tensor.numpy())
-    np.save(f'{name}log_beta_weight.npy', log_beta_weight_tensor.numpy())
-    np.save(f'{name}log_r.npy', log_r_tensor.numpy())
-    np.save(f'{name}log_pfs.npy', torch.cat(log_pfs_list, dim=0).numpy())
+    # create a dictionary to store the results
+    results = {
+        'deltaF_EXP': deltaF_EXP,
+        'deltaF_EXP_std': deltaF_EXP_std,
+        'deltaF_BAR': deltaF_BAR,
+        'deltaF_BAR_std': deltaF_BAR_std,
+        'deltaF_weighted_EXP_F': deltaF_weighted_EXP_F,
+        'deltaF_weighted_EXP_R': deltaF_weighted_EXP_R,
+        'delta_f_kcal': delta_f_gfn,
+        'ESS_v': ESS_v,
+        'ESS_ratio_v': ESS_ratio_v,
+        'ESS_s': ESS_s,
+        'ESS_ratio_s': ESS_ratio_s
+    }
+
+    # check if .csv file exists if it doesn't create it and write the header
+    if not os.path.exists(output_file):
+        with open(output_file, 'w', newline='') as outfile:
+            writer = csv.writer(outfile)
+            writer.writerow(['SMILES', 'deltaF_EXP', 'deltaF_EXP_std', 'deltaF_BAR', 'deltaF_BAR_std', 'deltaF_weighted_EXP_F', 'deltaF_weighted_EXP_R', 'delta_f_GFN', 'ESS_v', 'ESS_ratio_v', 'ESS_s', 'ESS_ratio_s'])
+
+    # write as a line to csv file (which could exist already)
+    with open(output_file, 'a', newline='') as outfile:
+        writer = csv.writer(outfile)
+        writer.writerow([args.smiles, deltaF_EXP, deltaF_EXP_std, deltaF_BAR, deltaF_BAR_std, deltaF_weighted_EXP_F, deltaF_weighted_EXP_R, delta_f_gfn, ESS_v, ESS_ratio_v, ESS_s, ESS_ratio_s])
+
+    if args.save_eval_samples:
+        # Optionally, save the energies and states
+        np.save(f'notebooks/data/{args.smiles}/vv_energies.npy', vv_energies_np)
+        np.save(f'notebooks/data/{args.smiles}/vs_energies.npy', vs_energies_np)
+        np.save(f'notebooks/data/{args.smiles}/sv_energies.npy', sv_energies_np)
+        np.save(f'notebooks/data/{args.smiles}/ss_energies.npy', ss_energies_np)
+        np.save(f'notebooks/data/{args.smiles}/v_states.npy', v_states.numpy())
+        np.save(f'notebooks/data/{args.smiles}/s_states.npy', s_states.numpy())
 
 if __name__ == '__main__':
     if args.eval:
         eval()
-    else:
-        train()
-        print('Finish')
-        os.kill(os.getpid(), 9)

@@ -18,7 +18,7 @@ def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
         'python', 'train.py', '--t_scale', '0.05', '--T', '1', '--epochs', '15000',
         '--batch_size', '6', '--energy', 'xtb', '--local_model', local_model,
         '--output_dir',  output_dir, #'--langevin',
-       '--learned_variance','--log_var_range', '0.5',
+       '--learned_variance','--log_var_range', '0.5',# '--learn_pb', '--pb_scale_range', '0.5',
         '--patience', '25000', '--model', 'mlp', #,
        # '--conditional_flow_model',#'--ld_step', '0.01','--ld_schedule',
         '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
@@ -110,8 +110,8 @@ with open(input_file, 'r') as infile, open(output_file, 'a', newline='') as outf
         local_model_vacuum = 'weights/egnn_vacuum_small_with_hs_final'
         local_model_solvation = 'weights/egnn_solvation_small_with_hs_final'
 
-        # run_command(smiles, local_model_vacuum, output_dir)
-        # print('Vacuum done')
+        run_command(smiles, local_model_vacuum, output_dir)
+        print('Vacuum done')
         run_command(smiles, local_model_solvation, output_dir, load_from_most_recent=True)
         print('Solvation done')
 

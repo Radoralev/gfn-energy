@@ -74,3 +74,74 @@ def langevin_dynamics(x, energy, device, args):
             if i % 25 == 0:
                 print(f'Iteration {i}, Acceptance Rate: {acceptance_rate}, LD Step: {ld_step}')
     return torch.cat(accepted_samples, dim=0), torch.cat(accepted_logr, dim=0)
+
+
+
+def standard_monte_carlo(x, energy, device, args):
+    accepted_samples = []
+    accepted_logr = []
+    acceptance_rate_lst = []
+    log_r_original = energy.log_reward(x)
+    acceptance_count = 0
+    total_proposals = 0
+
+    for i in range(args.max_iter_ls):
+        # Convert torsion angles to conformations
+        x_conf = torsions_to_conformations(x, energy.tas, energy.rd_conf, device).reshape(x.shape[0], -1)
+        
+        # Adjust MC step size if scheduling is enabled
+        if args.ld_schedule:
+            mc_step = args.ld_step if i == 0 else adjust_ld_step(
+                mc_step, acceptance_rate, target_acceptance_rate=args.target_acceptance_rate
+            )
+        else:
+            mc_step = args.ld_step
+
+        # Compute proposal standard deviation
+        proposal_std = torch.sqrt(torch.tensor(mc_step, device=device))
+
+        # Propose new configurations using a symmetric Gaussian proposal
+        new_x = x_conf + proposal_std * torch.randn_like(x_conf, device=device)
+
+        # Convert new configurations back to torsion angles
+        new_x_tas = conformations_to_torsions(
+            new_x.reshape(-1, energy.atom_nr, 3), energy.tas, energy.rd_conf
+        )
+
+        # Compute the new log rewards (negative potential energies)
+        log_r_new = energy.log_reward(new_x_tas)
+
+        # Calculate the acceptance probability (since the proposal is symmetric, proposal terms cancel out)
+        log_accept = log_r_new.squeeze() - log_r_original.squeeze()
+
+        # Decide which proposals to accept
+        accept_prob = torch.exp(torch.clamp(log_accept, max=0))
+        accept_mask = torch.rand(x.shape[0], device=device) < accept_prob
+        acceptance_count += accept_mask.sum().item()
+        total_proposals += x.shape[0]
+
+        # Update samples and log rewards for accepted proposals
+        if accept_mask.any():
+            accepted = new_x_tas[accept_mask]
+            x[accept_mask] = accepted
+            log_r_original[accept_mask] = log_r_new[accept_mask]
+
+            # Store samples after burn-in period
+            if i > args.burn_in:
+                accepted_samples.append(accepted)
+                accepted_logr.append(log_r_new[accept_mask])
+
+        # Compute acceptance rate
+        if i % 1 == 0:
+            acceptance_rate = acceptance_count / total_proposals
+            if i > args.burn_in:
+                acceptance_rate_lst.append(acceptance_rate)
+            acceptance_count = 0
+            total_proposals = 0
+
+            # Optional: print status every 25 iterations
+            if i % 25 == 0:
+                print(f'Iteration {i}, Acceptance Rate: {acceptance_rate:.4f}, MC Step: {mc_step}')
+
+    # Concatenate all accepted samples and their corresponding log rewards
+    return torch.cat(accepted_samples, dim=0), torch.cat(accepted_logr, dim=0)

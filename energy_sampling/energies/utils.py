@@ -59,7 +59,7 @@ def get_all_torsion_angles(mol, conf):
     ta_values = get_torsion_angles_values(conf, ta_atoms)
     return {k: v for k, v in zip(ta_atoms, ta_values)}
 
-def embed_mol_and_get_conformer(mol, extra_opt=False):
+def embed_mol_and_get_conformer(mol, extra_opt=False, implicit_solvent=False):
     """Embed RDkit mol with a conformer and return the RDKit conformer object
     (which is synchronized with the RDKit molecule object)
     :param mol: rdkit.Chem.rdchem.Mol object defining the molecule
@@ -67,6 +67,8 @@ def embed_mol_and_get_conformer(mol, extra_opt=False):
     """
     mol = Chem.AddHs(mol)
     AllChem.EmbedMolecule(mol)
+    if implicit_solvent:
+        AllChem.MMFFOptimizeMolecule(mol, confId=0, maxIters=1000)
     if extra_opt:
         AllChem.MMFFOptimizeMolecule(mol, confId=0, maxIters=1000)
     return mol.GetConformer()
@@ -201,8 +203,11 @@ class RDKitConformer:
         self.rdk_mol = self.get_mol_from_smiles(smiles)
         self.rdk_conf = embed_mol_and_get_conformer(self.rdk_mol, extra_opt=True)
 
-        num, pos, _ =  optimize_conformation(self.get_atomic_numbers(), self.rdk_conf.GetPositions(), method="gfn2", solvent=solvation)
-        self.set_atom_positions(pos)
+        if solvation:
+            num, pos, _ =  optimize_conformation(self.get_atomic_numbers(), self.rdk_conf.GetPositions(), method="gfn2", solvent=solvation)
+            self.set_atom_positions(pos)
+        else:
+            self.set_atom_positions(self.rdk_conf.GetPositions())
         self.freely_rotatable_tas, self.ring_bonds, self.nonring_bonds = get_rotatable_ta_list(self.rdk_mol)
 
         self.hydrogen_indices = [self.rdk_mol.GetAtomWithIdx(i).GetAtomicNum() == 1 for i in range(self.rdk_mol.GetNumAtoms())]

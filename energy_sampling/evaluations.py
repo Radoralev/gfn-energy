@@ -2,6 +2,7 @@ import torch
 from utils import logmeanexp
 from sample_metrics import compute_distribution_distances
 from openmm import unit 
+from mcmc_eval_utils import weighted_EXP
 
 kB = unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree/unit.kelvin)
 
@@ -19,7 +20,6 @@ def log_partition_function(initial_state, gfn, log_reward_fn, beta=1/(kB*298.15)
     weights = torch.where(weights > 1e-10, weights, torch.tensor(1e-10).to(states))
     NSS = torch.exp(-torch.sum(weights*torch.log(weights)))
     ESS = NSS/len(log_r)
-
 
     log_Z = logmeanexp(log_weight)
     log_Z_lb = log_weight.mean()
