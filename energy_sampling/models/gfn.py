@@ -11,6 +11,41 @@ logtwopi = math.log(2 * math.pi)
 
 from torch.distributions import Normal, VonMises, MixtureSameFamily 
 
+
+def compute_wrapped_gaussian_log_prob(delta_s, mean, std):
+    # Approximate the wrapped Gaussian log probability using a finite sum
+    # delta_s: Difference in states, adjusted for wrapping (shape: [batch_size, dim])
+    # mean: Mean of the Gaussian (shape: [batch_size, dim])
+    # std: Standard deviation of the Gaussian (shape: [batch_size, dim])
+
+    # Parameters
+    N = 10  # Number of terms to include in the sum
+    two_pi = 2 * np.pi
+
+    # Initialize log probability tensor
+    log_probs = None  # Will be initialized in the loop
+
+    # Prepare the range of k values for summation
+    ks = torch.arange(-N, N + 1, device=delta_s.device).reshape(1, 1, 2 * N + 1)
+
+    # Expand tensors to match dimensions for broadcasting
+    delta_s_expanded = delta_s.unsqueeze(2) + ks * two_pi
+    mean_expanded = mean.unsqueeze(2)
+    std_expanded = std.unsqueeze(2)
+
+    # Compute the normal log probabilities for each wrapped component
+    exponent = -0.5 * ((delta_s_expanded - mean_expanded) / std_expanded) ** 2
+    log_coeff = -torch.log(std_expanded * np.sqrt(2 * np.pi))
+
+    # Sum over k in log space using logsumexp
+    log_prob_components = exponent + log_coeff
+    log_probs = torch.logsumexp(log_prob_components, dim=2)
+
+    # Sum over dimensions if necessary
+    log_prob = log_probs.sum(dim=1)  # Sum over state dimensions
+
+    return log_prob
+
 class GFN(nn.Module):
     def __init__(self, dim: int, s_emb_dim: int, hidden_dim: int,
                  harmonics_dim: int, t_dim: int, log_var_range: float = 4.,
@@ -191,11 +226,15 @@ class GFN(nn.Module):
         logpb = torch.zeros((bsz, self.trajectory_length), device=self.device)
         logf = torch.zeros((bsz, self.trajectory_length + 1), device=self.device)
         states = torch.zeros((bsz, self.trajectory_length + 1, self.dim), device=self.device)
-        # start from init state
+        states[:, 0] = s
+
+        # Define constants for wrapping
+        two_pi = 2 * np.pi
+        pi = np.pi
+
         for i in range(self.trajectory_length):
-            # predict next state using neural nets (policies and flow model)
+            # Predict next state using neural nets (policies and flow model)
             pfs, flow = self.predict_next_state(s, i * self.dt, log_r)
-            # it's variational inference so we need to sample from the distribution
             pf_mean, pflogvars = self.split_params(pfs)
 
             logf[:, i] = flow
@@ -210,39 +249,60 @@ class GFN(nn.Module):
                     add_log_var = torch.full_like(pflogvars, np.log(exploration_std(i) / np.sqrt(self.dt)) * 2)
                     pflogvars_sample = torch.logaddexp(pflogvars, add_log_var).detach()
 
-            # Equation (2) in the paper
-            var_term = np.sqrt(self.dt) * (pflogvars_sample / 2).exp() * torch.randn_like(s, device=self.device)
-            # s_ is thr predicted next state
-            # important to note: that the predicted parameters of the distribution are detached
-            # before sampling the state
-            s_ = s + self.dt * pf_mean.detach() + var_term
+            # Sampling from the wrapped Gaussian distribution
+            # Sample from standard normal
+            epsilon = torch.randn_like(s, device=self.device)
 
-            # x_(t+dt) = x_t + u(xt)dt + sqrt(dt)*g(xt)*N(0,1)
-            # x_(t+dt)-x_t = u(xt)dt + sqrt(dt)*g(xt)*N(0,1)
-            # x_(t+dt)-x_t - u(xt)dt = sqrt(dt)*g(xt)*N(0,1)
-            # (x_t - x_(t+dt) + u(xt)dt) / (sqrt(dt)*g(xt)) = N(0,1)
-            # logpf = -0.5*(N(0,1)^2 + log(2pi) + log(pflogvars)).
-            # pf = N(0,1) * sqrt(pflogvars) + pf_mean
-            noise = ((s_ - s) - self.dt * pf_mean) / (np.sqrt(self.dt) * (pflogvars / 2).exp())
-            logpf[:, i] = -0.5 * (noise ** 2 + logtwopi + np.log(self.dt) + pflogvars).sum(1)
+            # Compute variance term
+            std = (pflogvars_sample / 2).exp()
+            var_term = np.sqrt(self.dt) * std * epsilon
 
-            if self.learn_pb:
+            # Compute the next state before wrapping
+            s_next = s + self.dt * pf_mean.detach() + var_term
+
+            # Wrap the next state to the interval [-π, π)
+            s_wrapped = ((s_next + pi) % two_pi) - pi
+
+            # Calculate the noise for log probability computation
+            # Adjusted for the wrapped Gaussian
+            delta_s = ((s_wrapped - s + pi) % two_pi) - pi
+            mean_delta = self.dt * pf_mean
+            std_delta = np.sqrt(self.dt) * std
+
+            # Compute the wrapped Gaussian log probability
+            logpf[:, i] = compute_wrapped_gaussian_log_prob(delta_s, mean_delta, std_delta)
+
+            # Update state
+            s = s_wrapped
+            states[:, i + 1] = s
+
+            # Backward probability computation (if applicable)
+            if self.learn_pb and i > 0:
+                # Similar adjustments for the backward process
+                # Predict backward mean and variance corrections
                 t = self.t_model((i + 1) * self.dt).repeat(bsz, 1)
-                pbs = self.back_model(self.s_model(s_), t)
-                dmean, dvar = gaussian_params(pbs)
+                pbs = self.back_model(self.s_model(s), t)
+                dmean, dvar = self.split_params(pbs)
                 back_mean_correction = 1 + dmean.tanh() * self.pb_scale_range
                 back_var_correction = 1 + dvar.tanh() * self.pb_scale_range
             else:
-                back_mean_correction, back_var_correction = torch.ones_like(s_), torch.ones_like(s_)
+                back_mean_correction = torch.ones_like(s)
+                back_var_correction = torch.ones_like(s)
 
             if i > 0:
-                back_mean = s_ - self.dt * s_ / ((i + 1) * self.dt) * back_mean_correction
+                # Compute backward mean and variance
+                back_mean = s - self.dt * s / ((i + 1) * self.dt) * back_mean_correction
                 back_var = (self.pf_std_per_traj ** 2) * self.dt * i / (i + 1) * back_var_correction
-                noise_backward = (s - back_mean) / back_var.sqrt()
-                logpb[:, i] = -0.5 * (noise_backward ** 2 + logtwopi + back_var.log()).sum(1)
-            s = s_
-            states[:, i + 1] = s
+
+                # Adjust for wrapping
+                delta_s_backward = ((states[:, i] - s + pi) % two_pi) - pi
+                noise_backward = delta_s_backward / back_var.sqrt()
+
+                # Compute wrapped Gaussian log probability for backward transition
+                logpb[:, i] = compute_wrapped_gaussian_log_prob(delta_s_backward, back_mean - s, back_var.sqrt())
+
         return states, logpf, logpb, logf
+
 
     def get_trajectory_bwd(self, s, exploration_std, log_r):
         bsz = s.shape[0]
