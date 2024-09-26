@@ -4,7 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 # from .xtb_energy import XTBEnergy, XTBBridge
 from .base_set import BaseSet
-from .alanine import load_data, plot_rama_traj
+# rom .alanine import load_data, plot_rama_traj
 #from xtb.libxtb import VERBOSITY_MUTED, VERBOSITY_MINIMAL
 #from xtb.interface import Calculator, Param, XTBException
 #from xtb.ase.calculator import XTB
@@ -46,7 +46,7 @@ class MoleculeFromSMILES_XTB(BaseSet):
         energies = []
 
         energies.extend(
-            Parallel(n_jobs=6)(
+            Parallel(n_jobs=16)(
                 delayed(get_energy)(self.atomic_numbers, conf, 'gfn2', solvent=self.solvate) for conf in confs
             )
         )

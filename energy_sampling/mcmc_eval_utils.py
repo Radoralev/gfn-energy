@@ -58,67 +58,6 @@ def brute_force_fed(smiles, T, ground_truth, uncertainty, num_batches=100, batch
     # fed = s_free_energy - v_free_energy
     return None, samples
 
-# https://en.wikipedia.org/wiki/Bennett_acceptance_ratio#The_basic_case
-def bar_estimate(v_file, s_file, beta, subsample=0):
-    v_states = torch.from_numpy(np.load(v_file))
-    s_states = torch.from_numpy(np.load(s_file))
-
-    if subsample > 0:
-        indices = np.random.choice(len(v_states), subsample, replace=False)
-        v_states = v_states[indices]
-        s_states = s_states[indices]
-
-
-    v_energy = MoleculeFromSMILES_XTB('CCCCCC(=O)OC', temp=T, solvate=False)
-    s_energy = MoleculeFromSMILES_XTB('CCCCCC(=O)OC', temp=T, solvate=True)
-    vv_energies = torch.zeros(len(v_states))
-    vs_energies = torch.zeros(len(v_states))
-    sv_energies = torch.zeros(len(v_states))
-    ss_energies = torch.zeros(len(v_states))
-
-    batch_size = 8
-    num_batches = len(v_states) // batch_size
-
-    for i in tqdm(range(num_batches)):
-        start = i * batch_size
-        end = start + batch_size
-
-        vv_energies[start:end] = v_energy.energy(v_states[start:end])
-        vs_energies[start:end] = v_energy.energy(s_states[start:end])
-        sv_energies[start:end] = s_energy.energy(v_states[start:end])
-        ss_energies[start:end] = s_energy.energy(s_states[start:end])
-
-    # Handle the remaining samples if the total number is not divisible by the batch size
-    if len(v_states) % batch_size != 0:
-        start = num_batches * batch_size
-        end = len(v_states)
-
-        vv_energies[start:end] = v_energy.energy(v_states[start:end])
-        vs_energies[start:end] = v_energy.energy(s_states[start:end])
-        sv_energies[start:end] = s_energy.energy(v_states[start:end])
-        ss_energies[start:end] = s_energy.energy(s_states[start:end]) 
-    w_F = ((sv_energies - vv_energies)*beta).cpu().numpy()
-    w_R = ((vs_energies - ss_energies)*beta).cpu().numpy()
-
-
-    exp_avg_f = pymbar.other_estimators.exp(w_F)
-    exp_avg_b = pymbar.other_estimators.exp(w_R)
-
-    result = pymbar.other_estimators.bar(w_F, w_R,
-                                maximum_iterations=1000000, 
-                                iterated_solution=True,
-                                relative_tolerance=1e-12,
-                                verbose=True)
-    overlap = pymbar.other_estimators.bar_overlap(w_F, w_R)
-
-    delta_f_kcal = result['Delta_f'] * kB * T * hartree_to_kcal
-    delta_f_error_kcal = result['dDelta_f'] * kB * T * hartree_to_kcal
-
-    delta_f_fwd = exp_avg_f['Delta_f'] * kB * T * hartree_to_kcal
-    delta_f_bwd = exp_avg_b['Delta_f'] * kB * T * hartree_to_kcal
-
-    return delta_f_kcal, delta_f_error_kcal, overlap, vv_energies, ss_energies, vs_energies, sv_energies, delta_f_fwd, delta_f_bwd
-
 
 # Define the likelihood function using GFN-related energy calculation
 def likelihood_v(angle_0, angle_1, angle_2, angle_3, angle_4, angle_5, angle_6, angle_7):

@@ -19,7 +19,7 @@ from openmm import unit
 from pymbar import other_estimators
 
 
-from mcmc_eval_utils import weighted_EXP, compute_weights, fed_estimate_Z, calc_ESS
+from mcmc_eval_utils import compute_weights, fed_estimate_Z, calc_ESS
 
 from utils import set_seed, cal_subtb_coef_matrix, fig_to_image, get_gfn_optimizer, get_gfn_forward_loss, \
     get_gfn_backward_loss, get_exploration_std, get_name
