@@ -11,7 +11,7 @@ from energies import *
 from evaluations import *
 from gflownet_losses import *
 from langevin import langevin_dynamics, standard_monte_carlo
-from models import GFN, EGNNModel, MACEModel
+from models import GFN, EGNNModel, MACEModel, TorchANI_Local
 from plot_utils import *
 from openmm import unit
 # import torchani
@@ -182,17 +182,17 @@ def get_energy():
     elif args.energy == 'neural':
         if args.torchani_model == 'ANI-1x_8x':
             model = torchani.models.ANI1x(periodic_table_index=True)
-            energy = TorchANIEnergy(model=model, smiles=args.smiles, batch_size=args.batch_size)
+            energy = TorchANIEnergy(model=model, smiles=args.smiles)
         elif args.torchani_model == 'ANI-2x':
             model = torchani.models.ANI2x(periodic_table_index=True)
-            energy = TorchANIEnergy(model=model, smiles=args.smiles, batch_size=args.batch_size)
+            energy = TorchANIEnergy(model=model, smiles=args.smiles)
         elif args.torchani_model == 'ANI-1ccx':
             model = torchani.models.ANI1ccx(periodic_table_index=True)
-            energy = TorchANIEnergy(model=model, smiles=args.smiles, batch_size=args.batch_size)
+            energy = TorchANIEnergy(model=model, smiles=args.smiles)
         elif 'torchani-' in args.torchani_model:
             model = TorchANI_Local()
             model.load(args.torchani_model)
-            energy = TorchANIEnergy(model=model, smiles=args.smiles, batch_size=args.batch_size)
+            energy = TorchANIEnergy(model=model, smiles=args.smiles, solvate=args.solvate)
         elif args.local_model:
             if args.local_model.split('/')[-1].startswith('egnn'):
                 model, model_args = load_model(model='egnn', filename=args.local_model)

@@ -5,7 +5,7 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/512x5_0.01var_fwd_xtb_bs6_T1_beta_tight_60ke_1ktemp.csv'
+output_file = 'fed_results/512x5_0.01var_fwd_xtb_bs6_T1_beta_tight_60ke_torchani_torsion.csv'
 
 import os
 
@@ -16,7 +16,7 @@ os.environ['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libgomp.so.1'
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
         'python', 'train.py', '--t_scale', '0.01', '--T', '1', '--epochs', '60000',
-        '--batch_size', '6', '--energy', 'xtb', '--local_model', local_model,
+        '--batch_size', '6', '--energy', 'neural', '--local_model', local_model,
         '--output_dir',  output_dir, #'--continue_training', #'--langevin',
        '--learned_variance','--log_var_range', '0.01',# '--learn_pb', '--pb_scale_range', '0.5',
         '--patience', '25000', '--model', 'mlp', '--temperature', '300', #,

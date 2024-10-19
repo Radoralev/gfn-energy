@@ -1,5 +1,5 @@
 import torch
-# import torchani
+import torchani
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from openmm import app, unit, LangevinIntegrator, Vec3, Platform
@@ -41,18 +41,17 @@ def get_atom_types_from_smiles(smiles, solvate=True):
     
 
 class TorchANIEnergy(BaseSet):
-    def __init__(self, model, smiles, batch_size=1, solvate=False):
+    def __init__(self, model, smiles, solvate=False):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(self.device)
         self.model.eval()
-        self.rd_conf = RDKitConformer(smiles)
+        self.rd_conf = RDKitConformer(smiles, solvation=solvate)
         self.atomic_numbers = torch.tensor(self.rd_conf.get_atomic_numbers()).to(self.device)
         self.tas = self.rd_conf.freely_rotatable_tas
         if smiles == 'C[C@@H](C(=O)NC)NC(=O)C':
             self.tas = ((0, 1, 2, 3), (0, 1, 6, 7))
         self.data_ndim = len(self.tas)
         self.atom_nr = len(self.atomic_numbers)
-        self.batch_size = batch_size
 
         print('Number of atoms:', self.atom_nr, ', Number of torsion angles:', self.data_ndim)
         print('Torsion angles:', self.tas)

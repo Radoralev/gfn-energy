@@ -6,7 +6,7 @@ from .many_well import ManyWell
 # from .alanine import Alanine
 from .smiles_energy import MoleculeFromSMILES_XTB
 from .openmm_energy import OpenMMEnergy
-# from .torchani_energy import TorchANIEnergy
+from .torchani_energy import TorchANIEnergy
 # from .xtb_energy import XTBEnergy, XTBBridge
 # from .base import _BridgeEnergy, _Bridge
 from .neural_energy import NeuralEnergy, SolvationEnergy
