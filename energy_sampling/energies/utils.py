@@ -21,11 +21,13 @@ def bas_bls_to_conformations(xyz, bonds, bas, rd_conf, device):
     confs = []
     for transformation_set in xyz:
         rotation_set = transformation_set[:len(bas)]
-        bond_lengths = transformation_set[len(bas):]
+        # bond_lengths = transformation_set[len(bas):]
         for i, bond_angle in enumerate(bas):
             rd_conf.set_bond_angle(bond_angle, rotation_set[i])
-        rd_conf.set_bond_lengths(bond_lengths, bonds)
-        xyz = torch.tensor(rd_conf.get_atom_positions()).to(device, dtype=torch.float32)
+        # check if bond lengths exist
+        # if len(bond_lengths) > 0:
+        #     rd_conf.set_bond_lengths(bond_lengths, bonds)
+        xyz = torch.tensor(rd_conf.get_atom_positions())#.to(device, dtype=torch.float32)
         confs.append(xyz)
     confs = torch.stack(confs)
     return confs
@@ -237,8 +239,8 @@ class RDKitConformer:
         for bond in mol.GetBonds():
             begin_idx = bond.GetBeginAtomIdx()
             end_idx = bond.GetEndAtomIdx()
-            # if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
-            #     continue
+            if begin_idx in self.hydrogen_indices or end_idx in self.hydrogen_indices:
+                continue
             if (begin_idx, end_idx) in self.ring_bonds:
                 continue
             # elif (begin_idx, end_idx) in self.nonring_bonds:

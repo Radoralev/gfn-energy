@@ -15,7 +15,7 @@ smiles_list = [name for name in os.listdir(directory) if os.path.isdir(os.path.j
 
 # Fixed parameters
 common_args = [
-    "--eval", "2048",
+    "--eval", "4096",
     "--epochs", "10000",
     "--batch_size", "6",
     "--energy", "xtb",
@@ -34,14 +34,12 @@ common_args = [
     "--s_emb_dim", "512",
     "--t_emb_dim", "512",
     "--harmonics_dim", "512",
-    "--t_scale", "0.05",
-    '--learned_variance','--log_var_range', '0.5',
-    "--T", "5",
+    "--t_scale", "0.01",
+    '--learned_variance','--log_var_range', '0.01',
+    "--T", "1",
     "--local_model", "weights/egnn_solvation_small_with_hs_final",
 ]
 
-# Optional: If you need to adjust t_scale, T, or local_model for specific SMILES, you can define them here
-# For now, we keep them fixed as per your request
 
 for smiles in smiles_list:
     args_list = [

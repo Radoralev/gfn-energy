@@ -15,7 +15,8 @@ from mcmc_eval_utils import weighted_EXP, compute_weights, fed_estimate_Z, calc_
 
 
 # Constants
-T = 298.15  # Temperature in Kelvin
+room_temp = 298.15  # Temperature in Kelvin
+high_temp = 1000  # High temperature in Kelvin
 kB = unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree / unit.kelvin)
 hartree_to_kcal = 627.509  # Conversion factor from Hartree to kcal/mol
 beta = 1 #/ (kB * T)  # Inverse temperature
@@ -67,12 +68,12 @@ def main():
             print(f"Processing SMILES: {smiles}")
 
             # Generate energies for solvate and vacuum states
-            energy_solvate = MoleculeFromSMILES_XTB(smiles, temp=T, solvate=True)
+            energy_solvate = MoleculeFromSMILES_XTB(smiles, temp=high_temp, solvate=True, n_jobs=16)
 
-            if energy_solvate.data_ndim == 0:
+            if energy_solvate.data_ndim == 0 or energy_solvate.data_ndim >= 9:
                 continue
 
-            energy_vacuum = MoleculeFromSMILES_XTB(smiles, temp=T, solvate=False)
+            energy_vacuum = MoleculeFromSMILES_XTB(smiles, temp=high_temp, solvate=False, n_jobs=16)
 
             # Run MCMC sampling for both states
             print("Sampling in vacuum state...")
@@ -93,6 +94,11 @@ def main():
             # np.save(os.path.join(args.output_dir, f'{compound_id}_vacuum_all_samples.npy'), samples_vacuum_all)
             # np.save(os.path.join(args.output_dir, f'{compound_id}_solvate_all_samples.npy'), samples_solvate_all)
 
+            # Generate energies for solvate and vacuum states
+            energy_solvate = MoleculeFromSMILES_XTB(smiles, temp=room_temp, solvate=True, n_jobs=16)
+            energy_vacuum = MoleculeFromSMILES_XTB(smiles, temp=room_temp, solvate=False, n_jobs=16)
+
+
             # Compute energies and work values for accepted samples
             energies_vv_acc = compute_energies(energy_vacuum, samples_vacuum_accepted)
             energies_vs_acc = compute_energies(energy_vacuum, samples_solvate_accepted)
@@ -102,14 +108,14 @@ def main():
             w_F_acc = (energies_sv_acc - energies_vv_acc) * beta
             w_R_acc = (energies_vs_acc - energies_ss_acc) * beta
 
-            # Compute energies and work values for all samples
-            energies_vv_all = compute_energies(energy_vacuum, samples_vacuum_all)
-            energies_vs_all = compute_energies(energy_vacuum, samples_solvate_all)
-            energies_sv_all = compute_energies(energy_solvate, samples_vacuum_all)
-            energies_ss_all = compute_energies(energy_solvate, samples_solvate_all)
+            # # Compute energies and work values for all samples
+            # energies_vv_all = compute_energies(energy_vacuum, samples_vacuum_all)
+            # energies_vs_all = compute_energies(energy_vacuum, samples_solvate_all)
+            # energies_sv_all = compute_energies(energy_solvate, samples_vacuum_all)
+            # energies_ss_all = compute_energies(energy_solvate, samples_solvate_all)
 
-            w_F_all = (energies_sv_all - energies_vv_all) * beta
-            w_R_all = (energies_vs_all - energies_ss_all) * beta
+            # w_F_all = (energies_sv_all - energies_vv_all) * beta
+            # w_R_all = (energies_vs_all - energies_ss_all) * beta
 
             # Function to compute chunked free energy differences
             def compute_chunked_free_energy_differences(w_F, w_R, energies_vv, energies_ss, sample_type):
@@ -140,9 +146,9 @@ def main():
             results_accepted = compute_chunked_free_energy_differences(w_F_acc, w_R_acc, energies_vv_acc, energies_ss_acc, sample_type='accepted')
 
             # Compute free energy differences using all samples
-            results_all = compute_chunked_free_energy_differences(w_F_all, w_R_all, energies_vv_all, energies_ss_all, sample_type='all')
+            # results_all = compute_chunked_free_energy_differences(w_F_all, w_R_all, energies_vv_all, energies_ss_all, sample_type='all')
             # Merge the results
-            results = {**results_accepted, **results_all}
+            results = {**results_accepted }#**results_all}
 
             # Add SMILES and experimental values to results
             results['SMILES'] = smiles
@@ -203,8 +209,8 @@ def run_mcmc_sampling(energy, n_samples_to_collect, max_samples):
         },
         "sampler": {
             "mcmc": {
-                "max_samples": 4096,
-                'Rminus1_stop': 0.05,
+                "max_samples": max_samples,
+                'Rminus1_stop': 0.02,
             }
         },
     }
@@ -220,28 +226,28 @@ def run_mcmc_sampling(energy, n_samples_to_collect, max_samples):
     accepted = len(sampler.products()['sample'][angle_names].values)  # Counter for accepted samples
     total_samples = len(sampler.products()['sample'][angle_names].values)  # Total number of attempted samples
 
-    with tqdm(total=n_samples_to_collect, desc="Sampling") as pbar:
-        while accepted < n_samples_to_collect and total_samples < max_samples:
-            trial = sampler.current_point.values.copy()
-            sampler.proposer.get_proposal(trial)
-            trial_results = sampler.model.logposterior(trial)
-            accept = sampler.metropolis_accept(trial_results.logpost, sampler.current_point.logpost)
+    # with tqdm(total=n_samples_to_collect, desc="Sampling") as pbar:
+    #     while accepted < n_samples_to_collect:
+    #         trial = sampler.current_point.values.copy()
+    #         sampler.proposer.get_proposal(trial)
+    #         trial_results = sampler.model.logposterior(trial)
+    #         accept = sampler.metropolis_accept(trial_results.logpost, sampler.current_point.logpost)
 
-            if accept:
-                accepted += 1
-            # Update the sampler state regardless of acceptance
-            sampler.process_accept_or_reject(accept, trial, trial_results)
+    #         if accept:
+    #             accepted += 1
+    #         # Update the sampler state regardless of acceptance
+    #         sampler.process_accept_or_reject(accept, trial, trial_results)
 
-            # Record the current state of the chain
-            all_samples.append(trial)
+    #         # Record the current state of the chain
+    #         all_samples.append(trial)
 
-            total_samples += 1
+    #         total_samples += 1
 
-            pbar.set_postfix({
-                'Acceptance Rate': f"{accepted / total_samples:.2%}",
-                'Accepted Samples': accepted
-            })
-            pbar.update(accepted - pbar.n)
+    #         pbar.set_postfix({
+    #             'Acceptance Rate': f"{accepted / total_samples:.2%}",
+    #             'Accepted Samples': accepted
+    #         })
+    #         pbar.update(accepted - pbar.n)
 
     if accepted < n_samples_to_collect:
         print(f"Warning: Only {accepted} samples were accepted out of {n_samples_to_collect} requested.")
@@ -255,18 +261,20 @@ def compute_energies(energy_model, samples):
     energies = []
     batch_size = 100  # Adjust as needed
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    for i in range(0, len(samples), batch_size):
-        batch = samples[i:i+batch_size]
-        batch_tensor = torch.tensor(batch, dtype=torch.float32).to(device)
-        with torch.no_grad():
-            energy_values = energy_model.energy(batch_tensor).cpu().numpy()
-        energies.extend(energy_values)
+    with tqdm(total=len(samples), desc="Computing energies") as pbar:
+        for i in range(0, len(samples), batch_size):
+            batch = samples[i:i+batch_size]
+            batch_tensor = torch.tensor(batch, dtype=torch.float32).to(device)
+            with torch.no_grad():
+                energy_values = energy_model.energy(batch_tensor).cpu().numpy()
+            energies.extend(energy_values)
+            pbar.update(len(batch))
     return np.array(energies)
 
 def compute_free_energy_differences(w_F, w_R, energies_vv, energies_ss, sample_type):
     # Compute free energy differences using BAR, EXP, and fedZ methods
     results = {}
-
+    T = room_temp
     try:
         # Compute EXP estimator
         deltaF_EXP_result = other_estimators.exp(w_F)

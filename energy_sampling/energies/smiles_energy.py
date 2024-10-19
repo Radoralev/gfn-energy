@@ -16,12 +16,10 @@ from .xtbcli import get_energy
 import gc
 from openmm import unit
 
-T = 298.15  # Temperature in Kelvin
-beta = 1/(unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree/unit.kelvin) * T)  # Inverse temperature
 
 
 class MoleculeFromSMILES_XTB(BaseSet):
-    def __init__(self, smiles, temp=300, solvate=False):
+    def __init__(self, smiles, temp=300, solvate=False, n_jobs=8):
         # Initialize RDKit molecule
         self.smiles = smiles
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -32,25 +30,27 @@ class MoleculeFromSMILES_XTB(BaseSet):
         self.bas = self.rd_conf.bond_angles 
         if smiles == 'C[C@@H](C(=O)NC)NC(=O)C':
             self.tas = ((0, 1, 2, 3), (0, 1, 6, 7))
-        self.data_ndim = len(self.tas)
+        self.data_ndim = len(self.bas)#len(self.atomic_numbers)*3 #len(self.tas)
         self.atom_nr = len(self.atomic_numbers)
         # Initialize XTB Energy
         self.solvate = solvate
         self.solvent = 'water' if solvate else ''
+        self.beta = 1/(unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree/unit.kelvin) * temp) 
+        self.n_jobs = n_jobs
     
     def energy(self, xyz):
-        # confs = bas_bls_to_conformations(xyz, self.bonds, self.bas, self.rd_conf, self.device)
-        confs = torsions_to_conformations(xyz, self.tas, self.rd_conf, self.device)
+        confs = bas_bls_to_conformations(xyz, self.bonds, self.bas, self.rd_conf, self.device)
+        #confs = torsions_to_conformations(xyz, self.tas, self.rd_conf, self.device)
         #energies = self.target.energy(confs.reshape(-1, self.atom_nr, 3)).squeeze()
-
+        # xyz = xyz.reshape(-1, self.atom_nr, 3)
         energies = []
 
         energies.extend(
-            Parallel(n_jobs=16)(
+            Parallel(n_jobs=self.n_jobs)(
                 delayed(get_energy)(self.atomic_numbers, conf, 'gfn2', solvent=self.solvate) for conf in confs
             )
         )
-        energies = torch.tensor(energies, device=self.device) * beta
+        energies = torch.tensor(energies, device=self.device) * self.beta
 
         return energies
     

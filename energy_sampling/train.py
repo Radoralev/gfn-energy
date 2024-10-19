@@ -123,7 +123,7 @@ if 'SLURM_PROCID' in os.environ:
 
 args.smiles = args.smiles.strip()
 eval_data_size = 128
-final_eval_data_size = 1024 * 2
+final_eval_data_size = 128
 plot_data_size = 1024
 final_plot_data_size = 2000
 
@@ -176,7 +176,7 @@ def get_energy():
         energy = Alanine(device=device, phi='full', temp=1000, energy=energy)
         args.smiles = energy.smiles
     elif args.energy == 'xtb':
-        energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
+        energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=args.solvate, n_jobs=16)
     elif args.energy == 'openmm':
         energy = OpenMMEnergy(smiles=args.smiles, temp=args.temperature, solvate=args.solvate)
     elif args.energy == 'neural':
@@ -429,7 +429,7 @@ def bwd_train_step(energy, gfn_model, buffer, buffer_ls, exploration_std=None, i
 
 def train():
     # name = get_name(args)
-    name = f'train/{args.energy}/{args.smiles}/{args.solvate}/'
+    name = f'train_pos_60k/{args.energy}/{args.smiles}/{args.solvate}/'
     if not os.path.exists(name):
         os.makedirs(name)
     print(args.energy)
@@ -462,6 +462,9 @@ def train():
     if args.continue_training:
         gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
         print('Loaded model.')
+        epoch = 20000
+    else:
+        epoch = 0
     
     if args.load_from_most_recent:
         # parent folder
@@ -492,7 +495,7 @@ def train():
     early_stop_counter = 0
     scheduler = torch.optim.lr_scheduler.ExponentialLR(gfn_optimizer, gamma=0.1**(1/7e4))
 
-    for i in trange(args.epochs + 1):
+    for i in trange(epoch, args.epochs + 1):
         metrics['train/loss'] = train_step(energy, gfn_model, gfn_optimizer, i, args.exploratory,
                                            buffer, buffer_ls, args.exploration_factor, args.exploration_wd, args)
         if (i) % 2500 == 0:
@@ -511,17 +514,23 @@ def train():
             plt.close('all')
             #metrics = check_nan_in_metrics(metrics)
             metrics['lr'] = scheduler.get_last_lr()[0]
-            wandb.log(metrics, step=i)
+            try:
+                wandb.log(metrics, step=i)
+            except wandb.errors.CommError as e:
+                print(f"wandb logging failed: {e}")
             #energy.min_val = 5
-        
-        if (i+1) % 15000 == 0:
-            torch.save(gfn_model.state_dict(), f'{name}model_{i}.pt')
+        # if within last 100 epochs, save model if it's the best so far
+        if i > args.epochs - 1000:
+            if metrics['train/loss'] < best_loss:
+                best_loss = metrics['train/loss']
+                torch.save(gfn_model.state_dict(), f'{name}model.pt')
 
         scheduler.step()
-
     # load best model if file exists
     if os.path.exists(f'{name}model.pt'):
         gfn_model.load_state_dict(torch.load(f'{name}model.pt'))
+    else:
+        torch.save(gfn_model.state_dict(), f'{name}model.pt')
     eval_results = final_eval(energy, gfn_model)#.to(device)
     metrics.update(eval_results)
 

@@ -5,7 +5,7 @@ from datetime import datetime
 from time import sleep
 # Define the input and output file paths
 input_file = 'database.txt'
-output_file = 'fed_results/512x5_0.25var_fwd_xtb_bs6_T5_beta_weighted.csv'
+output_file = 'fed_results/512x5_0.01var_fwd_xtb_bs6_T1_beta_tight_60ke_1ktemp.csv'
 
 import os
 
@@ -15,13 +15,13 @@ os.environ['LD_PRELOAD'] = '/usr/lib/x86_64-linux-gnu/libgomp.so.1'
 # Function to run the command and capture the output
 def run_command(smiles, local_model, output_dir, load_from_most_recent=False):
     command = [
-        'python', 'train.py', '--t_scale', '0.05', '--T', '1', '--epochs', '15000',
+        'python', 'train.py', '--t_scale', '0.01', '--T', '1', '--epochs', '60000',
         '--batch_size', '6', '--energy', 'xtb', '--local_model', local_model,
-        '--output_dir',  output_dir, #'--langevin',
-       '--learned_variance','--log_var_range', '0.5',# '--learn_pb', '--pb_scale_range', '0.5',
-        '--patience', '25000', '--model', 'mlp', #,
+        '--output_dir',  output_dir, #'--continue_training', #'--langevin',
+       '--learned_variance','--log_var_range', '0.01',# '--learn_pb', '--pb_scale_range', '0.5',
+        '--patience', '25000', '--model', 'mlp', '--temperature', '300', #,
        # '--conditional_flow_model',#'--ld_step', '0.01','--ld_schedule',
-        '--smiles', smiles, '--temperature', '300', '--zero_init', '--clipping',
+        '--smiles', smiles, '--zero_init', '--clipping',
         '--pis_architectures', '--mode_fwd', 'tb-avg',#'--mode_bwd', 'tb-avg', '--both_ways',#'--max_iter_ls', '100', '--burn_in', '50',
         '--lr_policy', '1e-3', '--lr_back', '1e-3', '--lr_flow', '1e-3', 
         # '--exploratory', '--exploration_wd', '--exploration_factor', '2.',# '--local_search',

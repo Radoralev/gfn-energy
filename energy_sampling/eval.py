@@ -5,7 +5,6 @@ import csv
 import torch
 import matplotlib.pyplot as plt
 import wandb
-wandb.require("core")
 from tqdm import trange
 from buffer import ReplayBuffer
 from energies import *
@@ -17,7 +16,7 @@ from plot_utils import *
 from openmm import unit
 # import torchani
 from pymbar import other_estimators
-
+from tqdm import tqdm
 
 from mcmc_eval_utils import compute_weights, fed_estimate_Z, calc_ESS
 
@@ -275,27 +274,27 @@ def load_gfn(args, energy):
 
 def eval():
     # name = get_name(args)
-    name_s = f'eval/{args.energy}/{args.smiles}/True/'
-    name_v = f'eval/{args.energy}/{args.smiles}/False/'
+    name_s = f'train_annealed_25k/{args.energy}/{args.smiles}/True/'
+    name_v = f'train_annealed_25k/{args.energy}/{args.smiles}/False/'
     # if not args.solvate:
     #     name_load = f'results_pis_architectures/xtb/clipping_lgv_100.0_gfn_10000.0_gfn/fwd/fwd_tb/T_5/tscale_0.25/lvr_4.0/seed_12345/ CCCCCC(=O)OC/2024-08-23_02-14-49/model.pt'
     # else:
     #     name_load = f'results_pis_architectures/xtb/clipping_lgv_100.0_gfn_10000.0_gfn/fwd/fwd_tb/T_5/tscale_0.25/lvr_4.0/seed_12345/ CCCCCC(=O)OC/2024-08-23_02-34-31/model.pt'
-    name_load_s = name_s + 'model_15000.pt'
-    name_load_v = name_v + 'model_15000.pt'
+    name_load_s = name_s + 'model.pt'
+    name_load_v = name_v + 'model.pt'
 
     print(args.energy)
-    s_energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=True)
-    v_energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=args.temperature, solvate=False)
+    T = 298.15
+    s_energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=T, solvate=True, n_jobs=16)
+    v_energy = MoleculeFromSMILES_XTB(smiles=args.smiles, temp=T, solvate=False, n_jobs=16)
 
     metrics = dict()
-    output_file = 'fed_results/eval'
+    output_file = 'fed_results/eval.csv'
 
     config = args.__dict__
     config["Experiment"] = "{args.energy}"
     wandb.init(project="GFN Energy Evaluation", config=config, name='eval/' + args.energy + '/' + args.smiles)
     kB = unit.BOLTZMANN_CONSTANT_kB.value_in_unit(unit.hartree/unit.kelvin)
-    T = 298.15
     beta = 1
     hartree_to_kcal = 627.509
     states_list = []
@@ -354,9 +353,9 @@ def eval():
     sv_energies = torch.zeros(total_samples)
     ss_energies = torch.zeros(total_samples)
 
-    batch_size = 6  # Adjust batch size as needed
+    batch_size = 32  # Adjust batch size as needed
     # Compute energies in batches
-    for start in range(0, total_samples, batch_size):
+    for start in tqdm(range(0, total_samples, batch_size), desc="Computing energies"):
         end = min(start + batch_size, total_samples)
         v_batch = v_states[start:end].to(device)
         s_batch = s_states[start:end].to(device)
@@ -380,7 +379,7 @@ def eval():
     print("Computing free energy differences using pymbar...")
 
     # EXP estimator
-    deltaF_EXP_result = other_estimators.exp(w_R)
+    deltaF_EXP_result = other_estimators.exp(w_F)
     deltaF_EXP = deltaF_EXP_result['Delta_f'] * kB * T * hartree_to_kcal
     deltaF_EXP_std = deltaF_EXP_result['dDelta_f'] * kB * T * hartree_to_kcal
     print(f"EXP estimate: {deltaF_EXP:.4f} ± {deltaF_EXP_std:.4f} kcal/mol")
@@ -392,8 +391,8 @@ def eval():
     print(f"BAR estimate: {deltaF_BAR:.4f} ± {deltaF_BAR_std:.4f} kcal/mol")
 
 
-    weights_v = compute_weights(-vv_energies, log_pfs_v, beta)
-    weights_s = compute_weights(-ss_energies, log_pfs_s, beta)
+    weights_v = compute_weights(-vv_energies, log_pfs_v, beta).numpy()
+    weights_s = compute_weights(-ss_energies, log_pfs_s, beta).numpy()
 
     ESS_v, ESS_ratio_v = calc_ESS(-vv_energies, log_pfs_v, beta)
     ESS_s, ESS_ratio_s = calc_ESS(-ss_energies, log_pfs_s, beta)
@@ -401,15 +400,41 @@ def eval():
     print(f"ESS vacuum: {ESS_v:.4f} ({ESS_ratio_v:.4f})")
     print(f"ESS solvate: {ESS_s:.4f} ({ESS_ratio_s:.4f})")
 
-    deltaF_weighted_EXP_F = -kB * T * np.log(np.sum(weights_v * np.exp(-w_F)) / np.sum(weights_v))
-    deltaF_weighted_EXP_R = kB * T * np.log(np.sum(weights_s * np.exp(-w_R)) / np.sum(weights_s))
+    # print('Weights shapes:', weights_v.shape, weights_s.shape, vv_energies_np.shape, ss_energies_np.shape, w_F.shape, w_R.shape)
+    from scipy.special import logsumexp
+
+    def weighted_EXP(energies_A, energies_B, weights):
+        #check if numpy
+        if isinstance(energies_A, np.ndarray):
+            energies_A = torch.from_numpy(energies_A)
+            energies_B = torch.from_numpy(energies_B)
+        exponents = (energies_A - energies_B) # sv is solvation energies on vacuum samples 
+        #fix inf 
+        exponents = exponents - exponents.max()
+        weighted = torch.exp(exponents) * weights
+        weighted_sum = weighted.sum()
+        return torch.log(weighted_sum)
+
+    # weighted_EXP(sv_energies_gfn, vv_energies_gfn, weights_v)*kB*T*hartree_to_kcal, weighted_EXP(ss_energies_gfn, vs_energies_gfn, weights_s)*kB*T*hartree_to_kcal
+
+    deltaF_weighted_EXP_F = weighted_EXP(sv_energies_np, vv_energies_np, weights_v).item() *kB*T*hartree_to_kcal
+    deltaF_weighted_EXP_R = weighted_EXP(ss_energies_np, vs_energies_np, weights_s).item() *kB*T*hartree_to_kcal
     print(f"Weighted EXP estimate (forward): {deltaF_weighted_EXP_F:.4f} kcal/mol")
     print(f"Weighted EXP estimate (reverse): {deltaF_weighted_EXP_R:.4f} kcal/mol")
 
     # FED_Z estimator
-    delta_f_gfn = fed_estimate_Z(vv_energies_np, ss_energies_np, beta_applied=True)
-    print(f"FED_Z estimate: {delta_f_gfn:.4f} kcal/mol")
+    # delta_f_gfn = fed_estimate_Z(vv_energies_np, ss_energies_np, beta_applied=True)
+    # print(f"FED_Z estimate: {delta_f_gfn:.4f} kcal/mol")
 
+    log_weights_v = -vv_energies - log_pfs_v.sum(dim=-1) + log_pbs_v.sum(dim=-1)
+    log_weights_s = -ss_energies - log_pfs_s.sum(dim=-1) + log_pbs_s.sum(dim=-1)
+
+    deltaF_GFN = -(logmeanexp(log_weights_s) - logmeanexp(log_weights_v)) * kB * T * hartree_to_kcal
+    deltaFlb_GFN = -(log_weights_s.mean() - log_weights_v.mean()) * kB * T * hartree_to_kcal
+
+    print(f"FED_Z estimate: {deltaF_GFN:.4f} kcal/mol")
+    print(f"FED_Z lower bound: {deltaFlb_GFN:.4f} kcal/mol")
+          
     # create a dictionary to store the results
     results = {
         'deltaF_EXP': deltaF_EXP,
@@ -418,7 +443,8 @@ def eval():
         'deltaF_BAR_std': deltaF_BAR_std,
         'deltaF_weighted_EXP_F': deltaF_weighted_EXP_F,
         'deltaF_weighted_EXP_R': deltaF_weighted_EXP_R,
-        'delta_f_kcal': delta_f_gfn,
+        'delta_f_kcal': deltaF_GFN,
+        'delta_f_lb_kcal': deltaFlb_GFN,
         'ESS_v': ESS_v,
         'ESS_ratio_v': ESS_ratio_v,
         'ESS_s': ESS_s,
@@ -429,12 +455,17 @@ def eval():
     if not os.path.exists(output_file):
         with open(output_file, 'w', newline='') as outfile:
             writer = csv.writer(outfile)
-            writer.writerow(['SMILES', 'deltaF_EXP', 'deltaF_EXP_std', 'deltaF_BAR', 'deltaF_BAR_std', 'deltaF_weighted_EXP_F', 'deltaF_weighted_EXP_R', 'delta_f_GFN', 'ESS_v', 'ESS_ratio_v', 'ESS_s', 'ESS_ratio_s'])
+            writer.writerow(['SMILES', 'deltaF_EXP', 'deltaF_EXP_std', 'deltaF_BAR', 'deltaF_BAR_std', 'deltaF_weighted_EXP_F', 'deltaF_weighted_EXP_R', 'delta_f_GFN','delta_Flb_GFN', 'ESS_v', 'ESS_ratio_v', 'ESS_s', 'ESS_ratio_s'])
 
     # write as a line to csv file (which could exist already)
     with open(output_file, 'a', newline='') as outfile:
         writer = csv.writer(outfile)
-        writer.writerow([args.smiles, deltaF_EXP, deltaF_EXP_std, deltaF_BAR, deltaF_BAR_std, deltaF_weighted_EXP_F, deltaF_weighted_EXP_R, delta_f_gfn, ESS_v, ESS_ratio_v, ESS_s, ESS_ratio_s])
+        # round up everything to 4th digit 
+        deltaF_EXP = round(deltaF_EXP, 4)
+        numeric = [deltaF_EXP, deltaF_EXP_std, deltaF_BAR, deltaF_BAR_std, deltaF_weighted_EXP_F, deltaF_weighted_EXP_R, deltaF_GFN.item(), deltaFlb_GFN.item(), ESS_v.item(), ESS_ratio_v.item(), ESS_s.item(), ESS_ratio_s.item()]
+        # round up everything to 4th digit
+        numeric = [round(num, 4) for num in numeric]
+        writer.writerow([args.smiles, *numeric])
 
     if args.save_eval_samples:
         # Optionally, save the energies and states

@@ -47,6 +47,10 @@ def cal_subtb_coef_matrix(lamda, N):
 
 
 def logmeanexp(x, dim=0):
+    # check if type numpy 
+    if isinstance(x, np.ndarray):
+        c = x.max()
+        return c + np.log(np.sum(np.exp(x - c))) - np.log(x.shape[dim])
     return x.logsumexp(dim) - math.log(x.shape[dim])
 
 
@@ -115,7 +119,7 @@ def get_exploration_std(iter, exploratory, exploration_factor=0.1, exploration_w
     if exploratory is False:
         return None
     if exploration_wd:
-        exploration_std = exploration_factor * max(0, 1. - iter / 3000.)
+        exploration_std = exploration_factor * max(0, 1. - iter / 10000.)
     else:
         exploration_std = exploration_factor
     expl = lambda x: exploration_std

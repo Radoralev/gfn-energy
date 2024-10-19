@@ -107,6 +107,8 @@ def compute_weights(energies, pfs, beta=1):
     exponents -= exponents.max()
     weights = torch.exp(exponents)
     weights /= weights.sum()
+    eps = torch.tensor(np.finfo(np.float32).eps)
+    weights = torch.where(weights > eps, weights, eps)
     return weights
 
 def calc_ESS(energies, pfs, beta):
